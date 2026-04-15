@@ -599,28 +599,25 @@ async function runBuild(ghUser,ghToken,repoName){
     else if(!rr.ok){const d=await rr.json();throw new Error('Gagal buat repo: '+(d.message||'Error'));}
     else{const rd=await rr.json();addLog('[+] Repo: '+rd.full_name,'success');}
 
-    await sleep(2000); // tunggu repo siap
+    await sleep(2000);
 
-    // ============================================================
-    // FIX UTAMA 1: Push gradle wrapper properties
-    // ============================================================
     setProgress(18,'Push Gradle Wrapper...');
     addLog('[>] gradle/wrapper/gradle-wrapper.properties...');
     const wrapperProps=`distributionBase=GRADLE_USER_HOME\ndistributionPath=wrapper/dists\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-8.0-bin.zip\nzipStoreBase=GRADLE_USER_HOME\nzipStorePath=wrapper/dists`;
     await pushFile(ghToken,ghUser,repoName,'gradle/wrapper/gradle-wrapper.properties',btoa(wrapperProps),'Add gradle wrapper');
     addLog('[+] wrapper properties OK','success');
 
-    // FIX UTAMA 2: gradlew script yang benar
     addLog('[>] gradlew script...');
     const gradlew=`#!/usr/bin/env sh
-##############################################################################
-# Gradle start up script for POSIX compatible shells
-##############################################################################
 APP_HOME="$(cd "$(dirname "$0")" && pwd)"
 CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
 exec java -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"`;
     await pushFile(ghToken,ghUser,repoName,'gradlew',btoa(gradlew),'Add gradlew');
     addLog('[+] gradlew OK','success');
+
+    addLog('[>] gradle-wrapper.jar...');
+    await pushFile(ghToken,ghUser,repoName,'gradle/wrapper/gradle-wrapper.jar',btoa('FAKE'),'Placeholder');
+    addLog('[+] wrapper jar OK','success');
 
     setProgress(28,'Push Gradle config...');
     addLog('[>] build.gradle (root)...');
@@ -667,23 +664,14 @@ exec java -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"`;
       addLog('[+] Icon OK','success');
     }
 
-    // ============================================================
-    // FIX UTAMA 3: Workflow pakai Node 24 + sdkmanager manual
-    // Tidak pakai android-actions/setup-android yang bermasalah
-    // Pakai upload-artifact@v4 bukan v3
-    // ============================================================
     setProgress(75,'Push GitHub Actions workflow...');
     addLog('[>] .github/workflows/build.yml...');
-    const apkName=appName.replace(/\s+/g,'-')+'-debug.apk';
-    const workflow=`name: Build APK
+    const workflowYaml = `name: Build APK
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
-  workflow_dispatch:
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
@@ -700,53 +688,54 @@ jobs:
 
       - name: Setup Android SDK
         run: |
-          ANDROID_SDK_ROOT=\$HOME/android-sdk
-          mkdir -p \$ANDROID_SDK_ROOT/cmdline-tools
-          cd \$ANDROID_SDK_ROOT/cmdline-tools
+          ANDROID_SDK_ROOT=$HOME/android-sdk
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+          cd $ANDROID_SDK_ROOT/cmdline-tools
           wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip
           unzip -q tools.zip
           mv cmdline-tools latest
-          export PATH="\$PATH:\$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:\$ANDROID_SDK_ROOT/platform-tools"
+          export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools"
           yes | sdkmanager --licenses 2>/dev/null || true
           sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
-          echo "ANDROID_HOME=\$ANDROID_SDK_ROOT" >> \$GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=\$ANDROID_SDK_ROOT" >> \$GITHUB_ENV
-          echo "\$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> \$GITHUB_PATH
-          echo "\$ANDROID_SDK_ROOT/build-tools/34.0.0" >> \$GITHUB_PATH
-          echo "\$ANDROID_SDK_ROOT/platform-tools" >> \$GITHUB_PATH
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/build-tools/34.0.0" >> $GITHUB_PATH
+          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
 
-      - name: Setup Gradle
+      - name: Setup Gradle Wrapper
         run: |
-          chmod +x gradlew
-          # Download wrapper jar dari Gradle CDN
+          chmod +x gradlew 2>/dev/null || true
           mkdir -p gradle/wrapper
-          wget -q https://raw.githubusercontent.com/gradle/gradle/v8.0.0/gradle/wrapper/gradle-wrapper.jar \
-            -O gradle/wrapper/gradle-wrapper.jar || \\
-          wget -q https://github.com/gradle/gradle/raw/v8.0.0/gradle/wrapper/gradle-wrapper.jar \
-            -O gradle/wrapper/gradle-wrapper.jar || \\
-          curl -sL https://services.gradle.org/distributions/gradle-8.0-bin.zip -o /tmp/gradle.zip && \\
-          unzip -q /tmp/gradle.zip -d /tmp/gradle-dist && \\
-          cp /tmp/gradle-dist/gradle-8.0/lib/gradle-wrapper-*.jar gradle/wrapper/gradle-wrapper.jar 2>/dev/null || \\
-          curl -sL "https://search.maven.org/remotecontent?filepath=org/gradle/gradle-wrapper/8.0/gradle-wrapper-8.0.jar" \\
-            -o gradle/wrapper/gradle-wrapper.jar || true
+          curl -sL -o gradle/wrapper/gradle-wrapper.jar \
+            "https://repo1.maven.org/maven2/org/gradle/gradle-wrapper/8.0/gradle-wrapper-8.0.jar"
+          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0-bin.zip
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
           ls -la gradle/wrapper/
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Move APK
         run: |
           mkdir -p output
-          cp app/build/outputs/apk/debug/app-debug.apk output/${apkName}
+          cp app/build/outputs/apk/debug/app-debug.apk output/app-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ${apkName}
-          path: output/${apkName}
+          name: app-debug
+          path: output/app-debug.apk
           retention-days: 30
 `;
-    await pushFile(ghToken,ghUser,repoName,'.github/workflows/build.yml',btoa(workflow),'Add workflow');
+    await pushFile(ghToken,ghUser,repoName,'.github/workflows/build.yml',btoa(workflowYaml),'Add workflow');
     addLog('[+] Workflow OK','success');
 
     setProgress(90,'Trigger build...');
@@ -858,4 +847,4 @@ function resetAll(){
 }
 </script>
 </body>
-  </html>
+</html>
