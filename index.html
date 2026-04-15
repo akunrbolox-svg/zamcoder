@@ -1,932 +1,2112 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Builder APK — Zam Coder</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Builder APK - Zam Coder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --black:#080808;
-  --white:#f5f5f5;
-  --gray:#1a1a1a;
-  --gray2:#2a2a2a;
-  --gray3:#3d3d3d;
-  --silver:#9a9a9a;
-  --silver2:#c8c8c8;
-  --accent:#d4d4d4;
-  --border:rgba(255,255,255,0.08);
-}
-html{scroll-behavior:smooth}
-body{
-  background:var(--black);
-  color:var(--white);
-  font-family:'DM Mono',monospace;
-  min-height:100vh;
-  overflow-x:hidden;
-}
+  :root {
+    --black: #0a0a0a;
+    --dark: #111111;
+    --card: #161616;
+    --border: #252525;
+    --silver: #a8a8b3;
+    --white: #f0f0f0;
+    --accent: #c8c8d4;
+    --dim: #666672;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+  }
 
-/* NOISE OVERLAY */
-body::before{
-  content:'';
-  position:fixed;
-  inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events:none;
-  z-index:0;
-  opacity:.4;
-}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* GRID LINES */
-body::after{
-  content:'';
-  position:fixed;
-  inset:0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-  background-size:60px 60px;
-  pointer-events:none;
-  z-index:0;
-}
+  html, body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-/* HEADER */
-header{
-  position:fixed;
-  top:0;left:0;right:0;
-  z-index:100;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:20px 48px;
-  border-bottom:1px solid var(--border);
-  background:rgba(8,8,8,0.85);
-  backdrop-filter:blur(20px);
-}
-.logo{
-  font-family:'Syne',sans-serif;
-  font-weight:800;
-  font-size:1.1rem;
-  letter-spacing:.15em;
-  text-transform:uppercase;
-  color:var(--white);
-}
-.logo span{color:var(--silver)}
-.badge{
-  font-size:.65rem;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  color:var(--silver);
-  border:1px solid var(--gray3);
-  padding:4px 12px;
-  border-radius:2px;
-}
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
 
-/* HERO */
-.hero{
-  position:relative;
-  z-index:1;
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:120px 24px 60px;
-}
-.hero-tag{
-  font-size:.65rem;
-  letter-spacing:.3em;
-  text-transform:uppercase;
-  color:var(--silver);
-  margin-bottom:28px;
-  opacity:0;
-  animation:fadeUp .6s .2s forwards;
-}
-.hero h1{
-  font-family:'Syne',sans-serif;
-  font-size:clamp(3rem,8vw,6.5rem);
-  font-weight:800;
-  line-height:.95;
-  letter-spacing:-.02em;
-  margin-bottom:24px;
-  opacity:0;
-  animation:fadeUp .7s .35s forwards;
-}
-.hero h1 em{
-  font-style:normal;
-  color:transparent;
-  -webkit-text-stroke:1px var(--silver2);
-}
-.hero p{
-  font-size:.85rem;
-  color:var(--silver);
-  max-width:460px;
-  line-height:1.7;
-  margin-bottom:56px;
-  opacity:0;
-  animation:fadeUp .7s .5s forwards;
-}
-.scroll-hint{
-  position:absolute;
-  bottom:40px;
-  left:50%;
-  transform:translateX(-50%);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:8px;
-  opacity:.4;
-  animation:bounce 2s infinite;
-}
-.scroll-hint span{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--silver)}
-.scroll-arrow{width:1px;height:40px;background:linear-gradient(var(--silver),transparent)}
+  /* SCANLINE */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-/* BUILDER SECTION */
-.builder{
-  position:relative;
-  z-index:1;
-  max-width:820px;
-  margin:0 auto;
-  padding:40px 24px 120px;
-}
-.section-label{
-  font-size:.6rem;
-  letter-spacing:.35em;
-  text-transform:uppercase;
-  color:var(--silver);
-  margin-bottom:40px;
-  display:flex;
-  align-items:center;
-  gap:16px;
-}
-.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 420px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
 
-/* FORM PANELS */
-.panel{
-  background:var(--gray);
-  border:1px solid var(--border);
-  border-radius:4px;
-  margin-bottom:2px;
-  overflow:hidden;
-  transition:border-color .3s;
-}
-.panel:hover{border-color:rgba(255,255,255,0.15)}
-.panel-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:20px 24px;
-  cursor:pointer;
-  user-select:none;
-}
-.panel-title{
-  font-family:'Syne',sans-serif;
-  font-size:.85rem;
-  font-weight:700;
-  letter-spacing:.1em;
-  text-transform:uppercase;
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.panel-num{
-  font-family:'DM Mono',monospace;
-  font-size:.7rem;
-  color:var(--silver);
-  font-weight:300;
-}
-.panel-arrow{
-  color:var(--silver);
-  font-size:.7rem;
-  transition:transform .3s;
-}
-.panel.open .panel-arrow{transform:rotate(180deg)}
-.panel-body{
-  max-height:0;
-  overflow:hidden;
-  transition:max-height .4s cubic-bezier(.4,0,.2,1);
-}
-.panel.open .panel-body{max-height:800px}
-.panel-inner{padding:0 24px 28px}
+  /* HEADER */
+  .header {
+    padding: 32px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
 
-/* INPUTS */
-.field{margin-bottom:20px}
-.field:last-child{margin-bottom:0}
-label{
-  display:block;
-  font-size:.65rem;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  color:var(--silver);
-  margin-bottom:8px;
-}
-input[type=text],input[type=color]{
-  width:100%;
-  background:var(--gray2);
-  border:1px solid var(--gray3);
-  border-radius:2px;
-  color:var(--white);
-  font-family:'DM Mono',monospace;
-  font-size:.85rem;
-  padding:12px 16px;
-  outline:none;
-  transition:border-color .2s;
-}
-input[type=text]:focus{border-color:var(--silver2)}
-input[type=color]{height:48px;padding:4px 8px;cursor:pointer}
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(168,168,179,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
 
-/* SOURCE TOGGLE */
-.source-toggle{
-  display:flex;
-  gap:2px;
-  margin-bottom:20px;
-  background:var(--gray2);
-  padding:3px;
-  border-radius:3px;
-}
-.source-btn{
-  flex:1;
-  padding:10px;
-  background:none;
-  border:none;
-  color:var(--silver);
-  font-family:'DM Mono',monospace;
-  font-size:.75rem;
-  letter-spacing:.15em;
-  text-transform:uppercase;
-  cursor:pointer;
-  border-radius:2px;
-  transition:all .2s;
-}
-.source-btn.active{
-  background:var(--gray3);
-  color:var(--white);
-}
-.source-panel{display:none}
-.source-panel.active{display:block}
+  .header-badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--dim);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 2px;
+    margin-bottom: 14px;
+  }
 
-/* ICON SECTION */
-.icon-preview-wrap{
-  display:flex;
-  gap:20px;
-  align-items:flex-start;
-  flex-wrap:wrap;
-}
-.icon-dropzone{
-  width:120px;height:120px;
-  border:1px dashed var(--gray3);
-  border-radius:4px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  position:relative;
-  overflow:hidden;
-  flex-shrink:0;
-  transition:border-color .2s;
-}
-.icon-dropzone:hover{border-color:var(--silver)}
-.icon-dropzone img{
-  width:100%;height:100%;
-  object-fit:cover;
-  position:absolute;inset:0;
-}
-.icon-dropzone-label{
-  font-size:.6rem;
-  letter-spacing:.15em;
-  text-transform:uppercase;
-  color:var(--silver);
-  text-align:center;
-  line-height:1.5;
-}
-.icon-controls{flex:1;min-width:160px}
-.shape-select{
-  display:flex;gap:8px;margin-bottom:16px;
-}
-.shape-opt{
-  flex:1;
-  padding:10px;
-  background:var(--gray2);
-  border:1px solid var(--gray3);
-  border-radius:2px;
-  color:var(--silver);
-  font-family:'DM Mono',monospace;
-  font-size:.7rem;
-  letter-spacing:.1em;
-  text-transform:uppercase;
-  cursor:pointer;
-  text-align:center;
-  transition:all .2s;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-}
-.shape-opt.active{border-color:var(--silver2);color:var(--white);background:var(--gray3)}
-.shape-icon{font-size:1.1rem}
-.zoom-wrap{margin-top:12px}
-.zoom-wrap label{margin-bottom:6px}
-input[type=range]{
-  width:100%;
-  accent-color:var(--silver2);
-  cursor:pointer;
-}
-.icon-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.btn-sm{
-  padding:8px 14px;
-  background:var(--gray2);
-  border:1px solid var(--gray3);
-  border-radius:2px;
-  color:var(--silver);
-  font-family:'DM Mono',monospace;
-  font-size:.65rem;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  cursor:pointer;
-  transition:all .2s;
-}
-.btn-sm:hover{border-color:var(--silver2);color:var(--white)}
+  .header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+    color: var(--white);
+  }
 
-/* CROP MODAL */
-.crop-modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:999;
-  background:rgba(0,0,0,.9);
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  gap:20px;
-}
-.crop-modal.open{display:flex}
-.crop-canvas-wrap{
-  position:relative;
-  width:300px;height:300px;
-  overflow:hidden;
-  border:1px solid var(--gray3);
-}
-#cropCanvas{display:block}
-.crop-actions{display:flex;gap:12px}
+  .header h1 span {
+    color: var(--silver);
+  }
 
-/* SPLASH PREVIEW */
-.splash-preview{
-  width:80px;height:80px;
-  border-radius:4px;
-  border:1px solid var(--gray3);
-  margin-top:8px;
-  transition:background .2s;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:.55rem;
-  color:rgba(255,255,255,.3);
-  letter-spacing:.1em;
-  text-transform:uppercase;
-}
+  .header-sub {
+    margin-top: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
 
-/* BUILD BUTTON */
-.build-wrap{
-  margin-top:40px;
-  text-align:center;
-}
-.build-btn{
-  position:relative;
-  padding:20px 60px;
-  background:var(--white);
-  color:var(--black);
-  border:none;
-  border-radius:2px;
-  font-family:'Syne',sans-serif;
-  font-size:1rem;
-  font-weight:700;
-  letter-spacing:.15em;
-  text-transform:uppercase;
-  cursor:pointer;
-  overflow:hidden;
-  transition:all .3s;
-}
-.build-btn::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:var(--silver2);
-  transform:translateX(-100%);
-  transition:transform .4s cubic-bezier(.4,0,.2,1);
-}
-.build-btn:hover::before{transform:translateX(0)}
-.build-btn span{position:relative;z-index:1}
-.build-btn:disabled{opacity:.4;cursor:not-allowed}
+  /* STEPS NAV */
+  .steps-nav {
+    display: flex;
+    padding: 20px 24px;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .steps-nav::-webkit-scrollbar { display: none; }
 
-/* PROGRESS */
-.progress-wrap{
-  display:none;
-  margin-top:24px;
-  text-align:left;
-}
-.progress-wrap.show{display:block}
-.progress-bar-bg{
-  height:2px;
-  background:var(--gray3);
-  border-radius:1px;
-  overflow:hidden;
-  margin-bottom:12px;
-}
-.progress-bar{
-  height:100%;
-  background:var(--silver2);
-  border-radius:1px;
-  width:0%;
-  transition:width .4s ease;
-}
-.progress-log{
-  font-size:.7rem;
-  color:var(--silver);
-  line-height:1.8;
-  font-family:'DM Mono',monospace;
-}
+  .step-dot {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    transition: background 0.3s ease;
+    cursor: pointer;
+    min-width: 30px;
+  }
+  .step-dot.active { background: var(--silver); }
+  .step-dot.done { background: var(--dim); }
 
-/* STATUS */
-.status-msg{
-  margin-top:20px;
-  padding:16px 20px;
-  border-radius:2px;
-  font-size:.8rem;
-  display:none;
-}
-.status-msg.show{display:block}
-.status-msg.success{background:rgba(100,200,100,.08);border:1px solid rgba(100,200,100,.2);color:#7ddb7d}
-.status-msg.error{background:rgba(200,80,80,.08);border:1px solid rgba(200,80,80,.2);color:#e07070}
+  /* STEP LABEL */
+  .step-label {
+    padding: 16px 24px 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-/* FOOTER */
-footer{
-  position:relative;z-index:1;
-  text-align:center;
-  padding:40px 24px;
-  border-top:1px solid var(--border);
-  font-size:.65rem;
-  letter-spacing:.2em;
-  text-transform:uppercase;
-  color:var(--silver);
-}
+  .step-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    background: var(--card);
+    border: 1px solid var(--border);
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
 
-/* ANIMATIONS */
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:translateY(0)}
-}
-@keyframes bounce{
-  0%,100%{transform:translateX(-50%) translateY(0)}
-  50%{transform:translateX(-50%) translateY(8px)}
-}
+  .step-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
 
-/* FILE UPLOAD */
-.upload-zone{
-  border:1px dashed var(--gray3);
-  border-radius:2px;
-  padding:32px;
-  text-align:center;
-  cursor:pointer;
-  transition:border-color .2s;
-  position:relative;
-}
-.upload-zone:hover{border-color:var(--silver)}
-.upload-zone input{
-  position:absolute;inset:0;
-  opacity:0;cursor:pointer;
-  width:100%;height:100%;
-}
-.upload-zone-label{
-  font-size:.7rem;
-  letter-spacing:.15em;
-  text-transform:uppercase;
-  color:var(--silver);
-  line-height:1.8;
-}
-.upload-zone-label strong{display:block;font-size:.9rem;margin-bottom:4px;color:var(--silver2)}
-.file-name{
-  margin-top:8px;
-  font-size:.7rem;
-  color:var(--silver2);
-  font-family:'DM Mono',monospace;
-}
+  /* FORM SECTION */
+  .form-section {
+    padding: 8px 24px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .form-section.active { display: block; }
 
-@media(max-width:600px){
-  header{padding:16px 20px}
-  .builder{padding:20px 16px 80px}
-  .panel-inner{padding:0 16px 20px}
-  .icon-preview-wrap{flex-direction:column}
-  .icon-controls{width:100%}
-}
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* FIELD */
+  .field {
+    margin-bottom: 18px;
+  }
+
+  .field-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .field-label .req {
+    color: var(--silver);
+    font-size: 8px;
+  }
+
+  .field-input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--white);
+    padding: 13px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .field-input:focus {
+    border-color: var(--silver);
+    box-shadow: 0 0 0 3px rgba(168,168,179,0.08);
+  }
+
+  .field-input::placeholder {
+    color: var(--dim);
+    font-size: 11px;
+  }
+
+  .field-hint {
+    margin-top: 5px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+
+  /* SOURCE TOGGLE */
+  .source-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .source-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--silver);
+    padding: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .source-btn.active {
+    background: var(--white);
+    color: var(--black);
+    border-color: var(--white);
+    font-weight: 700;
+  }
+
+  /* UPLOAD BOX */
+  .upload-box {
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-md);
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    background: var(--card);
+  }
+
+  .upload-box:hover, .upload-box.dragover {
+    border-color: var(--silver);
+    background: rgba(168,168,179,0.04);
+  }
+
+  .upload-box input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .upload-icon {
+    width: 36px;
+    height: 36px;
+    margin: 0 auto 10px;
+    background: var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .upload-icon svg { width: 18px; height: 18px; }
+
+  .upload-text {
+    font-size: 12px;
+    color: var(--silver);
+    font-weight: 600;
+  }
+
+  .upload-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    margin-top: 4px;
+  }
+
+  .upload-filename {
+    margin-top: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    background: rgba(168,168,179,0.08);
+    padding: 6px 12px;
+    border-radius: 4px;
+    display: none;
+  }
+
+  /* ICON SECTION */
+  .icon-preview-wrap {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .icon-canvas-wrap {
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .icon-preview {
+    width: 96px;
+    height: 96px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .icon-preview:hover { transform: scale(0.97); }
+  .icon-preview.shape-circle { border-radius: 50%; }
+  .icon-preview.shape-rounded { border-radius: 22px; }
+  .icon-preview.shape-square { border-radius: 0px; }
+
+  .icon-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .icon-placeholder {
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .icon-placeholder svg { width: 24px; height: 24px; opacity: 0.4; }
+  .icon-placeholder p {
+    font-size: 9px;
+    color: var(--dim);
+    margin-top: 4px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  #iconFileInput { display: none; }
+
+  .icon-controls {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .shape-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+
+  .shape-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 8px 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .shape-btn.active {
+    border-color: var(--silver);
+    background: rgba(168,168,179,0.08);
+  }
+
+  .shape-preview {
+    width: 28px;
+    height: 28px;
+    background: var(--silver);
+    margin: 0 auto;
+  }
+
+  .shape-preview.circle { border-radius: 50%; }
+  .shape-preview.rounded { border-radius: 7px; }
+  .shape-preview.square { border-radius: 0; }
+
+  .shape-btn span {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  /* ZOOM SLIDER */
+  .slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .slider-wrap label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    width: 32px;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    appearance: none;
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--white);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .slider-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--silver);
+    width: 28px;
+    text-align: right;
+  }
+
+  /* CROP BUTTON */
+  .btn-crop {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--silver);
+    padding: 9px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn-crop:hover {
+    border-color: var(--silver);
+    background: rgba(168,168,179,0.06);
+  }
+
+  /* SPLASH COLOR */
+  .color-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .color-swatch {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+    position: relative;
+  }
+
+  .color-swatch:hover { transform: scale(1.1); }
+  .color-swatch.selected { border-color: var(--white); }
+
+  .color-picker-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .color-picker-wrap label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    text-transform: uppercase;
+  }
+
+  input[type="color"] {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 2px;
+    background: var(--card);
+    outline: none;
+  }
+
+  .splash-preview-box {
+    width: 100%;
+    height: 80px;
+    border-radius: var(--radius-md);
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    transition: background 0.3s;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 2px;
+  }
+
+  /* GITHUB SECTION */
+  .info-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 18px;
+  }
+
+  .info-box-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--silver);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .info-box-title::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--silver);
+  }
+
+  .info-box p {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    line-height: 1.7;
+  }
+
+  .info-box p strong {
+    color: var(--accent);
+  }
+
+  /* TOKEN STEPS */
+  .token-steps {
+    counter-reset: ts;
+    list-style: none;
+    margin-top: 10px;
+  }
+
+  .token-steps li {
+    counter-increment: ts;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    padding: 6px 0 6px 24px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.5;
+  }
+
+  .token-steps li:last-child { border-bottom: none; }
+
+  .token-steps li::before {
+    content: counter(ts, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    font-size: 8px;
+    color: var(--silver);
+    top: 8px;
+  }
+
+  /* NAV BUTTONS */
+  .nav-row {
+    display: flex;
+    gap: 10px;
+    padding: 20px 24px 0;
+  }
+
+  .btn-back {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--dim);
+    padding: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-back:hover { border-color: var(--silver); color: var(--silver); }
+
+  .btn-next {
+    flex: 2;
+    background: var(--white);
+    border: none;
+    color: var(--black);
+    padding: 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-next::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0);
+    transition: background 0.2s;
+  }
+
+  .btn-next:hover::after { background: rgba(0,0,0,0.08); }
+
+  /* BUILD BUTTON */
+  .btn-build {
+    width: calc(100% - 48px);
+    margin: 20px 24px 0;
+    background: var(--white);
+    border: none;
+    color: var(--black);
+    padding: 18px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn-build:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-build .btn-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* PROGRESS OVERLAY */
+  .progress-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,10,0.95);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .progress-overlay.show { display: flex; }
+
+  .progress-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .progress-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    margin-bottom: 36px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  .progress-track {
+    width: 100%;
+    max-width: 320px;
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--white);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.5s ease;
+  }
+
+  .progress-step-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: 1.5px;
+    text-align: center;
+    min-height: 18px;
+    transition: opacity 0.3s;
+  }
+
+  .progress-log {
+    margin-top: 24px;
+    width: 100%;
+    max-width: 320px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    max-height: 160px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .progress-log::-webkit-scrollbar { display: none; }
+
+  .log-line {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    padding: 3px 0;
+    line-height: 1.5;
+    border-bottom: 1px solid var(--border);
+    opacity: 0;
+    animation: logIn 0.3s ease forwards;
+  }
+
+  @keyframes logIn {
+    from { opacity: 0; transform: translateX(-6px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .log-line:last-child { border-bottom: none; }
+  .log-line.success { color: #a8c4a8; }
+  .log-line.warn { color: #c4b8a8; }
+
+  /* SUCCESS STATE */
+  .success-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,10,0.97);
+    z-index: 101;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .success-overlay.show { display: flex; }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+
+  .success-icon svg { width: 32px; height: 32px; }
+
+  .success-title {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .success-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--dim);
+    margin-bottom: 32px;
+    text-align: center;
+    line-height: 1.7;
+  }
+
+  .btn-download {
+    background: var(--white);
+    color: var(--black);
+    border: none;
+    padding: 16px 40px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: opacity 0.2s;
+    text-decoration: none;
+  }
+
+  .btn-download:hover { opacity: 0.9; }
+
+  .btn-reset {
+    margin-top: 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--dim);
+    padding: 11px 28px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-reset:hover { border-color: var(--silver); color: var(--silver); }
+
+  /* FOOTER */
+  .footer {
+    padding: 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .footer p {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .footer strong { color: var(--silver); }
+
+  /* CROP MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,10,0.92);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal-box {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 380px;
+    padding: 24px;
+  }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .modal-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+
+  .crop-canvas-container {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    background: var(--card);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    cursor: crosshair;
+    user-select: none;
+  }
+
+  #cropCanvas {
+    display: block;
+    position: absolute;
+    top: 0; left: 0;
+  }
+
+  .crop-overlay-svg {
+    position: absolute;
+    top: 0; left: 0;
+    pointer-events: none;
+  }
+
+  .modal-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .btn-modal-cancel {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--dim);
+    padding: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-modal-cancel:hover { border-color: var(--silver); color: var(--silver); }
+
+  .btn-modal-apply {
+    flex: 2;
+    background: var(--white);
+    border: none;
+    color: var(--black);
+    padding: 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .btn-modal-apply:hover { opacity: 0.9; }
+
+  /* ERROR */
+  .error-msg {
+    display: none;
+    background: rgba(180,80,80,0.1);
+    border: 1px solid rgba(180,80,80,0.3);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: #e8a0a0;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  .error-msg.show { display: block; }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+
+  /* REPO INFO BOX */
+  .repo-auto {
+    background: rgba(168,168,179,0.05);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .repo-auto-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .repo-auto-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  .repo-auto-badge {
+    margin-left: auto;
+    background: var(--border);
+    border-radius: 3px;
+    padding: 2px 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 8px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
 </style>
 </head>
 <body>
 
-<!-- AUDIO -->
-<audio id="bgAudio" loop preload="auto">
-  <source src="https://files.catbox.moe/hdj17h.mp3" type="audio/mpeg"/>
+<audio id="bgMusic" loop>
+  <source src="https://www.image2url.com/r2/default/audio/1776258663976-363dbaa8-f66a-48b4-a22e-256984457724.mp3" type="audio/mpeg">
 </audio>
 
-<!-- HEADER -->
-<header>
-  <div class="logo">Builder <span>APK</span></div>
-  <div class="badge">by Zam Coder</div>
-</header>
+<div class="wrapper">
 
-<!-- HERO -->
-<section class="hero">
-  <p class="hero-tag">// Android App Builder</p>
-  <h1>Turn Website<br/>Into <em>APK</em></h1>
-  <p>Isi form, klik build — dapatkan APK Android siap install. Dibuat oleh Zam Coder.</p>
-  <div class="scroll-hint">
-    <span>Scroll</span>
-    <div class="scroll-arrow"></div>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-badge">Zam Coder</div>
+    <h1>Builder<span>APK</span></h1>
+    <p class="header-sub">// convert website to android app</p>
   </div>
-</section>
 
-<!-- BUILDER -->
-<section class="builder">
-  <div class="section-label">// Konfigurasi Aplikasi</div>
+  <!-- STEPS NAV -->
+  <div class="steps-nav" id="stepsNav">
+    <div class="step-dot active" onclick="goStep(0)"></div>
+    <div class="step-dot" onclick="goStep(1)"></div>
+    <div class="step-dot" onclick="goStep(2)"></div>
+    <div class="step-dot" onclick="goStep(3)"></div>
+    <div class="step-dot" onclick="goStep(4)"></div>
+  </div>
 
-  <!-- PANEL 1: INFO DASAR -->
-  <div class="panel open" id="p1">
-    <div class="panel-header" onclick="togglePanel('p1')">
-      <div class="panel-title"><span class="panel-num">01</span> Info Aplikasi</div>
-      <span class="panel-arrow">▼</span>
+  <!-- STEP 0: APP INFO -->
+  <div class="step-label" id="labelStep">
+    <div class="step-num" id="stepNumEl">01</div>
+    <div class="step-title" id="stepTitleEl">Informasi Aplikasi</div>
+  </div>
+
+  <div class="form-section active" id="step0">
+    <div class="error-msg" id="err0"></div>
+
+    <div class="field">
+      <div class="field-label">Nama Aplikasi <span class="req">* wajib</span></div>
+      <input class="field-input" id="appName" type="text" placeholder="contoh: My App" maxlength="40">
     </div>
-    <div class="panel-body">
-      <div class="panel-inner">
-        <div class="field">
-          <label>Nama Aplikasi</label>
-          <input type="text" id="appName" placeholder="contoh: Toko Online Ku"/>
+
+    <div class="field">
+      <div class="field-label">Package Name <span class="req">* wajib</span></div>
+      <input class="field-input" id="packageName" type="text" placeholder="com.nama.app" maxlength="80">
+      <div class="field-hint">Format: com.developer.appname (huruf kecil, titik)</div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-next" onclick="nextStep(0)">Lanjut &rarr;</button>
+    </div>
+  </div>
+
+  <!-- STEP 1: SOURCE -->
+  <div class="form-section" id="step1">
+    <div class="error-msg" id="err1"></div>
+
+    <div class="field">
+      <div class="field-label">Pilih Sumber Konten</div>
+      <div class="source-toggle">
+        <button class="source-btn active" id="srcUrl" onclick="setSource('url')">URL WebView</button>
+        <button class="source-btn" id="srcHtml" onclick="setSource('html')">File HTML</button>
+      </div>
+    </div>
+
+    <div id="urlField" class="field">
+      <div class="field-label">URL Website <span class="req">* wajib</span></div>
+      <input class="field-input" id="webviewUrl" type="url" placeholder="https://website.com">
+      <div class="field-hint">URL harus diawali https:// atau http://</div>
+    </div>
+
+    <div id="htmlField" class="field" style="display:none;">
+      <div class="field-label">Upload File HTML <span class="req">* wajib</span></div>
+      <div class="upload-box" id="htmlUploadBox">
+        <input type="file" id="htmlFile" accept=".html,.htm" onchange="handleHtmlFile(this)">
+        <div class="upload-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         </div>
-        <div class="field">
-          <label>Package Name</label>
-          <input type="text" id="packageName" placeholder="com.zamcoder.tokoonline"/>
+        <div class="upload-text">Pilih File HTML</div>
+        <div class="upload-sub">Klik atau drag & drop di sini</div>
+        <div class="upload-filename" id="htmlFilename"></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="prevStep(1)">&larr; Kembali</button>
+      <button class="btn-next" onclick="nextStep(1)">Lanjut &rarr;</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: ICON -->
+  <div class="form-section" id="step2">
+    <div class="error-msg" id="err2"></div>
+
+    <div class="field">
+      <div class="field-label">Icon Aplikasi <span class="req">* wajib</span></div>
+      <div class="icon-preview-wrap">
+        <div class="icon-canvas-wrap">
+          <div class="icon-preview shape-rounded" id="iconPreview" onclick="document.getElementById('iconFileInput').click()">
+            <div class="icon-placeholder" id="iconPlaceholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <p>Tap pilih<br>gambar</p>
+            </div>
+            <img id="iconImg" src="" style="display:none;">
+          </div>
+          <input type="file" id="iconFileInput" accept="image/*" onchange="handleIconFile(this)">
+        </div>
+
+        <div class="icon-controls">
+          <div class="field-label" style="margin-bottom:6px;">Bentuk Icon</div>
+          <div class="shape-grid">
+            <button class="shape-btn" onclick="setShape('square')">
+              <div class="shape-preview square"></div>
+              <span>Kotak</span>
+            </button>
+            <button class="shape-btn active" onclick="setShape('rounded')">
+              <div class="shape-preview rounded"></div>
+              <span>Bulat</span>
+            </button>
+            <button class="shape-btn" onclick="setShape('circle')">
+              <div class="shape-preview circle"></div>
+              <span>Lingkaran</span>
+            </button>
+          </div>
+
+          <div class="slider-wrap" style="margin-top:8px;">
+            <label>Zoom</label>
+            <input type="range" id="iconZoom" min="80" max="150" value="100" oninput="applyZoom(this.value)">
+            <div class="slider-val" id="zoomVal">100%</div>
+          </div>
+
+          <button class="btn-crop" onclick="openCrop()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+            Buka Crop Editor
+          </button>
         </div>
       </div>
     </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="prevStep(2)">&larr; Kembali</button>
+      <button class="btn-next" onclick="nextStep(2)">Lanjut &rarr;</button>
+    </div>
   </div>
 
-  <!-- PANEL 2: SUMBER KONTEN -->
-  <div class="panel" id="p2">
-    <div class="panel-header" onclick="togglePanel('p2')">
-      <div class="panel-title"><span class="panel-num">02</span> Sumber Konten</div>
-      <span class="panel-arrow">▼</span>
+  <!-- STEP 3: SPLASH -->
+  <div class="form-section" id="step3">
+    <div class="error-msg" id="err3"></div>
+
+    <div class="field">
+      <div class="field-label">Warna Background Splash</div>
+      <div class="color-row">
+        <div class="color-swatch selected" style="background:#0a0a0a;" data-color="#0a0a0a" onclick="pickSwatch(this)"></div>
+        <div class="color-swatch" style="background:#1a1a1a;" data-color="#1a1a1a" onclick="pickSwatch(this)"></div>
+        <div class="color-swatch" style="background:#2d2d2d;" data-color="#2d2d2d" onclick="pickSwatch(this)"></div>
+        <div class="color-swatch" style="background:#ffffff;" data-color="#ffffff" onclick="pickSwatch(this)"></div>
+        <div class="color-swatch" style="background:#e0e0e0;" data-color="#e0e0e0" onclick="pickSwatch(this)"></div>
+        <div class="color-swatch" style="background:#a8a8b3;" data-color="#a8a8b3" onclick="pickSwatch(this)"></div>
+      </div>
+      <div class="color-picker-wrap">
+        <label>Custom Color</label>
+        <input type="color" id="splashColor" value="#0a0a0a" oninput="updateSplashColor(this.value)">
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--dim)" id="splashColorHex">#0a0a0a</span>
+      </div>
+      <div class="splash-preview-box" id="splashPreview" style="background:#0a0a0a;">SPLASH SCREEN</div>
     </div>
-    <div class="panel-body">
-      <div class="panel-inner">
-        <div class="source-toggle">
-          <button class="source-btn active" onclick="switchSource('url')">🌐 URL WebView</button>
-          <button class="source-btn" onclick="switchSource('html')">📄 File HTML</button>
-        </div>
 
-        <div class="source-panel active" id="src-url">
-          <div class="field">
-            <label>URL Website Target</label>
-            <input type="text" id="webviewUrl" placeholder="https://example.com"/>
-          </div>
-        </div>
+    <div class="nav-row">
+      <button class="btn-back" onclick="prevStep(3)">&larr; Kembali</button>
+      <button class="btn-next" onclick="nextStep(3)">Lanjut &rarr;</button>
+    </div>
+  </div>
 
-        <div class="source-panel" id="src-html">
-          <div class="field">
-            <label>Upload File HTML</label>
-            <div class="upload-zone" onclick="document.getElementById('htmlFile').click()">
-              <input type="file" id="htmlFile" accept=".html,.htm" style="display:none" onchange="handleHtmlFile(event)"/>
-              <div class="upload-zone-label">
-                <strong>Pilih File</strong>
-                .html atau .htm
-              </div>
-            </div>
-            <div class="file-name" id="htmlFileName"></div>
-          </div>
+  <!-- STEP 4: GITHUB -->
+  <div class="form-section" id="step4">
+    <div class="error-msg" id="err4"></div>
+
+    <div class="info-box">
+      <div class="info-box-title">Cara Dapat Access Token</div>
+      <ol class="token-steps">
+        <li>Buka <strong>github.com</strong> &rarr; login akun kamu</li>
+        <li>Klik foto profil &rarr; <strong>Settings</strong></li>
+        <li>Scroll ke bawah &rarr; <strong>Developer settings</strong></li>
+        <li>Pilih <strong>Personal access tokens</strong> &rarr; Tokens (classic)</li>
+        <li>Klik <strong>Generate new token (classic)</strong></li>
+        <li>Centang <strong>repo</strong> (semua) &amp; <strong>workflow</strong></li>
+        <li>Klik <strong>Generate token</strong> &rarr; copy tokennya</li>
+      </ol>
+    </div>
+
+    <div class="field">
+      <div class="field-label">GitHub Username <span class="req">* wajib</span></div>
+      <input class="field-input" id="githubUser" type="text" placeholder="username kamu">
+    </div>
+
+    <div class="field">
+      <div class="field-label">Access Token <span class="req">* wajib</span></div>
+      <input class="field-input" id="githubToken" type="password" placeholder="ghp_xxxxxxxxxxxxx">
+      <div class="field-hint">Token tidak disimpan, hanya dipakai untuk build sekali ini</div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Repository</div>
+      <div class="repo-auto" id="repoAutoBox">
+        <div>
+          <div class="repo-auto-label">Nama repo (otomatis)</div>
+          <div class="repo-auto-value" id="repoAutoName">-- isi nama app dulu --</div>
         </div>
+        <div class="repo-auto-badge">PRIVATE</div>
       </div>
     </div>
-  </div>
 
-  <!-- PANEL 3: ICON -->
-  <div class="panel" id="p3">
-    <div class="panel-header" onclick="togglePanel('p3')">
-      <div class="panel-title"><span class="panel-num">03</span> Icon Aplikasi</div>
-      <span class="panel-arrow">▼</span>
-    </div>
-    <div class="panel-body">
-      <div class="panel-inner">
-        <div class="icon-preview-wrap">
-          <div>
-            <div class="icon-dropzone" id="iconDropzone" onclick="document.getElementById('iconFile').click()">
-              <input type="file" id="iconFile" accept="image/*" style="display:none" onchange="handleIcon(event)"/>
-              <img id="iconPreview" style="display:none"/>
-              <div class="icon-dropzone-label" id="iconLabel">+ Pilih<br/>Gambar</div>
-            </div>
-          </div>
-          <div class="icon-controls">
-            <label style="margin-bottom:8px">Bentuk Icon</label>
-            <div class="shape-select">
-              <div class="shape-opt active" id="shapeSquare" onclick="setShape('square')">
-                <span class="shape-icon">⬛</span> Kotak
-              </div>
-              <div class="shape-opt" id="shapeCircle" onclick="setShape('circle')">
-                <span class="shape-icon">⚫</span> Bulat
-              </div>
-            </div>
-            <div class="zoom-wrap">
-              <label>Zoom Icon</label>
-              <input type="range" id="iconZoom" min="50" max="200" value="100" oninput="applyZoom(this.value)"/>
-            </div>
-            <div class="icon-actions">
-              <button class="btn-sm" onclick="openCrop()">✂ Crop / Edit</button>
-              <button class="btn-sm" onclick="document.getElementById('iconFile').click()">↺ Ganti</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PANEL 4: SPLASH SCREEN -->
-  <div class="panel" id="p4">
-    <div class="panel-header" onclick="togglePanel('p4')">
-      <div class="panel-title"><span class="panel-num">04</span> Splash Screen</div>
-      <span class="panel-arrow">▼</span>
-    </div>
-    <div class="panel-body">
-      <div class="panel-inner">
-        <div class="field">
-          <label>Warna Background Splash</label>
-          <input type="color" id="splashColor" value="#0a0a0a" oninput="updateSplashPreview()"/>
-          <div class="splash-preview" id="splashPreview" style="background:#0a0a0a">Preview</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BUILD BUTTON -->
-  <div class="build-wrap">
-    <button class="build-btn" id="buildBtn" onclick="startBuild()">
-      <span>⚡ Build APK</span>
+    <button class="btn-build" id="buildBtn" onclick="startBuild()">
+      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      Build APK Sekarang
     </button>
-
-    <div class="progress-wrap" id="progressWrap">
-      <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
-      <div class="progress-log" id="progressLog"></div>
-    </div>
-
-    <div class="status-msg" id="statusMsg"></div>
   </div>
-</section>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <p>Builder APK &mdash; by <strong>Zam Coder</strong></p>
+  </div>
+
+</div>
 
 <!-- CROP MODAL -->
-<div class="crop-modal" id="cropModal">
-  <canvas id="cropCanvas" width="300" height="300"></canvas>
-  <div class="crop-actions">
-    <button class="btn-sm" onclick="applyCrop()">✓ Apply Crop</button>
-    <button class="btn-sm" onclick="closeCrop()">✕ Batal</button>
+<div class="modal-overlay" id="cropModal">
+  <div class="modal-box">
+    <div class="modal-title">Crop Editor</div>
+    <div class="modal-sub">// drag untuk memilih area crop</div>
+    <div class="crop-canvas-container" id="cropContainer">
+      <canvas id="cropCanvas"></canvas>
+      <svg class="crop-overlay-svg" id="cropSvg"></svg>
+    </div>
+    <div class="modal-row">
+      <button class="btn-modal-cancel" onclick="closeCrop()">Batal</button>
+      <button class="btn-modal-apply" onclick="applyCrop()">Terapkan</button>
+    </div>
   </div>
 </div>
 
-<!-- FOOTER -->
-<footer>© 2024 Builder APK — Dibuat dengan ♥ oleh Zam Coder</footer>
+<!-- PROGRESS OVERLAY -->
+<div class="progress-overlay" id="progressOverlay">
+  <div class="progress-title">Sedang Build...</div>
+  <div class="progress-sub" id="progressSub">// mohon tunggu, jangan tutup halaman ini</div>
+  <div class="progress-track">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="progress-step-text" id="progressStepText">Memulai proses build...</div>
+  <div class="progress-log" id="progressLog"></div>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  </div>
+  <div class="success-title">Build Berhasil!</div>
+  <div class="success-sub" id="successSub">APK kamu sudah siap.<br>Klik tombol di bawah untuk download.</div>
+  <a class="btn-download" id="downloadBtn" href="#" target="_blank">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Download APK
+  </a>
+  <button class="btn-reset" onclick="resetAll()">Buat APK Lain</button>
+</div>
 
 <script>
-// ============ CONFIG ============
-// GANTI INI DENGAN URL RAILWAY KAMU SETELAH DEPLOY!
-const BACKEND_URL = "https://builder-apk-backend-production.up.railway.app";
+// ---- AUDIO ----
+(function() {
+  const audio = document.getElementById('bgMusic');
+  audio.volume = 0.72;
+  function tryPlay() {
+    audio.play().catch(() => {});
+  }
+  tryPlay();
+  document.addEventListener('click', tryPlay, { once: false });
+  document.addEventListener('touchstart', tryPlay, { once: false });
+})();
 
-// ============ AUDIO ============
-const audio = document.getElementById('bgAudio');
-audio.volume = 0.72;
-
-function tryPlay(){
-  audio.play().catch(()=>{
-    document.addEventListener('click', ()=>{ audio.play(); }, { once:true });
-    document.addEventListener('touchstart', ()=>{ audio.play(); }, { once:true });
-  });
-}
-window.addEventListener('load', tryPlay);
-
-// ============ STATE ============
+// ---- STATE ----
+let currentStep = 0;
 let sourceType = 'url';
-let iconDataUrl = null;
-let htmlContent = null;
-let iconShape = 'square';
+let iconBlob = null;
+let iconOriginalSrc = null;
+let iconShape = 'rounded';
+let splashBgColor = '#0a0a0a';
+let cropData = null;
+let cropStartX, cropStartY, cropEndX, cropEndY, isCropping = false;
 
-// ============ PANEL TOGGLE ============
-function togglePanel(id){
-  const el = document.getElementById(id);
-  el.classList.toggle('open');
-}
+const stepTitles = [
+  'Informasi Aplikasi',
+  'Sumber Konten',
+  'Icon Aplikasi',
+  'Splash Screen',
+  'GitHub & Build'
+];
 
-// ============ SOURCE SWITCH ============
-function switchSource(type){
-  sourceType = type;
-  document.querySelectorAll('.source-btn').forEach((b,i)=>{
-    b.classList.toggle('active', (i===0 && type==='url') || (i===1 && type==='html'));
+const stepNums = ['01','02','03','04','05'];
+
+// ---- STEPS ----
+function goStep(n) {
+  document.getElementById('step' + currentStep).classList.remove('active');
+  document.querySelectorAll('.step-dot').forEach((d, i) => {
+    d.classList.remove('active', 'done');
+    if (i < n) d.classList.add('done');
+    else if (i === n) d.classList.add('active');
   });
-  document.getElementById('src-url').classList.toggle('active', type==='url');
-  document.getElementById('src-html').classList.toggle('active', type==='html');
+  currentStep = n;
+  document.getElementById('step' + n).classList.add('active');
+  document.getElementById('stepNumEl').textContent = stepNums[n];
+  document.getElementById('stepTitleEl').textContent = stepTitles[n];
+  updateRepoName();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ============ HTML FILE ============
-function handleHtmlFile(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  document.getElementById('htmlFileName').textContent = '✓ ' + file.name;
-  const reader = new FileReader();
-  reader.onload = ev => { htmlContent = ev.target.result; };
-  reader.readAsText(file);
+function nextStep(from) {
+  if (!validateStep(from)) return;
+  goStep(from + 1);
 }
 
-// ============ ICON ============
-function handleIcon(e){
-  const file = e.target.files[0];
-  if(!file) return;
+function prevStep(from) {
+  goStep(from - 1);
+}
+
+// ---- VALIDATE ----
+function showErr(id, msg) {
+  const el = document.getElementById('err' + id);
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function validateStep(step) {
+  if (step === 0) {
+    const name = document.getElementById('appName').value.trim();
+    const pkg = document.getElementById('packageName').value.trim();
+    if (!name) { showErr(0, 'Nama aplikasi wajib diisi.'); return false; }
+    if (!pkg || !/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(pkg)) {
+      showErr(0, 'Package name tidak valid. Contoh: com.nama.app'); return false;
+    }
+    return true;
+  }
+  if (step === 1) {
+    if (sourceType === 'url') {
+      const url = document.getElementById('webviewUrl').value.trim();
+      if (!url || !/^https?:\/\/.+/.test(url)) {
+        showErr(1, 'URL tidak valid. Awali dengan https:// atau http://'); return false;
+      }
+    } else {
+      if (!document.getElementById('htmlFile').files.length) {
+        showErr(1, 'Pilih file HTML terlebih dahulu.'); return false;
+      }
+    }
+    return true;
+  }
+  if (step === 2) {
+    if (!iconBlob && !document.getElementById('iconFileInput').files.length) {
+      showErr(2, 'Pilih icon aplikasi terlebih dahulu.'); return false;
+    }
+    return true;
+  }
+  if (step === 3) return true;
+  return true;
+}
+
+// ---- SOURCE TOGGLE ----
+function setSource(type) {
+  sourceType = type;
+  document.getElementById('srcUrl').classList.toggle('active', type === 'url');
+  document.getElementById('srcHtml').classList.toggle('active', type === 'html');
+  document.getElementById('urlField').style.display = type === 'url' ? 'block' : 'none';
+  document.getElementById('htmlField').style.display = type === 'html' ? 'block' : 'none';
+}
+
+function handleHtmlFile(input) {
+  if (input.files.length) {
+    const fn = document.getElementById('htmlFilename');
+    fn.textContent = input.files[0].name;
+    fn.style.display = 'block';
+  }
+}
+
+// ---- ICON ----
+function handleIconFile(input) {
+  if (!input.files.length) return;
+  const file = input.files[0];
   const reader = new FileReader();
-  reader.onload = ev => {
-    iconDataUrl = ev.target.result;
-    const img = document.getElementById('iconPreview');
-    img.src = iconDataUrl;
+  reader.onload = function(e) {
+    iconOriginalSrc = e.target.result;
+    iconBlob = e.target.result;
+    const img = document.getElementById('iconImg');
+    img.src = e.target.result;
     img.style.display = 'block';
-    document.getElementById('iconLabel').style.display = 'none';
-    applyIconShape();
+    img.style.transform = 'scale(1)';
+    document.getElementById('iconPlaceholder').style.display = 'none';
+    document.getElementById('iconZoom').value = 100;
+    document.getElementById('zoomVal').textContent = '100%';
   };
   reader.readAsDataURL(file);
 }
 
-function setShape(shape){
+function setShape(shape) {
   iconShape = shape;
-  document.getElementById('shapeSquare').classList.toggle('active', shape==='square');
-  document.getElementById('shapeCircle').classList.toggle('active', shape==='circle');
-  applyIconShape();
+  document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  const preview = document.getElementById('iconPreview');
+  preview.className = 'icon-preview shape-' + shape;
 }
 
-function applyIconShape(){
-  const img = document.getElementById('iconPreview');
-  img.style.borderRadius = iconShape === 'circle' ? '50%' : '4px';
+function applyZoom(val) {
+  document.getElementById('zoomVal').textContent = val + '%';
+  const img = document.getElementById('iconImg');
+  img.style.transform = 'scale(' + (val / 100) + ')';
 }
 
-function applyZoom(val){
-  const img = document.getElementById('iconPreview');
-  const scale = val / 100;
-  img.style.transform = `scale(${scale})`;
+// ---- CROP ----
+let cropImg = null;
+let cropRect = null;
+
+function openCrop() {
+  if (!iconOriginalSrc) {
+    showErr(2, 'Upload icon dulu sebelum crop.'); return;
+  }
+  document.getElementById('cropModal').classList.add('show');
+  initCropCanvas();
 }
 
-// ============ CROP ============
-let cropImg = new Image();
-let cropX = 0, cropY = 0, isDragging = false, lastX, lastY;
+function closeCrop() {
+  document.getElementById('cropModal').classList.remove('show');
+}
 
-function openCrop(){
-  if(!iconDataUrl){ alert('Upload icon dulu!'); return; }
-  const modal = document.getElementById('cropModal');
+function initCropCanvas() {
   const canvas = document.getElementById('cropCanvas');
+  const container = document.getElementById('cropContainer');
+  const cw = container.clientWidth;
+  const ch = container.clientHeight;
+  canvas.width = cw;
+  canvas.height = ch;
+
   const ctx = canvas.getContext('2d');
-  cropImg.onload = ()=>{
-    cropX = 0; cropY = 0;
-    ctx.drawImage(cropImg,0,0,300,300);
+  const img = new Image();
+  img.onload = function() {
+    cropImg = img;
+    const scale = Math.min(cw / img.width, ch / img.height);
+    const dw = img.width * scale;
+    const dh = img.height * scale;
+    const ox = (cw - dw) / 2;
+    const oy = (ch - dh) / 2;
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(img, ox, oy, dw, dh);
+    canvas._imgBounds = { ox, oy, dw, dh, scale, imgW: img.width, imgH: img.height };
   };
-  cropImg.src = iconDataUrl;
-  modal.classList.add('open');
+  img.src = iconOriginalSrc;
 
-  canvas.onmousedown = e=>{ isDragging=true; lastX=e.clientX; lastY=e.clientY; };
-  canvas.onmousemove = e=>{
-    if(!isDragging) return;
-    cropX += e.clientX - lastX;
-    cropY += e.clientY - lastY;
-    lastX=e.clientX; lastY=e.clientY;
-    const ctx2 = canvas.getContext('2d');
-    ctx2.clearRect(0,0,300,300);
-    ctx2.fillStyle='#111';
-    ctx2.fillRect(0,0,300,300);
-    ctx2.drawImage(cropImg, cropX, cropY, 300, 300);
-  };
-  canvas.onmouseup = ()=>{ isDragging=false; };
+  cropRect = null;
+  updateCropOverlay();
+
+  canvas.onmousedown = canvas.ontouchstart = startCropDrag;
+  canvas.onmousemove = canvas.ontouchmove = moveCropDrag;
+  canvas.onmouseup = canvas.ontouchend = endCropDrag;
 }
 
-function applyCrop(){
+function getPos(e, el) {
+  const rect = el.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+}
+
+function startCropDrag(e) {
+  e.preventDefault();
+  isCropping = true;
+  const p = getPos(e, this);
+  cropStartX = p.x; cropStartY = p.y;
+  cropEndX = p.x; cropEndY = p.y;
+}
+
+function moveCropDrag(e) {
+  e.preventDefault();
+  if (!isCropping) return;
+  const p = getPos(e, this);
+  cropEndX = p.x; cropEndY = p.y;
+  updateCropOverlay();
+}
+
+function endCropDrag(e) {
+  if (!isCropping) return;
+  isCropping = false;
+  const p = getPos(e, this);
+  cropEndX = p.x; cropEndY = p.y;
+  cropRect = {
+    x: Math.min(cropStartX, cropEndX),
+    y: Math.min(cropStartY, cropEndY),
+    w: Math.abs(cropEndX - cropStartX),
+    h: Math.abs(cropEndY - cropStartY)
+  };
+  updateCropOverlay();
+}
+
+function updateCropOverlay() {
+  const svg = document.getElementById('cropSvg');
   const canvas = document.getElementById('cropCanvas');
-  iconDataUrl = canvas.toDataURL('image/png');
-  document.getElementById('iconPreview').src = iconDataUrl;
+  svg.setAttribute('width', canvas.width);
+  svg.setAttribute('height', canvas.height);
+  if (!isCropping && !cropRect) { svg.innerHTML = ''; return; }
+  const rx = Math.min(cropStartX, cropEndX);
+  const ry = Math.min(cropStartY, cropEndY);
+  const rw = Math.abs(cropEndX - cropStartX);
+  const rh = Math.abs(cropEndY - cropStartY);
+  svg.innerHTML = `
+    <rect x="0" y="0" width="${canvas.width}" height="${canvas.height}" fill="rgba(0,0,0,0.5)"/>
+    <rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" fill="none" stroke="#f0f0f0" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" fill="rgba(240,240,240,0.05)"/>
+  `;
+}
+
+function applyCrop() {
+  if (!cropRect || cropRect.w < 10 || cropRect.h < 10) {
+    closeCrop(); return;
+  }
+  const canvas = document.getElementById('cropCanvas');
+  const bounds = canvas._imgBounds;
+  if (!bounds) { closeCrop(); return; }
+
+  // Convert canvas coords to image coords
+  const scaleX = bounds.imgW / bounds.dw;
+  const scaleY = bounds.imgH / bounds.dh;
+  const ix = (cropRect.x - bounds.ox) * scaleX;
+  const iy = (cropRect.y - bounds.oy) * scaleY;
+  const iw = cropRect.w * scaleX;
+  const ih = cropRect.h * scaleY;
+
+  const out = document.createElement('canvas');
+  const size = Math.min(iw, ih);
+  out.width = 512;
+  out.height = 512;
+  const ctx = out.getContext('2d');
+  ctx.drawImage(cropImg, ix, iy, iw, ih, 0, 0, 512, 512);
+
+  const result = out.toDataURL('image/png');
+  iconOriginalSrc = result;
+  iconBlob = result;
+  const img = document.getElementById('iconImg');
+  img.src = result;
+  img.style.display = 'block';
+  document.getElementById('iconPlaceholder').style.display = 'none';
   closeCrop();
 }
 
-function closeCrop(){
-  document.getElementById('cropModal').classList.remove('open');
+// ---- SPLASH ----
+function pickSwatch(el) {
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  const c = el.getAttribute('data-color');
+  splashBgColor = c;
+  document.getElementById('splashColor').value = c;
+  document.getElementById('splashColorHex').textContent = c;
+  document.getElementById('splashPreview').style.background = c;
 }
 
-// ============ SPLASH PREVIEW ============
-function updateSplashPreview(){
-  const color = document.getElementById('splashColor').value;
-  document.getElementById('splashPreview').style.background = color;
+function updateSplashColor(c) {
+  splashBgColor = c;
+  document.getElementById('splashColorHex').textContent = c;
+  document.getElementById('splashPreview').style.background = c;
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
 }
 
-// ============ VALIDATE ============
-function validate(){
+// ---- REPO AUTO ----
+function updateRepoName() {
   const name = document.getElementById('appName').value.trim();
-  const pkg = document.getElementById('packageName').value.trim();
-  if(!name){ showStatus('error','Nama aplikasi wajib diisi!'); return false; }
-  if(!pkg){ showStatus('error','Package name wajib diisi!'); return false; }
-  if(sourceType === 'url'){
-    const url = document.getElementById('webviewUrl').value.trim();
-    if(!url){ showStatus('error','URL WebView wajib diisi!'); return false; }
-  } else {
-    if(!htmlContent){ showStatus('error','File HTML wajib diupload!'); return false; }
-  }
-  return true;
+  const slug = name ? name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') : '';
+  const repoName = slug ? 'apk-' + slug : '-- isi nama app dulu --';
+  document.getElementById('repoAutoName').textContent = repoName;
+  return slug ? 'apk-' + slug : null;
 }
 
-// ============ BUILD ============
-async function startBuild(){
-  if(!validate()) return;
+document.getElementById('appName').addEventListener('input', updateRepoName);
 
-  const btn = document.getElementById('buildBtn');
-  btn.disabled = true;
+// ---- BUILD ----
+function startBuild() {
+  const ghUser = document.getElementById('githubUser').value.trim();
+  const ghToken = document.getElementById('githubToken').value.trim();
+  if (!ghUser) { showErr(4, 'GitHub username wajib diisi.'); return; }
+  if (!ghToken || !ghToken.startsWith('ghp_') && !ghToken.startsWith('github_pat_')) {
+    showErr(4, 'Access token tidak valid. Harus diawali ghp_ atau github_pat_'); return;
+  }
 
-  const pw = document.getElementById('progressWrap');
-  pw.classList.add('show');
-  setProgress(0, '⚙ Menyiapkan konfigurasi...');
+  const repoName = updateRepoName();
+  if (!repoName) { showErr(4, 'Isi nama aplikasi di step 1 dulu.'); return; }
 
-  const payload = {
-    appName: document.getElementById('appName').value.trim(),
-    packageName: document.getElementById('packageName').value.trim(),
-    sourceType,
-    url: document.getElementById('webviewUrl').value.trim(),
-    htmlContent: htmlContent || '',
-    iconData: iconDataUrl || '',
-    iconShape,
-    splashColor: document.getElementById('splashColor').value,
-  };
+  document.getElementById('progressOverlay').classList.add('show');
+  runBuildProcess(ghUser, ghToken, repoName);
+}
 
-  // Simulate progress while waiting
-  const steps = [
-    [15, '📦 Menyusun struktur project Android...'],
-    [30, '📝 Menulis source code...'],
-    [50, '🔧 Mengkonfigurasi WebView...'],
-    [65, '🎨 Memasang icon & splash screen...'],
-    [80, '🔨 Mengirim ke server builder...'],
-    [90, '⏳ Sedang diproses di server...'],
-  ];
+function addLog(msg, type = '') {
+  const log = document.getElementById('progressLog');
+  const line = document.createElement('div');
+  line.className = 'log-line' + (type ? ' ' + type : '');
+  line.textContent = msg;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
 
-  let si = 0;
-  const interval = setInterval(()=>{
-    if(si < steps.length){
-      setProgress(steps[si][0], steps[si][1]);
-      si++;
-    }
-  }, 1200);
+function setProgress(pct, text) {
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressStepText').textContent = text;
+}
+
+async function runBuildProcess(ghUser, ghToken, repoName) {
+  const appName = document.getElementById('appName').value.trim();
+  const pkgName = document.getElementById('packageName').value.trim();
+  const webUrl = document.getElementById('webviewUrl').value.trim();
+  const htmlFile = document.getElementById('htmlFile').files[0];
 
   try {
-    const res = await fetch(`${BACKEND_URL}/build`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
+    setProgress(5, 'Memeriksa koneksi GitHub...');
+    addLog('[>] Verifikasi token GitHub...');
+
+    // Step 1: Verify token
+    const userRes = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': 'token ' + ghToken,
+        'Accept': 'application/vnd.github.v3+json'
+      }
     });
 
-    clearInterval(interval);
-
-    if(!res.ok){
-      const err = await res.json();
-      throw new Error(err.error || 'Build gagal');
+    if (!userRes.ok) {
+      const d = await userRes.json();
+      throw new Error('Token tidak valid: ' + (d.message || 'Unauthorized'));
     }
 
-    setProgress(100, '✅ Selesai! Mendownload file...');
+    const userData = await userRes.json();
+    addLog('[+] Login sebagai: ' + userData.login, 'success');
+    setProgress(15, 'Membuat repository...');
 
-    const blob = await res.blob();
-    const fileName = payload.appName.replace(/[^a-zA-Z0-9]/g,'_');
-    const contentType = res.headers.get('content-type') || '';
-    const ext = contentType.includes('zip') ? '_AndroidProject.zip' : '.apk';
+    // Step 2: Create repo
+    addLog('[>] Membuat private repository: ' + repoName + '...');
+    const repoRes = await fetch('https://api.github.com/user/repos', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'token ' + ghToken,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: repoName,
+        private: true,
+        auto_init: true,
+        description: 'APK Builder - ' + appName
+      })
+    });
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName + ext;
-    a.click();
-    URL.revokeObjectURL(url);
+    let repoData;
+    if (repoRes.status === 422) {
+      addLog('[!] Repo sudah ada, menggunakan yang lama...', 'warn');
+      repoData = { full_name: ghUser + '/' + repoName, name: repoName };
+    } else if (!repoRes.ok) {
+      const d = await repoRes.json();
+      throw new Error('Gagal buat repo: ' + (d.message || 'Unknown error'));
+    } else {
+      repoData = await repoRes.json();
+      addLog('[+] Repository dibuat: ' + repoData.full_name, 'success');
+    }
 
-    showStatus('success', `🎉 ${fileName}${ext} berhasil didownload!`);
+    await sleep(1000);
+    setProgress(30, 'Menyiapkan konfigurasi APK...');
 
-  } catch(err) {
-    clearInterval(interval);
-    setProgress(0,'');
-    showStatus('error','❌ Error: ' + err.message + '<br><small>Pastikan backend Railway sudah running dan URL sudah diset dengan benar.</small>');
-  } finally {
-    btn.disabled = false;
+    // Step 3: Build Gradle config
+    addLog('[>] Menulis build.gradle...');
+    const buildGradle = generateBuildGradle(pkgName, appName);
+    await pushFile(ghToken, ghUser, repoName, 'app/build.gradle', btoa(buildGradle), 'Add build.gradle');
+    addLog('[+] build.gradle berhasil.', 'success');
+    setProgress(42, 'Menyiapkan source code...');
+
+    // Step 4: MainActivity
+    addLog('[>] Menulis MainActivity.java...');
+    let mainActivity;
+    if (sourceType === 'html' && htmlFile) {
+      const htmlContent = await readFileAsText(htmlFile);
+      const b64Html = btoa(unescape(encodeURIComponent(htmlContent)));
+      mainActivity = generateMainActivityHtml(pkgName, appName, splashBgColor, b64Html);
+    } else {
+      mainActivity = generateMainActivityUrl(pkgName, appName, webUrl, splashBgColor);
+    }
+    await pushFile(ghToken, ghUser, repoName, 'app/src/main/java/' + pkgName.replace(/\./g, '/') + '/MainActivity.java', btoa(unescape(encodeURIComponent(mainActivity))), 'Add MainActivity');
+    addLog('[+] MainActivity.java berhasil.', 'success');
+    setProgress(55, 'Menyiapkan AndroidManifest...');
+
+    // Step 5: Manifest
+    addLog('[>] Menulis AndroidManifest.xml...');
+    const manifest = generateManifest(pkgName, appName);
+    await pushFile(ghToken, ghUser, repoName, 'app/src/main/AndroidManifest.xml', btoa(manifest), 'Add AndroidManifest');
+    addLog('[+] AndroidManifest.xml berhasil.', 'success');
+    setProgress(65, 'Upload icon...');
+
+    // Step 6: Icon
+    if (iconBlob) {
+      addLog('[>] Upload icon aplikasi...');
+      const iconB64 = iconBlob.split(',')[1];
+      await pushFile(ghToken, ghUser, repoName, 'app/src/main/res/mipmap-xxxhdpi/ic_launcher.png', iconB64, 'Add app icon');
+      addLog('[+] Icon berhasil di-upload.', 'success');
+    }
+
+    setProgress(74, 'Menyiapkan GitHub Actions...');
+
+    // Step 7: GitHub Actions Workflow
+    addLog('[>] Menulis workflow CI/CD...');
+    const workflow = generateWorkflow(appName, repoName);
+    await pushFile(ghToken, ghUser, repoName, '.github/workflows/build.yml', btoa(workflow), 'Add CI workflow');
+    addLog('[+] Workflow berhasil.', 'success');
+    setProgress(82, 'Menulis settings.gradle...');
+
+    // Step 8: settings.gradle & root build.gradle
+    const settingsGradle = `rootProject.name = "${repoName}"\ninclude ':app'`;
+    await pushFile(ghToken, ghUser, repoName, 'settings.gradle', btoa(settingsGradle), 'Add settings.gradle');
+
+    const rootBuildGradle = `buildscript {\n    repositories { google(); mavenCentral() }\n    dependencies { classpath 'com.android.tools.build:gradle:8.1.4' }\n}\nallprojects { repositories { google(); mavenCentral() } }`;
+    await pushFile(ghToken, ghUser, repoName, 'build.gradle', btoa(rootBuildGradle), 'Add root build.gradle');
+
+    addLog('[+] Gradle files berhasil.', 'success');
+    setProgress(90, 'Memicu build di GitHub Actions...');
+
+    await sleep(2000);
+    addLog('[>] Trigger workflow dispatch...');
+
+    // Step 9: Trigger workflow
+    const triggerRes = await fetch(`https://api.github.com/repos/${ghUser}/${repoName}/actions/workflows/build.yml/dispatches`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'token ' + ghToken,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ ref: 'main' })
+    });
+
+    setProgress(100, 'Build dipicu! Menunggu hasil...');
+    addLog('[+] Build sedang berjalan di GitHub Actions!', 'success');
+    addLog('[>] APK akan siap dalam ~3-5 menit...', 'success');
+
+    await sleep(1500);
+
+    const actionsUrl = `https://github.com/${ghUser}/${repoName}/actions`;
+    document.getElementById('progressOverlay').classList.remove('show');
+    document.getElementById('successOverlay').classList.add('show');
+    document.getElementById('successSub').innerHTML = `Build sedang berjalan di GitHub Actions.<br>Klik tombol di bawah untuk monitor & download APK.<br><span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--dim)">File: ${appName.replace(/\s+/g, '-')}.apk</span>`;
+    document.getElementById('downloadBtn').href = actionsUrl;
+    document.getElementById('downloadBtn').textContent = 'Buka GitHub Actions';
+
+  } catch (err) {
+    document.getElementById('progressOverlay').classList.remove('show');
+    showErr(4, 'Error: ' + err.message);
+    addLog('[x] Error: ' + err.message);
   }
 }
 
-function setProgress(pct, msg){
-  document.getElementById('progressBar').style.width = pct + '%';
-  if(msg) document.getElementById('progressLog').innerHTML += msg + '<br>';
-  document.getElementById('progressLog').scrollTop = 9999;
+async function pushFile(token, owner, repo, path, content, message) {
+  // Check if file exists first
+  let sha = null;
+  try {
+    const check = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+      headers: {
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (check.ok) {
+      const d = await check.json();
+      sha = d.sha;
+    }
+  } catch(e) {}
+
+  const body = {
+    message: message,
+    content: content,
+    branch: 'main'
+  };
+  if (sha) body.sha = sha;
+
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'token ' + token,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const d = await res.json();
+    throw new Error('Gagal push ' + path + ': ' + (d.message || 'Error'));
+  }
+  await sleep(300);
 }
 
-function showStatus(type, msg){
-  const el = document.getElementById('statusMsg');
-  el.className = 'status-msg show ' + type;
-  el.innerHTML = msg;
+function readFileAsText(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = () => rej(new Error('Gagal baca file'));
+    r.readAsText(file);
+  });
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ---- CODE GENERATORS ----
+function generateBuildGradle(pkgName, appName) {
+  return `apply plugin: 'com.android.application'
+android {
+    compileSdkVersion 34
+    defaultConfig {
+        applicationId "${pkgName}"
+        minSdkVersion 21
+        targetSdkVersion 34
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+}`;
+}
+
+function generateManifest(pkgName, appName) {
+  return `<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="${pkgName}">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="${appName}"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>`;
+}
+
+function generateMainActivityUrl(pkgName, appName, url, splashColor) {
+  const pkg = pkgName.split('.').map((s,i,a) => i < a.length-1 ? s : null).filter(Boolean).join('.');
+  return `package ${pkgName};
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.view.Window;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.RelativeLayout;
+
+public class MainActivity extends Activity {
+    private WebView webView;
+
+    @SuppressLint("SetJavaScriptEnabled")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        // Splash
+        final RelativeLayout splash = new RelativeLayout(this);
+        splash.setBackgroundColor(Color.parseColor("${splashColor}"));
+        setContentView(splash);
+
+        webView = new WebView(this);
+        WebSettings ws = webView.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setDomStorageEnabled(true);
+        ws.setLoadWithOverviewMode(true);
+        ws.setUseWideViewPort(true);
+        ws.setBuiltInZoomControls(false);
+        ws.setDisplayZoomControls(false);
+        webView.setWebViewClient(new WebViewClient());
+        webView.loadUrl("${url}");
+
+        new Handler().postDelayed(() -> setContentView(webView), 2000);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (webView != null && webView.canGoBack()) webView.goBack();
+        else super.onBackPressed();
+    }
+}`;
+}
+
+function generateMainActivityHtml(pkgName, appName, splashColor, b64Html) {
+  return `package ${pkgName};
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.Window;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.RelativeLayout;
+import java.util.Base64;
+
+public class MainActivity extends Activity {
+    private WebView webView;
+    private static final String HTML_B64 = "${b64Html}";
+
+    @SuppressLint("SetJavaScriptEnabled")
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        final RelativeLayout splash = new RelativeLayout(this);
+        splash.setBackgroundColor(Color.parseColor("${splashColor}"));
+        setContentView(splash);
+
+        webView = new WebView(this);
+        WebSettings ws = webView.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setDomStorageEnabled(true);
+        ws.setAllowFileAccess(true);
+        webView.setWebViewClient(new WebViewClient());
+        try {
+            byte[] decoded = Base64.decode(HTML_B64, Base64.DEFAULT);
+            String html = new String(decoded, "UTF-8");
+            webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
+        } catch (Exception e) {
+            webView.loadData("<h1>Error loading content</h1>", "text/html", "UTF-8");
+        }
+
+        new Handler().postDelayed(() -> setContentView(webView), 2000);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (webView != null && webView.canGoBack()) webView.goBack();
+        else super.onBackPressed();
+    }
+}`;
+}
+
+function generateWorkflow(appName, repoName) {
+  const apkFilename = appName.replace(/\s+/g, '-') + '.apk';
+  return `name: Build APK
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew || true
+
+      - name: Setup Gradle Wrapper
+        run: |
+          if [ ! -f gradlew ]; then
+            gradle wrapper --gradle-version 8.0
+          fi
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+
+      - name: Rename APK
+        run: |
+          mkdir -p output
+          cp app/build/outputs/apk/debug/app-debug.apk output/${apkFilename}
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${apkFilename}
+          path: output/${apkFilename}
+          retention-days: 30
+`;
+}
+
+// ---- RESET ----
+function resetAll() {
+  document.getElementById('successOverlay').classList.remove('show');
+  document.getElementById('appName').value = '';
+  document.getElementById('packageName').value = '';
+  document.getElementById('webviewUrl').value = '';
+  document.getElementById('githubUser').value = '';
+  document.getElementById('githubToken').value = '';
+  document.getElementById('iconImg').src = '';
+  document.getElementById('iconImg').style.display = 'none';
+  document.getElementById('iconPlaceholder').style.display = 'block';
+  iconBlob = null;
+  iconOriginalSrc = null;
+  document.getElementById('progressLog').innerHTML = '';
+  document.getElementById('progressBar').style.width = '0%';
+  setSource('url');
+  goStep(0);
 }
 </script>
 </body>
-</html>
+  </html>
