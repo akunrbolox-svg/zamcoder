@@ -2052,10 +2052,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -2081,7 +2081,7 @@ jobs:
           cp app/build/outputs/apk/debug/app-debug.apk output/${apkFilename}
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${apkFilename}
           path: output/${apkFilename}
@@ -2109,4 +2109,4 @@ function resetAll() {
 }
 </script>
 </body>
-  </html>
+</html>
