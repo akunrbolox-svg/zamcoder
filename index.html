@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Builder APK — Zam Coder</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#080808;
+  --white:#f5f5f5;
+  --gray:#1a1a1a;
+  --gray2:#2a2a2a;
+  --gray3:#3d3d3d;
+  --silver:#9a9a9a;
+  --silver2:#c8c8c8;
+  --accent:#d4d4d4;
+  --border:rgba(255,255,255,0.08);
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--black);
+  color:var(--white);
+  font-family:'DM Mono',monospace;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* NOISE OVERLAY */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:0;
+  opacity:.4;
+}
+
+/* GRID LINES */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* HEADER */
+header{
+  position:fixed;
+  top:0;left:0;right:0;
+  z-index:100;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px 48px;
+  border-bottom:1px solid var(--border);
+  background:rgba(8,8,8,0.85);
+  backdrop-filter:blur(20px);
+}
+.logo{
+  font-family:'Syne',sans-serif;
+  font-weight:800;
+  font-size:1.1rem;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--white);
+}
+.logo span{color:var(--silver)}
+.badge{
+  font-size:.65rem;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--silver);
+  border:1px solid var(--gray3);
+  padding:4px 12px;
+  border-radius:2px;
+}
+
+/* HERO */
+.hero{
+  position:relative;
+  z-index:1;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:120px 24px 60px;
+}
+.hero-tag{
+  font-size:.65rem;
+  letter-spacing:.3em;
+  text-transform:uppercase;
+  color:var(--silver);
+  margin-bottom:28px;
+  opacity:0;
+  animation:fadeUp .6s .2s forwards;
+}
+.hero h1{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(3rem,8vw,6.5rem);
+  font-weight:800;
+  line-height:.95;
+  letter-spacing:-.02em;
+  margin-bottom:24px;
+  opacity:0;
+  animation:fadeUp .7s .35s forwards;
+}
+.hero h1 em{
+  font-style:normal;
+  color:transparent;
+  -webkit-text-stroke:1px var(--silver2);
+}
+.hero p{
+  font-size:.85rem;
+  color:var(--silver);
+  max-width:460px;
+  line-height:1.7;
+  margin-bottom:56px;
+  opacity:0;
+  animation:fadeUp .7s .5s forwards;
+}
+.scroll-hint{
+  position:absolute;
+  bottom:40px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  opacity:.4;
+  animation:bounce 2s infinite;
+}
+.scroll-hint span{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--silver)}
+.scroll-arrow{width:1px;height:40px;background:linear-gradient(var(--silver),transparent)}
+
+/* BUILDER SECTION */
+.builder{
+  position:relative;
+  z-index:1;
+  max-width:820px;
+  margin:0 auto;
+  padding:40px 24px 120px;
+}
+.section-label{
+  font-size:.6rem;
+  letter-spacing:.35em;
+  text-transform:uppercase;
+  color:var(--silver);
+  margin-bottom:40px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* FORM PANELS */
+.panel{
+  background:var(--gray);
+  border:1px solid var(--border);
+  border-radius:4px;
+  margin-bottom:2px;
+  overflow:hidden;
+  transition:border-color .3s;
+}
+.panel:hover{border-color:rgba(255,255,255,0.15)}
+.panel-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px 24px;
+  cursor:pointer;
+  user-select:none;
+}
+.panel-title{
+  font-family:'Syne',sans-serif;
+  font-size:.85rem;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.panel-num{
+  font-family:'DM Mono',monospace;
+  font-size:.7rem;
+  color:var(--silver);
+  font-weight:300;
+}
+.panel-arrow{
+  color:var(--silver);
+  font-size:.7rem;
+  transition:transform .3s;
+}
+.panel.open .panel-arrow{transform:rotate(180deg)}
+.panel-body{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height .4s cubic-bezier(.4,0,.2,1);
+}
+.panel.open .panel-body{max-height:800px}
+.panel-inner{padding:0 24px 28px}
+
+/* INPUTS */
+.field{margin-bottom:20px}
+.field:last-child{margin-bottom:0}
+label{
+  display:block;
+  font-size:.65rem;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--silver);
+  margin-bottom:8px;
+}
+input[type=text],input[type=color]{
+  width:100%;
+  background:var(--gray2);
+  border:1px solid var(--gray3);
+  border-radius:2px;
+  color:var(--white);
+  font-family:'DM Mono',monospace;
+  font-size:.85rem;
+  padding:12px 16px;
+  outline:none;
+  transition:border-color .2s;
+}
+input[type=text]:focus{border-color:var(--silver2)}
+input[type=color]{height:48px;padding:4px 8px;cursor:pointer}
+
+/* SOURCE TOGGLE */
+.source-toggle{
+  display:flex;
+  gap:2px;
+  margin-bottom:20px;
+  background:var(--gray2);
+  padding:3px;
+  border-radius:3px;
+}
+.source-btn{
+  flex:1;
+  padding:10px;
+  background:none;
+  border:none;
+  color:var(--silver);
+  font-family:'DM Mono',monospace;
+  font-size:.75rem;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  cursor:pointer;
+  border-radius:2px;
+  transition:all .2s;
+}
+.source-btn.active{
+  background:var(--gray3);
+  color:var(--white);
+}
+.source-panel{display:none}
+.source-panel.active{display:block}
+
+/* ICON SECTION */
+.icon-preview-wrap{
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+.icon-dropzone{
+  width:120px;height:120px;
+  border:1px dashed var(--gray3);
+  border-radius:4px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  flex-shrink:0;
+  transition:border-color .2s;
+}
+.icon-dropzone:hover{border-color:var(--silver)}
+.icon-dropzone img{
+  width:100%;height:100%;
+  object-fit:cover;
+  position:absolute;inset:0;
+}
+.icon-dropzone-label{
+  font-size:.6rem;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--silver);
+  text-align:center;
+  line-height:1.5;
+}
+.icon-controls{flex:1;min-width:160px}
+.shape-select{
+  display:flex;gap:8px;margin-bottom:16px;
+}
+.shape-opt{
+  flex:1;
+  padding:10px;
+  background:var(--gray2);
+  border:1px solid var(--gray3);
+  border-radius:2px;
+  color:var(--silver);
+  font-family:'DM Mono',monospace;
+  font-size:.7rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  cursor:pointer;
+  text-align:center;
+  transition:all .2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.shape-opt.active{border-color:var(--silver2);color:var(--white);background:var(--gray3)}
+.shape-icon{font-size:1.1rem}
+.zoom-wrap{margin-top:12px}
+.zoom-wrap label{margin-bottom:6px}
+input[type=range]{
+  width:100%;
+  accent-color:var(--silver2);
+  cursor:pointer;
+}
+.icon-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn-sm{
+  padding:8px 14px;
+  background:var(--gray2);
+  border:1px solid var(--gray3);
+  border-radius:2px;
+  color:var(--silver);
+  font-family:'DM Mono',monospace;
+  font-size:.65rem;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .2s;
+}
+.btn-sm:hover{border-color:var(--silver2);color:var(--white)}
+
+/* CROP MODAL */
+.crop-modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:999;
+  background:rgba(0,0,0,.9);
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:20px;
+}
+.crop-modal.open{display:flex}
+.crop-canvas-wrap{
+  position:relative;
+  width:300px;height:300px;
+  overflow:hidden;
+  border:1px solid var(--gray3);
+}
+#cropCanvas{display:block}
+.crop-actions{display:flex;gap:12px}
+
+/* SPLASH PREVIEW */
+.splash-preview{
+  width:80px;height:80px;
+  border-radius:4px;
+  border:1px solid var(--gray3);
+  margin-top:8px;
+  transition:background .2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.55rem;
+  color:rgba(255,255,255,.3);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+
+/* BUILD BUTTON */
+.build-wrap{
+  margin-top:40px;
+  text-align:center;
+}
+.build-btn{
+  position:relative;
+  padding:20px 60px;
+  background:var(--white);
+  color:var(--black);
+  border:none;
+  border-radius:2px;
+  font-family:'Syne',sans-serif;
+  font-size:1rem;
+  font-weight:700;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  cursor:pointer;
+  overflow:hidden;
+  transition:all .3s;
+}
+.build-btn::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:var(--silver2);
+  transform:translateX(-100%);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);
+}
+.build-btn:hover::before{transform:translateX(0)}
+.build-btn span{position:relative;z-index:1}
+.build-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* PROGRESS */
+.progress-wrap{
+  display:none;
+  margin-top:24px;
+  text-align:left;
+}
+.progress-wrap.show{display:block}
+.progress-bar-bg{
+  height:2px;
+  background:var(--gray3);
+  border-radius:1px;
+  overflow:hidden;
+  margin-bottom:12px;
+}
+.progress-bar{
+  height:100%;
+  background:var(--silver2);
+  border-radius:1px;
+  width:0%;
+  transition:width .4s ease;
+}
+.progress-log{
+  font-size:.7rem;
+  color:var(--silver);
+  line-height:1.8;
+  font-family:'DM Mono',monospace;
+}
+
+/* STATUS */
+.status-msg{
+  margin-top:20px;
+  padding:16px 20px;
+  border-radius:2px;
+  font-size:.8rem;
+  display:none;
+}
+.status-msg.show{display:block}
+.status-msg.success{background:rgba(100,200,100,.08);border:1px solid rgba(100,200,100,.2);color:#7ddb7d}
+.status-msg.error{background:rgba(200,80,80,.08);border:1px solid rgba(200,80,80,.2);color:#e07070}
+
+/* FOOTER */
+footer{
+  position:relative;z-index:1;
+  text-align:center;
+  padding:40px 24px;
+  border-top:1px solid var(--border);
+  font-size:.65rem;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--silver);
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes bounce{
+  0%,100%{transform:translateX(-50%) translateY(0)}
+  50%{transform:translateX(-50%) translateY(8px)}
+}
+
+/* FILE UPLOAD */
+.upload-zone{
+  border:1px dashed var(--gray3);
+  border-radius:2px;
+  padding:32px;
+  text-align:center;
+  cursor:pointer;
+  transition:border-color .2s;
+  position:relative;
+}
+.upload-zone:hover{border-color:var(--silver)}
+.upload-zone input{
+  position:absolute;inset:0;
+  opacity:0;cursor:pointer;
+  width:100%;height:100%;
+}
+.upload-zone-label{
+  font-size:.7rem;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--silver);
+  line-height:1.8;
+}
+.upload-zone-label strong{display:block;font-size:.9rem;margin-bottom:4px;color:var(--silver2)}
+.file-name{
+  margin-top:8px;
+  font-size:.7rem;
+  color:var(--silver2);
+  font-family:'DM Mono',monospace;
+}
+
+@media(max-width:600px){
+  header{padding:16px 20px}
+  .builder{padding:20px 16px 80px}
+  .panel-inner{padding:0 16px 20px}
+  .icon-preview-wrap{flex-direction:column}
+  .icon-controls{width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- AUDIO -->
+<audio id="bgAudio" loop preload="auto">
+  <source src="https://files.catbox.moe/hdj17h.mp3" type="audio/mpeg"/>
+</audio>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">Builder <span>APK</span></div>
+  <div class="badge">by Zam Coder</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-tag">// Android App Builder</p>
+  <h1>Turn Website<br/>Into <em>APK</em></h1>
+  <p>Isi form, klik build — dapatkan APK Android siap install. Dibuat oleh Zam Coder.</p>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- BUILDER -->
+<section class="builder">
+  <div class="section-label">// Konfigurasi Aplikasi</div>
+
+  <!-- PANEL 1: INFO DASAR -->
+  <div class="panel open" id="p1">
+    <div class="panel-header" onclick="togglePanel('p1')">
+      <div class="panel-title"><span class="panel-num">01</span> Info Aplikasi</div>
+      <span class="panel-arrow">▼</span>
+    </div>
+    <div class="panel-body">
+      <div class="panel-inner">
+        <div class="field">
+          <label>Nama Aplikasi</label>
+          <input type="text" id="appName" placeholder="contoh: Toko Online Ku"/>
+        </div>
+        <div class="field">
+          <label>Package Name</label>
+          <input type="text" id="packageName" placeholder="com.zamcoder.tokoonline"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 2: SUMBER KONTEN -->
+  <div class="panel" id="p2">
+    <div class="panel-header" onclick="togglePanel('p2')">
+      <div class="panel-title"><span class="panel-num">02</span> Sumber Konten</div>
+      <span class="panel-arrow">▼</span>
+    </div>
+    <div class="panel-body">
+      <div class="panel-inner">
+        <div class="source-toggle">
+          <button class="source-btn active" onclick="switchSource('url')">🌐 URL WebView</button>
+          <button class="source-btn" onclick="switchSource('html')">📄 File HTML</button>
+        </div>
+
+        <div class="source-panel active" id="src-url">
+          <div class="field">
+            <label>URL Website Target</label>
+            <input type="text" id="webviewUrl" placeholder="https://example.com"/>
+          </div>
+        </div>
+
+        <div class="source-panel" id="src-html">
+          <div class="field">
+            <label>Upload File HTML</label>
+            <div class="upload-zone" onclick="document.getElementById('htmlFile').click()">
+              <input type="file" id="htmlFile" accept=".html,.htm" style="display:none" onchange="handleHtmlFile(event)"/>
+              <div class="upload-zone-label">
+                <strong>Pilih File</strong>
+                .html atau .htm
+              </div>
+            </div>
+            <div class="file-name" id="htmlFileName"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 3: ICON -->
+  <div class="panel" id="p3">
+    <div class="panel-header" onclick="togglePanel('p3')">
+      <div class="panel-title"><span class="panel-num">03</span> Icon Aplikasi</div>
+      <span class="panel-arrow">▼</span>
+    </div>
+    <div class="panel-body">
+      <div class="panel-inner">
+        <div class="icon-preview-wrap">
+          <div>
+            <div class="icon-dropzone" id="iconDropzone" onclick="document.getElementById('iconFile').click()">
+              <input type="file" id="iconFile" accept="image/*" style="display:none" onchange="handleIcon(event)"/>
+              <img id="iconPreview" style="display:none"/>
+              <div class="icon-dropzone-label" id="iconLabel">+ Pilih<br/>Gambar</div>
+            </div>
+          </div>
+          <div class="icon-controls">
+            <label style="margin-bottom:8px">Bentuk Icon</label>
+            <div class="shape-select">
+              <div class="shape-opt active" id="shapeSquare" onclick="setShape('square')">
+                <span class="shape-icon">⬛</span> Kotak
+              </div>
+              <div class="shape-opt" id="shapeCircle" onclick="setShape('circle')">
+                <span class="shape-icon">⚫</span> Bulat
+              </div>
+            </div>
+            <div class="zoom-wrap">
+              <label>Zoom Icon</label>
+              <input type="range" id="iconZoom" min="50" max="200" value="100" oninput="applyZoom(this.value)"/>
+            </div>
+            <div class="icon-actions">
+              <button class="btn-sm" onclick="openCrop()">✂ Crop / Edit</button>
+              <button class="btn-sm" onclick="document.getElementById('iconFile').click()">↺ Ganti</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 4: SPLASH SCREEN -->
+  <div class="panel" id="p4">
+    <div class="panel-header" onclick="togglePanel('p4')">
+      <div class="panel-title"><span class="panel-num">04</span> Splash Screen</div>
+      <span class="panel-arrow">▼</span>
+    </div>
+    <div class="panel-body">
+      <div class="panel-inner">
+        <div class="field">
+          <label>Warna Background Splash</label>
+          <input type="color" id="splashColor" value="#0a0a0a" oninput="updateSplashPreview()"/>
+          <div class="splash-preview" id="splashPreview" style="background:#0a0a0a">Preview</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUILD BUTTON -->
+  <div class="build-wrap">
+    <button class="build-btn" id="buildBtn" onclick="startBuild()">
+      <span>⚡ Build APK</span>
+    </button>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-log" id="progressLog"></div>
+    </div>
+
+    <div class="status-msg" id="statusMsg"></div>
+  </div>
+</section>
+
+<!-- CROP MODAL -->
+<div class="crop-modal" id="cropModal">
+  <canvas id="cropCanvas" width="300" height="300"></canvas>
+  <div class="crop-actions">
+    <button class="btn-sm" onclick="applyCrop()">✓ Apply Crop</button>
+    <button class="btn-sm" onclick="closeCrop()">✕ Batal</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>© 2024 Builder APK — Dibuat dengan ♥ oleh Zam Coder</footer>
+
+<script>
+// ============ CONFIG ============
+// GANTI INI DENGAN URL RAILWAY KAMU SETELAH DEPLOY!
+const BACKEND_URL = "https://builder-apk-backend-production.up.railway.app";
+
+// ============ AUDIO ============
+const audio = document.getElementById('bgAudio');
+audio.volume = 0.72;
+
+function tryPlay(){
+  audio.play().catch(()=>{
+    document.addEventListener('click', ()=>{ audio.play(); }, { once:true });
+    document.addEventListener('touchstart', ()=>{ audio.play(); }, { once:true });
+  });
+}
+window.addEventListener('load', tryPlay);
+
+// ============ STATE ============
+let sourceType = 'url';
+let iconDataUrl = null;
+let htmlContent = null;
+let iconShape = 'square';
+
+// ============ PANEL TOGGLE ============
+function togglePanel(id){
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// ============ SOURCE SWITCH ============
+function switchSource(type){
+  sourceType = type;
+  document.querySelectorAll('.source-btn').forEach((b,i)=>{
+    b.classList.toggle('active', (i===0 && type==='url') || (i===1 && type==='html'));
+  });
+  document.getElementById('src-url').classList.toggle('active', type==='url');
+  document.getElementById('src-html').classList.toggle('active', type==='html');
+}
+
+// ============ HTML FILE ============
+function handleHtmlFile(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  document.getElementById('htmlFileName').textContent = '✓ ' + file.name;
+  const reader = new FileReader();
+  reader.onload = ev => { htmlContent = ev.target.result; };
+  reader.readAsText(file);
+}
+
+// ============ ICON ============
+function handleIcon(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    iconDataUrl = ev.target.result;
+    const img = document.getElementById('iconPreview');
+    img.src = iconDataUrl;
+    img.style.display = 'block';
+    document.getElementById('iconLabel').style.display = 'none';
+    applyIconShape();
+  };
+  reader.readAsDataURL(file);
+}
+
+function setShape(shape){
+  iconShape = shape;
+  document.getElementById('shapeSquare').classList.toggle('active', shape==='square');
+  document.getElementById('shapeCircle').classList.toggle('active', shape==='circle');
+  applyIconShape();
+}
+
+function applyIconShape(){
+  const img = document.getElementById('iconPreview');
+  img.style.borderRadius = iconShape === 'circle' ? '50%' : '4px';
+}
+
+function applyZoom(val){
+  const img = document.getElementById('iconPreview');
+  const scale = val / 100;
+  img.style.transform = `scale(${scale})`;
+}
+
+// ============ CROP ============
+let cropImg = new Image();
+let cropX = 0, cropY = 0, isDragging = false, lastX, lastY;
+
+function openCrop(){
+  if(!iconDataUrl){ alert('Upload icon dulu!'); return; }
+  const modal = document.getElementById('cropModal');
+  const canvas = document.getElementById('cropCanvas');
+  const ctx = canvas.getContext('2d');
+  cropImg.onload = ()=>{
+    cropX = 0; cropY = 0;
+    ctx.drawImage(cropImg,0,0,300,300);
+  };
+  cropImg.src = iconDataUrl;
+  modal.classList.add('open');
+
+  canvas.onmousedown = e=>{ isDragging=true; lastX=e.clientX; lastY=e.clientY; };
+  canvas.onmousemove = e=>{
+    if(!isDragging) return;
+    cropX += e.clientX - lastX;
+    cropY += e.clientY - lastY;
+    lastX=e.clientX; lastY=e.clientY;
+    const ctx2 = canvas.getContext('2d');
+    ctx2.clearRect(0,0,300,300);
+    ctx2.fillStyle='#111';
+    ctx2.fillRect(0,0,300,300);
+    ctx2.drawImage(cropImg, cropX, cropY, 300, 300);
+  };
+  canvas.onmouseup = ()=>{ isDragging=false; };
+}
+
+function applyCrop(){
+  const canvas = document.getElementById('cropCanvas');
+  iconDataUrl = canvas.toDataURL('image/png');
+  document.getElementById('iconPreview').src = iconDataUrl;
+  closeCrop();
+}
+
+function closeCrop(){
+  document.getElementById('cropModal').classList.remove('open');
+}
+
+// ============ SPLASH PREVIEW ============
+function updateSplashPreview(){
+  const color = document.getElementById('splashColor').value;
+  document.getElementById('splashPreview').style.background = color;
+}
+
+// ============ VALIDATE ============
+function validate(){
+  const name = document.getElementById('appName').value.trim();
+  const pkg = document.getElementById('packageName').value.trim();
+  if(!name){ showStatus('error','Nama aplikasi wajib diisi!'); return false; }
+  if(!pkg){ showStatus('error','Package name wajib diisi!'); return false; }
+  if(sourceType === 'url'){
+    const url = document.getElementById('webviewUrl').value.trim();
+    if(!url){ showStatus('error','URL WebView wajib diisi!'); return false; }
+  } else {
+    if(!htmlContent){ showStatus('error','File HTML wajib diupload!'); return false; }
+  }
+  return true;
+}
+
+// ============ BUILD ============
+async function startBuild(){
+  if(!validate()) return;
+
+  const btn = document.getElementById('buildBtn');
+  btn.disabled = true;
+
+  const pw = document.getElementById('progressWrap');
+  pw.classList.add('show');
+  setProgress(0, '⚙ Menyiapkan konfigurasi...');
+
+  const payload = {
+    appName: document.getElementById('appName').value.trim(),
+    packageName: document.getElementById('packageName').value.trim(),
+    sourceType,
+    url: document.getElementById('webviewUrl').value.trim(),
+    htmlContent: htmlContent || '',
+    iconData: iconDataUrl || '',
+    iconShape,
+    splashColor: document.getElementById('splashColor').value,
+  };
+
+  // Simulate progress while waiting
+  const steps = [
+    [15, '📦 Menyusun struktur project Android...'],
+    [30, '📝 Menulis source code...'],
+    [50, '🔧 Mengkonfigurasi WebView...'],
+    [65, '🎨 Memasang icon & splash screen...'],
+    [80, '🔨 Mengirim ke server builder...'],
+    [90, '⏳ Sedang diproses di server...'],
+  ];
+
+  let si = 0;
+  const interval = setInterval(()=>{
+    if(si < steps.length){
+      setProgress(steps[si][0], steps[si][1]);
+      si++;
+    }
+  }, 1200);
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/build`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+
+    clearInterval(interval);
+
+    if(!res.ok){
+      const err = await res.json();
+      throw new Error(err.error || 'Build gagal');
+    }
+
+    setProgress(100, '✅ Selesai! Mendownload file...');
+
+    const blob = await res.blob();
+    const fileName = payload.appName.replace(/[^a-zA-Z0-9]/g,'_');
+    const contentType = res.headers.get('content-type') || '';
+    const ext = contentType.includes('zip') ? '_AndroidProject.zip' : '.apk';
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName + ext;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showStatus('success', `🎉 ${fileName}${ext} berhasil didownload!`);
+
+  } catch(err) {
+    clearInterval(interval);
+    setProgress(0,'');
+    showStatus('error','❌ Error: ' + err.message + '<br><small>Pastikan backend Railway sudah running dan URL sudah diset dengan benar.</small>');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function setProgress(pct, msg){
+  document.getElementById('progressBar').style.width = pct + '%';
+  if(msg) document.getElementById('progressLog').innerHTML += msg + '<br>';
+  document.getElementById('progressLog').scrollTop = 9999;
+}
+
+function showStatus(type, msg){
+  const el = document.getElementById('statusMsg');
+  el.className = 'status-msg show ' + type;
+  el.innerHTML = msg;
+}
+</script>
+</body>
+</html>
