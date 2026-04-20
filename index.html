@@ -6,347 +6,1193 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Cek Device">
 <meta name="theme-color" content="#0a0a0a">
-<link rel="manifest" href="data:application/json,{%22name%22:%22Cek Device%22,%22short_name%22:%22CekDevice%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230a0a0a%22,%22theme_color%22:%22%230a0a0a%22}">
-<title>Cek Device</title>
+<title>ZamDex</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne+Mono&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
-  :root {
-    --bg-primary:#0a0a0a;--bg-secondary:#111111;--bg-card:#161616;
-    --bg-elevated:#1e1e1e;--border:#2a2a2a;--border-light:#333333;
-    --text-primary:#f0f0f0;--text-secondary:#a0a0a0;--text-muted:#555555;
-    --accent:#c8c8c8;--accent-bright:#ffffff;--silver:#b8b8b8;--tab-active:#e8e8e8;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  body{background:var(--bg-primary);color:var(--text-primary);font-family:'IBM Plex Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+:root{
+  --bg:#080808;
+  --bg2:#0f0f0f;
+  --bg3:#141414;
+  --bg4:#1a1a1a;
+  --bg5:#212121;
+  --bd:#272727;
+  --bd2:#353535;
+  --bd3:#444;
+  --t1:#f5f5f5;
+  --t2:#999;
+  --t3:#444;
+  --t4:#2a2a2a;
+  --ac:#d0d0d0;
+  --acb:#ffffff;
+  --sv:#aaa;
+  --accent:#e8e8e8;
+  --glow:rgba(255,255,255,0.04);
+}
 
-  /* SCREENS */
-  .screen{display:none;position:fixed;inset:0;background:var(--bg-primary);z-index:999;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
-  .screen.active{display:flex;}
-  .screen-logo{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;letter-spacing:4px;color:var(--accent-bright);text-transform:uppercase;margin-bottom:6px;}
-  .screen-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:40px;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 
-  .auth-tabs{display:flex;border:1px solid var(--border);margin-bottom:24px;width:100%;max-width:320px;}
-  .auth-tab{flex:1;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;background:none;border:none;color:var(--text-muted);cursor:pointer;transition:all 0.2s;}
-  .auth-tab.active{background:var(--bg-elevated);color:var(--accent-bright);}
+body{
+  background:var(--bg);
+  color:var(--t1);
+  font-family:'Space Grotesk',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
 
-  .auth-form{width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px;}
-  .auth-input{background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:12px;width:100%;outline:none;transition:border-color 0.2s;}
-  .auth-input:focus{border-color:var(--border-light);}
-  .auth-input::placeholder{color:var(--text-muted);}
-  .auth-btn{background:var(--bg-elevated);border:1px solid var(--border-light);color:var(--accent-bright);padding:13px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;margin-top:4px;}
-  .auth-btn:hover{background:#252525;border-color:#555;}
-  .auth-google-btn{background:none;border:1px solid var(--border);color:var(--text-secondary);padding:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-  .auth-google-btn:hover{background:var(--bg-elevated);border-color:var(--border-light);color:var(--accent-bright);}
-  .auth-divider{display:flex;align-items:center;gap:10px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;}
-  .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
-  .auth-error{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#888;letter-spacing:1px;text-align:center;min-height:16px;}
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size:200px;
+  pointer-events:none;
+  z-index:9999;
+  opacity:.6;
+}
 
-  /* PERMISSION */
-  .perm-list{width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
-  .perm-item{background:var(--bg-card);border:1px solid var(--border);padding:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-  .perm-name{font-size:12px;color:var(--text-secondary);flex:1;}
-  .perm-status{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;min-width:60px;text-align:center;}
-  .perm-status.waiting{color:var(--text-muted);}
-  .perm-status.granted{color:#888;}
-  .perm-status.denied{color:#555;}
-  .perm-grant-btn{background:none;border:1px solid var(--border-light);color:var(--accent);padding:6px 12px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
-  .perm-grant-btn:hover{background:var(--bg-elevated);}
-  .perm-grant-btn:disabled{opacity:0.3;cursor:default;}
-  .play-btn{background:var(--bg-elevated);border:1px solid var(--border-light);color:var(--accent-bright);padding:16px 48px;font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;display:none;}
-  .play-btn:hover{background:#252525;border-color:#555;}
-  .play-btn.visible{display:block;}
+/* ── SCREENS ── */
+.screen{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  z-index:999;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px 28px;
+  overflow-y:auto;
+}
+.screen.active{display:flex;}
 
-  /* ADMIN PANEL - USER LIST */
-  #screen-admin{overflow-y:auto;justify-content:flex-start;padding:0;}
-  .admin-header{width:100%;background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:20px 24px;position:sticky;top:0;z-index:10;}
-  .admin-title{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;letter-spacing:3px;color:var(--accent-bright);text-transform:uppercase;}
-  .admin-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:2px;margin-top:3px;}
-  .admin-body{width:100%;padding:16px;max-width:480px;margin:0 auto;}
-  .admin-section-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-muted);margin:16px 0 8px;}
-  .user-card{background:var(--bg-card);border:1px solid var(--border);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.2s;}
-  .user-card:hover{background:var(--bg-elevated);border-color:var(--border-light);}
-  .user-avatar{width:36px;height:36px;background:var(--bg-elevated);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--accent-bright);flex-shrink:0;text-transform:uppercase;}
-  .user-info{flex:1;}
-  .user-name{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--accent-bright);}
-  .user-meta{font-size:11px;color:var(--text-secondary);margin-top:2px;}
-  .user-device-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-muted);background:var(--bg-elevated);border:1px solid var(--border);padding:2px 7px;letter-spacing:1px;text-transform:uppercase;}
-  .user-arrow{color:var(--text-muted);font-size:16px;}
-  .admin-empty{text-align:center;padding:40px 20px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:1px;}
-  .admin-close-btn{background:none;border:1px solid var(--border);color:var(--text-secondary);padding:10px 20px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;margin-top:8px;}
-  .admin-close-btn:hover{background:var(--bg-elevated);color:var(--accent-bright);border-color:var(--border-light);}
+.s-logo{
+  font-family:'Syne',sans-serif;
+  font-size:26px;
+  font-weight:800;
+  letter-spacing:6px;
+  color:var(--acb);
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+.s-sub{
+  font-family:'Syne Mono',monospace;
+  font-size:9px;
+  color:var(--t3);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin-bottom:44px;
+}
+.s-logoimg{
+  width:64px;
+  height:64px;
+  object-fit:contain;
+  margin-bottom:20px;
+  filter:drop-shadow(0 0 24px rgba(255,255,255,.15));
+}
 
-  /* PASSWORD MODAL */
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;}
-  .modal-overlay.active{display:flex;}
-  .modal-box{background:var(--bg-card);border:1px solid var(--border-light);padding:28px 24px;width:280px;}
-  .modal-title{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-secondary);margin-bottom:16px;}
-  .modal-input{background:var(--bg-primary);border:1px solid var(--border);color:var(--text-primary);padding:11px 12px;font-family:'IBM Plex Mono',monospace;font-size:12px;width:100%;outline:none;margin-bottom:12px;transition:border-color 0.2s;}
-  .modal-input:focus{border-color:var(--border-light);}
-  .modal-row{display:flex;gap:8px;}
-  .modal-btn{flex:1;background:var(--bg-elevated);border:1px solid var(--border-light);color:var(--accent-bright);padding:10px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
-  .modal-btn:hover{background:#252525;}
-  .modal-btn.cancel{color:var(--text-muted);border-color:var(--border);}
-  .modal-err{font-family:'IBM Plex Mono',monospace;font-size:10px;color:#666;letter-spacing:1px;margin-bottom:10px;min-height:14px;}
+/* ── AUTH ── */
+.auth-tabs{
+  display:flex;
+  border:1px solid var(--bd);
+  margin-bottom:28px;
+  width:100%;
+  max-width:320px;
+  background:var(--bg2);
+}
+.auth-tab{
+  flex:1;
+  padding:11px;
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  background:none;
+  border:none;
+  color:var(--t3);
+  cursor:pointer;
+  transition:all .2s;
+  position:relative;
+}
+.auth-tab.active{
+  background:var(--bg5);
+  color:var(--acb);
+}
+.auth-tab.active::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:1px;
+  background:var(--bd3);
+}
 
-  /* VOLUME */
-  .vol-bar-wrap{position:fixed;bottom:16px;right:16px;z-index:200;background:var(--bg-card);border:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
-  .vol-bar-wrap.show{opacity:1;pointer-events:all;}
-  .vol-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:1px;}
-  .vol-slider{width:80px;accent-color:#888;}
+.auth-form{width:100%;max-width:320px;display:flex;flex-direction:column;gap:10px;}
 
-  /* STATUSBAR */
-  .statusbar{background:#000;padding:8px 16px 6px;display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#ccc;letter-spacing:0.5px;}
-  .statusbar-right{display:flex;gap:6px;align-items:center;}
+.a-inp{
+  background:var(--bg2);
+  border:1px solid var(--bd);
+  color:var(--t1);
+  padding:13px 16px;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:13px;
+  width:100%;
+  outline:none;
+  transition:border-color .2s, background .2s;
+  letter-spacing:.3px;
+}
+.a-inp:focus{border-color:var(--bd3);background:var(--bg3);}
+.a-inp::placeholder{color:var(--t3);font-size:12px;}
 
-  /* HEADER */
-  .header{background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:14px 16px 12px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
-  .header-icon{width:36px;height:36px;background:var(--bg-elevated);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;}
-  .header-title-wrap{position:relative;cursor:pointer;user-select:none;display:inline-block;}
-  .header-title{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;letter-spacing:2px;color:var(--accent-bright);text-transform:uppercase;}
-  .header-subtitle{font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
-  .header-right{margin-left:auto;}
-  .scan-btn{background:none;border:1px solid var(--border-light);color:var(--text-secondary);padding:6px 12px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;cursor:pointer;text-transform:uppercase;transition:all 0.2s;}
-  .scan-btn:hover,.scan-btn.scanning{background:var(--bg-elevated);color:var(--accent-bright);border-color:#555;}
+.a-btn{
+  background:var(--acb);
+  border:none;
+  color:#000;
+  padding:14px;
+  font-family:'Syne',sans-serif;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .2s;
+  margin-top:4px;
+}
+.a-btn:hover{background:#e0e0e0;}
 
-  /* LONG PRESS */
-  .lp-bar{position:absolute;bottom:-3px;left:0;height:2px;width:0%;background:var(--silver);transition:none;}
+.a-google{
+  background:none;
+  border:1px solid var(--bd);
+  color:var(--t2);
+  padding:12px;
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.a-google:hover{background:var(--bg4);border-color:var(--bd2);color:var(--acb);}
 
-  /* VIEWING USER BADGE */
-  .viewing-badge{background:var(--bg-elevated);border:1px solid var(--border);padding:3px 10px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--silver);letter-spacing:1px;text-transform:uppercase;display:none;}
-  .viewing-badge.show{display:block;}
+.a-div{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:var(--t4);
+  font-family:'Syne Mono',monospace;
+  font-size:9px;
+  letter-spacing:1px;
+}
+.a-div::before,.a-div::after{content:'';flex:1;height:1px;background:var(--bd);}
 
-  /* TABS */
-  .tabs-wrapper{background:var(--bg-secondary);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:63px;z-index:99;}
-  .tabs-wrapper::-webkit-scrollbar{display:none;}
-  .tabs{display:flex;padding:0 8px;min-width:max-content;}
-  .tab{padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;outline:none;}
-  .tab.active{color:var(--tab-active);border-bottom-color:var(--silver);}
-  .tab:hover:not(.active){color:var(--text-secondary);}
+.a-err{
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  color:#666;
+  letter-spacing:1px;
+  text-align:center;
+  min-height:16px;
+}
 
-  /* CONTENT */
-  .content{padding:16px;display:none;animation:fadeIn 0.25s ease;}
-  .content.active{display:block;}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+/* ── PERM ── */
+.perm-list{width:100%;max-width:320px;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;}
+.perm-item{
+  background:var(--bg3);
+  border:1px solid var(--bd);
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.perm-name{font-size:12px;color:var(--t2);flex:1;letter-spacing:.3px;}
+.perm-st{font-family:'Syne Mono',monospace;font-size:10px;letter-spacing:1px;min-width:70px;text-align:center;}
+.perm-st.w{color:var(--t3);}
+.perm-st.g{color:#888;}
+.perm-st.d{color:#555;}
 
-  .section-label{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-muted);margin:20px 0 8px;padding-left:2px;}
-  .section-label:first-child{margin-top:0;}
-  .card{background:var(--bg-card);border:1px solid var(--border);margin-bottom:2px;overflow:hidden;}
-  .row{display:flex;align-items:flex-start;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--border);gap:12px;}
-  .row:last-child{border-bottom:none;}
-  .row-label{font-size:12px;color:var(--text-secondary);font-weight:400;flex-shrink:0;min-width:120px;padding-top:1px;}
-  .row-value{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);text-align:right;word-break:break-word;line-height:1.5;}
-  .row-value.highlight{color:var(--accent-bright);font-weight:500;}
+.perm-btn2{
+  background:none;
+  border:1px solid var(--bd2);
+  color:var(--ac);
+  padding:6px 14px;
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .2s;
+}
+.perm-btn2:hover{border-color:var(--bd3);color:var(--acb);}
+.perm-btn2:disabled{opacity:.25;cursor:default;}
 
-  .chip-header{background:var(--bg-elevated);border-bottom:1px solid var(--border);padding:14px;display:flex;align-items:center;gap:14px;}
-  .chip-logo{width:44px;height:28px;background:var(--bg-card);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);letter-spacing:1px;}
-  .chip-name{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:var(--accent-bright);letter-spacing:0.5px;}
-  .chip-freq{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--silver);margin-top:2px;}
+.play-btn{
+  background:var(--acb);
+  border:none;
+  color:#000;
+  padding:16px 56px;
+  font-family:'Syne',sans-serif;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:5px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .2s;
+  display:none;
+  position:relative;
+  overflow:hidden;
+}
+.play-btn::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15) 0%,transparent 50%);
+}
+.play-btn:hover{background:#e8e8e8;transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,255,255,.08);}
+.play-btn.vis{display:block;}
 
-  .progress-wrap{padding:10px 14px 12px;border-bottom:1px solid var(--border);background:var(--bg-card);}
-  .progress-header{display:flex;justify-content:space-between;margin-bottom:6px;}
-  .progress-label{font-size:11px;color:var(--text-secondary);}
-  .progress-pct{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);}
-  .progress-track{height:3px;background:var(--border);overflow:hidden;}
-  .progress-fill{height:100%;background:linear-gradient(90deg,#666 0%,#aaa 100%);transition:width 1s ease;}
-  .progress-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:5px;}
+.perm-info{
+  font-family:'Syne Mono',monospace;
+  font-size:9px;
+  color:var(--t3);
+  letter-spacing:1px;
+  text-align:center;
+  max-width:280px;
+  line-height:1.7;
+}
 
-  .battery-visual{padding:20px;display:flex;align-items:center;justify-content:center;gap:20px;background:var(--bg-card);border:1px solid var(--border);margin-bottom:2px;}
-  .battery-shell{position:relative;width:64px;height:30px;border:2px solid #555;display:flex;align-items:center;padding:2px;}
-  .battery-shell::after{content:'';position:absolute;right:-7px;top:50%;transform:translateY(-50%);width:5px;height:12px;background:#555;}
-  .battery-fill{height:100%;background:linear-gradient(90deg,#777 0%,#ccc 100%);transition:width 1s ease;}
-  .battery-info{text-align:left;}
-  .battery-pct{font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:600;color:var(--accent-bright);line-height:1;}
-  .battery-status{font-size:11px;color:var(--text-secondary);margin-top:3px;}
-  .battery-health{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--silver);margin-top:1px;letter-spacing:0.5px;}
+/* ── PLAY SCREEN ── */
+#screen-play .play-btn{display:block;}
 
-  .sensor-card{background:var(--bg-card);border:1px solid var(--border);margin-bottom:2px;padding:10px 14px;}
-  .sensor-name{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--accent);letter-spacing:0.5px;margin-bottom:4px;text-transform:uppercase;}
-  .sensor-value{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-secondary);line-height:1.6;}
-  .sensor-dot{display:inline-block;width:6px;height:6px;background:#444;margin-right:6px;vertical-align:middle;}
-  .sensor-dot.active{background:#888;}
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+/* ── ADMIN ── */
+#screen-admin{overflow-y:auto;justify-content:flex-start;padding:0;}
 
-  .device-hero{background:var(--bg-card);border:1px solid var(--border);padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;}
-  .device-icon-wrap{width:48px;height:80px;border:2px solid #444;border-radius:6px;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
-  .device-icon-wrap::before{content:'';position:absolute;top:8px;width:16px;height:2px;background:#333;border-radius:1px;}
-  .device-icon-wrap::after{content:'';position:absolute;bottom:6px;width:12px;height:12px;border:1px solid #333;border-radius:50%;}
-  .device-model-main{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--accent-bright);letter-spacing:0.5px;}
-  .device-model-sub{font-size:12px;color:var(--text-secondary);margin-top:4px;}
-  .device-model-code{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:6px;letter-spacing:1px;}
+.adm-hd{
+  width:100%;
+  background:var(--bg2);
+  border-bottom:1px solid var(--bd);
+  padding:22px 24px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+.adm-title{
+  font-family:'Syne',sans-serif;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:4px;
+  color:var(--acb);
+  text-transform:uppercase;
+}
+.adm-sub{
+  font-family:'Syne Mono',monospace;
+  font-size:9px;
+  color:var(--t3);
+  letter-spacing:2px;
+  margin-top:3px;
+}
 
-  .about-wrap{padding:24px 0;}
-  .about-logo{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;letter-spacing:4px;color:var(--accent-bright);text-align:center;margin-bottom:4px;}
-  .about-tagline{text-align:center;font-size:11px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:28px;}
-  .about-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border-light),transparent);margin:16px 0;}
-  .scroll-hint{text-align:center;padding:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;}
+.adm-body{width:100%;padding:16px;max-width:480px;margin:0 auto;}
 
-  .loc-btn{width:100%;background:var(--bg-elevated);border:1px solid var(--border-light);color:var(--accent-bright);padding:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-bottom:16px;transition:all 0.2s;}
-  .loc-btn:hover{background:#252525;border-color:#555;}
-  .loc-btn:disabled{color:var(--text-muted);cursor:default;}
-  .loc-maps-link{display:block;background:var(--bg-elevated);border:1px solid var(--border-light);color:var(--silver);padding:11px 14px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;text-decoration:none;text-align:center;margin-top:12px;transition:all 0.2s;}
-  .loc-maps-link:hover{color:var(--accent-bright);border-color:#555;}
+.adm-sl{
+  font-family:'Syne Mono',monospace;
+  font-size:9px;
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+  color:var(--t3);
+  margin:16px 0 8px;
+}
 
-  /* BOTTOM NAV (Home & Back) */
-  .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg-secondary);border-top:1px solid var(--border);display:none;align-items:center;justify-content:space-around;padding:8px 0 max(8px, env(safe-area-inset-bottom));z-index:150;}
-  .bottom-nav.show{display:flex;}
-  .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px;background:none;border:none;cursor:pointer;color:var(--text-muted);transition:all 0.15s;}
-  .nav-btn:hover,.nav-btn:active{color:var(--accent-bright);}
-  .nav-btn svg{width:20px;height:20px;}
-  .nav-btn span{font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;}
-  .nav-divider{width:1px;height:30px;background:var(--border);}
+.u-card{
+  background:var(--bg2);
+  border:1px solid var(--bd);
+  padding:14px 16px;
+  margin-bottom:6px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  cursor:pointer;
+  transition:all .2s;
+}
+.u-card:hover{background:var(--bg4);border-color:var(--bd2);}
 
-  /* Extra padding for bottom nav */
-  #main-app{padding-bottom:56px;}
+.u-av{
+  width:36px;height:36px;
+  background:var(--bg5);
+  border:1px solid var(--bd2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Syne',sans-serif;
+  font-size:14px;
+  font-weight:700;
+  color:var(--acb);
+  flex-shrink:0;
+  text-transform:uppercase;
+}
+.u-info{flex:1;}
+.u-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--acb);}
+.u-meta{font-size:11px;color:var(--t2);margin-top:2px;letter-spacing:.2px;}
+.u-badge{
+  font-family:'Syne Mono',monospace;
+  font-size:9px;
+  color:var(--t3);
+  background:var(--bg4);
+  border:1px solid var(--bd);
+  padding:2px 8px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
 
-  /* Viewing user info bar */
-  .user-info-bar{background:var(--bg-elevated);border-bottom:1px solid var(--border);padding:8px 16px;display:none;align-items:center;justify-content:space-between;}
-  .user-info-bar.show{display:flex;}
-  .user-info-bar-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--silver);letter-spacing:1px;}
-  .user-info-bar-label{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;}
+.adm-empty{
+  text-align:center;
+  padding:48px 20px;
+  font-family:'Syne Mono',monospace;
+  font-size:11px;
+  color:var(--t3);
+  letter-spacing:1px;
+}
+.adm-close{
+  background:none;
+  border:1px solid var(--bd);
+  color:var(--t2);
+  padding:11px 22px;
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .2s;
+  margin-top:8px;
+}
+.adm-close:hover{background:var(--bg4);color:var(--acb);border-color:var(--bd2);}
+
+/* ── USER DETAIL OVERLAY ── */
+.ud-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:9990;overflow-y:auto;}
+.ud-overlay.active{display:block;}
+
+.ud-box{
+  background:var(--bg2);
+  border:1px solid var(--bd2);
+  margin:16px;
+  overflow:hidden;
+}
+.ud-hd{
+  background:var(--bg3);
+  border-bottom:1px solid var(--bd);
+  padding:18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.ud-av{
+  width:44px;height:44px;
+  background:var(--bg5);
+  border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;
+  font-size:18px;font-weight:700;
+  color:var(--acb);
+  text-transform:uppercase;
+  flex-shrink:0;
+}
+.ud-uname{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--acb);}
+.ud-usub{font-size:11px;color:var(--t3);margin-top:2px;}
+.ud-close{
+  margin-left:auto;
+  background:none;
+  border:1px solid var(--bd);
+  color:var(--t3);
+  padding:6px 14px;
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  letter-spacing:1px;
+  cursor:pointer;
+  transition:all .2s;
+}
+.ud-close:hover{color:var(--acb);border-color:var(--bd2);}
+
+.ud-sec{padding:0 14px 4px;}
+.ud-sl{
+  font-family:'Syne Mono',monospace;
+  font-size:9px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--t3);
+  margin:14px 0 6px;
+}
+.ud-card{background:var(--bg);border:1px solid var(--bd);}
+.ud-row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  padding:10px 14px;
+  border-bottom:1px solid var(--bd);
+  gap:12px;
+}
+.ud-row:last-child{border-bottom:none;}
+.ud-lbl{font-size:11px;color:var(--t2);flex-shrink:0;min-width:110px;}
+.ud-val{font-family:'Syne Mono',monospace;font-size:11px;color:var(--ac);text-align:right;word-break:break-all;line-height:1.5;}
+.ud-val.hi{color:var(--acb);font-weight:500;}
+
+.ud-maps{
+  display:block;
+  background:var(--bg4);
+  border:1px solid var(--bd2);
+  color:var(--sv);
+  padding:12px 14px;
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  letter-spacing:1px;
+  text-decoration:none;
+  text-align:center;
+  margin:10px 14px;
+  transition:all .2s;
+}
+.ud-maps:hover{color:var(--acb);border-color:var(--bd3);}
+
+.ud-noloc{
+  padding:18px;
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  color:var(--t3);
+  text-align:center;
+  letter-spacing:1px;
+}
+.ud-upd{
+  font-family:'Syne Mono',monospace;
+  font-size:9px;
+  color:var(--t3);
+  text-align:center;
+  padding:10px 14px 14px;
+  letter-spacing:1px;
+}
+
+/* ── PASSWORD MODAL ── */
+.pw-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.pw-ov.active{display:flex;}
+.pw-box{
+  background:var(--bg3);
+  border:1px solid var(--bd2);
+  padding:30px 26px;
+  width:290px;
+}
+.pw-title{
+  font-family:'Syne',sans-serif;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--t2);
+  margin-bottom:18px;
+}
+.pw-inp{
+  background:var(--bg);
+  border:1px solid var(--bd);
+  color:var(--t1);
+  padding:12px 14px;
+  font-family:'Syne Mono',monospace;
+  font-size:12px;
+  width:100%;
+  outline:none;
+  margin-bottom:12px;
+}
+.pw-inp:focus{border-color:var(--bd2);}
+.pw-row{display:flex;gap:8px;}
+.pw-btn{
+  flex:1;
+  background:var(--bg5);
+  border:1px solid var(--bd2);
+  color:var(--acb);
+  padding:10px;
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:all .2s;
+}
+.pw-btn:hover{background:var(--acb);color:#000;}
+.pw-btn.cancel{color:var(--t3);border-color:var(--bd);}
+.pw-btn.cancel:hover{background:var(--bg4);color:var(--t2);}
+.pw-err{font-family:'Syne Mono',monospace;font-size:10px;color:#555;letter-spacing:1px;margin-bottom:10px;min-height:14px;}
+
+/* ── VOL ── */
+.vol-wrap{
+  position:fixed;
+  bottom:72px;right:16px;
+  z-index:200;
+  background:var(--bg3);
+  border:1px solid var(--bd);
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .3s;
+}
+.vol-wrap.show{opacity:1;pointer-events:all;}
+.vol-lbl{font-family:'Syne Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;}
+.vol-sl{width:80px;accent-color:#888;}
+
+/* ── STATUSBAR ── */
+.sbar{
+  background:#000;
+  padding:7px 18px 6px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  color:#888;
+  letter-spacing:.5px;
+  border-bottom:1px solid #111;
+}
+.sbar-r{display:flex;gap:8px;align-items:center;}
+
+/* ── HEADER ── */
+.hdr{
+  background:var(--bg2);
+  border-bottom:1px solid var(--bd);
+  padding:14px 18px 13px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+.hdr-icon{
+  width:38px;height:38px;
+  background:var(--bg4);
+  border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.lp-wrap{position:relative;cursor:pointer;user-select:none;display:inline-block;}
+.hdr-title{
+  font-family:'Syne',sans-serif;
+  font-size:17px;
+  font-weight:800;
+  letter-spacing:3px;
+  color:var(--acb);
+  text-transform:uppercase;
+}
+.hdr-sub{
+  font-size:10px;
+  color:var(--t3);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  font-family:'Syne Mono',monospace;
+  margin-top:1px;
+}
+.hdr-r{margin-left:auto;}
+
+.scan-btn{
+  background:none;
+  border:1px solid var(--bd2);
+  color:var(--t2);
+  padding:7px 14px;
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  cursor:pointer;
+  text-transform:uppercase;
+  transition:all .2s;
+}
+.scan-btn:hover,.scan-btn.sc{
+  background:var(--acb);
+  color:#000;
+  border-color:var(--acb);
+}
+
+.lp-bar{position:absolute;bottom:-3px;left:0;height:1px;width:0%;background:var(--sv);transition:none;}
+
+/* ── TABS ── */
+.tabs-wr{
+  background:var(--bg2);
+  border-bottom:1px solid var(--bd);
+  overflow-x:auto;
+  scrollbar-width:none;
+  position:sticky;
+  top:66px;
+  z-index:99;
+}
+.tabs-wr::-webkit-scrollbar{display:none;}
+.tabs{display:flex;padding:0 6px;min-width:max-content;}
+.tab{
+  padding:11px 14px;
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  font-weight:400;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--t3);
+  cursor:pointer;
+  border-bottom:1px solid transparent;
+  transition:all .2s;
+  white-space:nowrap;
+  background:none;
+  border-top:none;
+  border-left:none;
+  border-right:none;
+  outline:none;
+}
+.tab.active{color:var(--acb);border-bottom-color:var(--acb);}
+.tab:hover:not(.active){color:var(--t2);}
+
+/* ── CONTENT ── */
+.content{padding:16px;display:none;animation:fi .2s ease;}
+.content.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.sl{
+  font-family:'Syne Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--t3);
+  margin:22px 0 8px;
+  padding-left:2px;
+}
+.sl:first-child{margin-top:0;}
+
+.card{
+  background:var(--bg2);
+  border:1px solid var(--bd);
+  margin-bottom:2px;
+  overflow:hidden;
+}
+
+.row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  padding:11px 16px;
+  border-bottom:1px solid var(--bd);
+  gap:12px;
+}
+.row:last-child{border-bottom:none;}
+.row-l{
+  font-size:12px;
+  color:var(--t2);
+  font-weight:400;
+  flex-shrink:0;
+  min-width:120px;
+  padding-top:1px;
+  letter-spacing:.2px;
+}
+.row-v{
+  font-family:'Syne Mono',monospace;
+  font-size:11px;
+  color:var(--ac);
+  text-align:right;
+  word-break:break-word;
+  line-height:1.5;
+}
+.row-v.hi{color:var(--acb);font-weight:500;}
+
+/* ── CHIP ── */
+.chip-hd{
+  background:var(--bg3);
+  border-bottom:1px solid var(--bd);
+  padding:16px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+.chip-logo{
+  width:48px;height:30px;
+  background:var(--bg5);
+  border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne Mono',monospace;
+  font-size:8px;
+  color:var(--t3);
+  letter-spacing:1px;
+}
+.chip-name{
+  font-family:'Syne',sans-serif;
+  font-size:15px;
+  font-weight:700;
+  color:var(--acb);
+  letter-spacing:.5px;
+}
+.chip-freq{
+  font-family:'Syne Mono',monospace;
+  font-size:11px;
+  color:var(--sv);
+  margin-top:3px;
+}
+
+/* ── PROGRESS ── */
+.prog-wr{padding:12px 16px 14px;border-bottom:1px solid var(--bd);background:var(--bg2);}
+.prog-hd{display:flex;justify-content:space-between;margin-bottom:7px;}
+.prog-lb{font-size:11px;color:var(--t2);}
+.prog-pc{font-family:'Syne Mono',monospace;font-size:11px;color:var(--ac);}
+.prog-tr{height:2px;background:var(--bd);overflow:hidden;}
+.prog-fi{height:100%;background:linear-gradient(90deg,#555 0%,#ccc 100%);transition:width 1s ease;}
+.prog-sb{font-family:'Syne Mono',monospace;font-size:10px;color:var(--t3);margin-top:6px;}
+
+/* ── BATTERY ── */
+.bat-vis{
+  padding:24px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:24px;
+  background:var(--bg2);
+  border:1px solid var(--bd);
+  margin-bottom:2px;
+}
+.bat-sh{
+  position:relative;
+  width:68px;height:32px;
+  border:2px solid #444;
+  display:flex;align-items:center;padding:3px;
+}
+.bat-sh::after{
+  content:'';
+  position:absolute;right:-8px;top:50%;
+  transform:translateY(-50%);
+  width:5px;height:14px;
+  background:#444;
+}
+.bat-fi{height:100%;background:linear-gradient(90deg,#666 0%,#ddd 100%);transition:width 1s ease;}
+.bat-inf{text-align:left;}
+.bat-pct{
+  font-family:'Syne',sans-serif;
+  font-size:28px;
+  font-weight:700;
+  color:var(--acb);
+  line-height:1;
+}
+.bat-st{font-size:11px;color:var(--t2);margin-top:4px;}
+.bat-hl{font-family:'Syne Mono',monospace;font-size:10px;color:var(--sv);margin-top:2px;letter-spacing:.5px;}
+
+/* ── DEVICE HERO ── */
+.dev-hero{
+  background:var(--bg2);
+  border:1px solid var(--bd);
+  padding:22px;
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+.dev-ic{
+  width:48px;height:82px;
+  border:2px solid #333;
+  border-radius:7px;
+  background:var(--bg4);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;position:relative;
+}
+.dev-ic::before{content:'';position:absolute;top:9px;width:16px;height:2px;background:#2a2a2a;border-radius:1px;}
+.dev-ic::after{content:'';position:absolute;bottom:7px;width:12px;height:12px;border:1px solid #2a2a2a;border-radius:50%;}
+
+/* ── LOC ── */
+.loc-btn{
+  width:100%;
+  background:var(--acb);
+  border:none;
+  color:#000;
+  padding:14px;
+  font-family:'Syne',sans-serif;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  cursor:pointer;
+  margin-bottom:16px;
+  transition:all .2s;
+}
+.loc-btn:hover{background:#e0e0e0;}
+.loc-btn:disabled{background:var(--bg4);color:var(--t3);cursor:default;border:1px solid var(--bd);}
+
+.loc-maps{
+  display:block;
+  background:var(--bg4);
+  border:1px solid var(--bd2);
+  color:var(--sv);
+  padding:12px 14px;
+  font-family:'Syne Mono',monospace;
+  font-size:11px;
+  letter-spacing:1px;
+  text-decoration:none;
+  text-align:center;
+  margin-top:12px;
+  transition:all .2s;
+}
+.loc-maps:hover{color:var(--acb);border-color:var(--bd3);}
+
+/* ── ABOUT ── */
+.about-wr{padding:24px 0;}
+.about-logo{
+  font-family:'Syne',sans-serif;
+  font-size:24px;
+  font-weight:800;
+  letter-spacing:6px;
+  color:var(--acb);
+  text-align:center;
+  margin-bottom:4px;
+  text-transform:uppercase;
+}
+.about-tag{
+  text-align:center;
+  font-family:'Syne Mono',monospace;
+  font-size:9px;
+  color:var(--t3);
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+  margin-bottom:28px;
+}
+.about-div{height:1px;background:linear-gradient(90deg,transparent,var(--bd2),transparent);margin:16px 0;}
+
+.hint{
+  text-align:center;
+  padding:12px;
+  font-family:'Syne Mono',monospace;
+  font-size:9px;
+  color:var(--t3);
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+/* ── BOTTOM NAV ── */
+.bnav{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  background:var(--bg2);
+  border-top:1px solid var(--bd);
+  display:none;
+  align-items:center;
+  justify-content:space-around;
+  padding:8px 0 max(8px,env(safe-area-inset-bottom));
+  z-index:150;
+}
+.bnav.show{display:flex;}
+.nav-btn{
+  flex:1;
+  display:flex;flex-direction:column;
+  align-items:center;gap:3px;
+  padding:8px;
+  background:none;border:none;
+  cursor:pointer;
+  color:var(--t3);
+  transition:all .15s;
+}
+.nav-btn:hover,.nav-btn:active{color:var(--acb);}
+.nav-btn svg{width:20px;height:20px;}
+.nav-btn span{
+  font-family:'Syne Mono',monospace;
+  font-size:8px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+.nav-div{width:1px;height:28px;background:var(--bd);}
+
+#main-app{padding-bottom:56px;}
+
+.ubar{
+  background:var(--bg3);
+  border-bottom:1px solid var(--bd);
+  padding:7px 18px;
+  display:none;
+  align-items:center;
+  justify-content:space-between;
+}
+.ubar.show{display:flex;}
+.ubar-name{
+  font-family:'Syne Mono',monospace;
+  font-size:10px;
+  color:var(--sv);
+  letter-spacing:1px;
+}
+.ubar-lbl{
+  font-family:'Syne Mono',monospace;
+  font-size:8px;
+  color:var(--t3);
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+/* ── INTERACTION ANIMATIONS ── */
+
+/* Ripple base */
+.ripple-host{position:relative;overflow:hidden;}
+.ripple{
+  position:absolute;
+  border-radius:50%;
+  background:rgba(255,255,255,.12);
+  transform:scale(0);
+  animation:ripple-anim .5s linear;
+  pointer-events:none;
+}
+@keyframes ripple-anim{
+  to{transform:scale(4);opacity:0;}
+}
+
+/* Button press */
+.a-btn:active,.play-btn:active,.loc-btn:active,.scan-btn:active,.perm-btn2:active,.pw-btn:active,.adm-close:active,.a-google:active{
+  transform:scale(.97);
+  transition:transform .08s ease;
+}
+
+/* Tab press feedback */
+.tab{transition:color .2s, border-color .2s, background .15s, transform .1s;}
+.tab:active{transform:scale(.94);}
+
+/* Card row flash on tab switch */
+@keyframes row-flash{
+  0%{background:rgba(255,255,255,.04);}
+  100%{background:transparent;}
+}
+.content.active .row{
+  animation:row-flash .3s ease forwards;
+}
+
+/* Screen transition */
+.screen{transition:opacity .2s ease;}
+.screen.active{animation:screen-in .25s ease;}
+@keyframes screen-in{
+  from{opacity:0;transform:translateY(8px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* Input focus pop */
+.a-inp,.pw-inp{transition:border-color .2s, transform .15s, box-shadow .2s;}
+.a-inp:focus,.pw-inp:focus{
+  transform:scale(1.01);
+  box-shadow:0 0 0 1px rgba(255,255,255,.06);
+}
+
+/* Auth tab switch slide */
+.auth-form{transition:opacity .18s ease, transform .18s ease;}
+
+/* Nav btn press */
+.nav-btn:active{transform:scale(.88);}
+.nav-btn{transition:color .15s, transform .1s;}
+
+/* u-card hover slide */
+.u-card{transition:background .2s, border-color .2s, transform .15s;}
+.u-card:active{transform:scale(.98);}
+
+/* scan btn pulse when scanning */
+@keyframes scan-pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.15);}
+  50%{box-shadow:0 0 0 6px rgba(255,255,255,.0);}
+}
+.scan-btn.sc{animation:scan-pulse .8s ease infinite;}
+
+/* modal slide up */
+.pw-ov.active .pw-box{animation:modal-up .22s ease;}
+@keyframes modal-up{
+  from{transform:translateY(12px);opacity:0;}
+  to{transform:translateY(0);opacity:1;}
+}
+
+/* ud-overlay slide */
+.ud-overlay.active .ud-box{animation:modal-up .22s ease;}
+
+/* play-btn appear */
+.play-btn.vis{animation:btn-appear .3s ease;}
+@keyframes btn-appear{
+  from{transform:scale(.92);opacity:0;}
+  to{transform:scale(1);opacity:1;}
+}
+
+/* logo pulse on screen load */
+.s-logoimg{animation:logo-in .4s ease;}
+@keyframes logo-in{
+  from{transform:scale(.85);opacity:0;}
+  to{transform:scale(1);opacity:1;}
+}
+
+/* row hover */
+.row{transition:background .15s;}
+.row:hover{background:rgba(255,255,255,.025);}
 </style>
 </head>
 <body>
 
-<!-- SCREEN: AUTH -->
+<!-- AUTH SCREEN -->
 <div class="screen active" id="screen-auth">
-  <div class="screen-logo">Cek Device</div>
-  <div class="screen-sub">System Inspector</div>
+  <img class="s-logoimg" src="https://files.catbox.moe/lrn5qr.png" alt="logo">
+  <div class="s-logo">ZamDex</div>
+  <div class="s-sub">System Inspector</div>
   <div class="auth-tabs">
-    <button class="auth-tab active" id="tab-login-btn" onclick="authSwitch('login')">Login</button>
-    <button class="auth-tab" id="tab-signup-btn" onclick="authSwitch('signup')">Sign Up</button>
+    <button class="auth-tab active" id="tl-btn" onclick="authSwitch('login')">Login</button>
+    <button class="auth-tab" id="ts-btn" onclick="authSwitch('signup')">Sign Up</button>
   </div>
   <div class="auth-form" id="form-login">
-    <input class="auth-input" id="login-user" type="text" placeholder="Username" autocomplete="off">
-    <input class="auth-input" id="login-pass" type="password" placeholder="Password" autocomplete="off">
-    <div class="auth-error" id="login-err"></div>
-    <button class="auth-btn" onclick="doLogin()">Masuk</button>
-    <div class="auth-divider">atau</div>
-    <button class="auth-google-btn" onclick="doGoogleLogin()">
+    <input class="a-inp" id="l-user" type="text" placeholder="Username / Email" autocomplete="off">
+    <input class="a-inp" id="l-pass" type="password" placeholder="Password" autocomplete="off">
+    <div class="a-err" id="l-err"></div>
+    <button class="a-btn" onclick="doLogin()">Masuk</button>
+    <div class="a-div">atau</div>
+    <button class="a-google" onclick="doGoogleLogin()">
       <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#888" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#888" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#888" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#888" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Login dengan Google
     </button>
   </div>
   <div class="auth-form" id="form-signup" style="display:none">
-    <input class="auth-input" id="signup-user" type="text" placeholder="Username" autocomplete="off">
-    <input class="auth-input" id="signup-pass" type="password" placeholder="Password" autocomplete="off">
-    <input class="auth-input" id="signup-pass2" type="password" placeholder="Konfirmasi Password" autocomplete="off">
-    <div class="auth-error" id="signup-err"></div>
-    <button class="auth-btn" onclick="doSignup()">Daftar</button>
-    <div class="auth-divider">atau</div>
-    <button class="auth-google-btn" onclick="doGoogleLogin()">
+    <input class="a-inp" id="s-user" type="text" placeholder="Username" autocomplete="off">
+    <input class="a-inp" id="s-email" type="email" placeholder="Email" autocomplete="off">
+    <input class="a-inp" id="s-pass" type="password" placeholder="Password" autocomplete="off">
+    <input class="a-inp" id="s-pass2" type="password" placeholder="Konfirmasi Password" autocomplete="off">
+    <div class="a-err" id="s-err"></div>
+    <button class="a-btn" onclick="doSignup()">Daftar</button>
+    <div class="a-div">atau</div>
+    <button class="a-google" onclick="doGoogleLogin()">
       <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#888" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#888" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#888" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#888" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Daftar dengan Google
     </button>
   </div>
 </div>
 
-<!-- SCREEN: PERMISSION -->
+<!-- PERM SCREEN -->
 <div class="screen" id="screen-perm">
-  <div class="screen-logo">Izin Diperlukan</div>
-  <div class="screen-sub">Izinkan akses berikut</div>
+  <img class="s-logoimg" src="https://files.catbox.moe/lrn5qr.png" alt="logo">
+  <div class="s-logo">Izin Diperlukan</div>
+  <div class="s-sub">Untuk fitur yang tersedia</div>
   <div class="perm-list">
     <div class="perm-item">
-      <span class="perm-name">Lokasi</span>
-      <span class="perm-status waiting" id="perm-geo-status">Belum</span>
-      <button class="perm-grant-btn" id="perm-geo-btn" onclick="grantPerm('geo')">Izinkan</button>
-    </div>
-    <div class="perm-item">
-      <span class="perm-name">Notifikasi</span>
-      <span class="perm-status waiting" id="perm-notif-status">Belum</span>
-      <button class="perm-grant-btn" id="perm-notif-btn" onclick="grantPerm('notif')">Izinkan</button>
-    </div>
-    <div class="perm-item">
-      <span class="perm-name">Kamera</span>
-      <span class="perm-status waiting" id="perm-cam-status">Belum</span>
-      <button class="perm-grant-btn" id="perm-cam-btn" onclick="grantPerm('cam')">Izinkan</button>
-    </div>
-    <div class="perm-item">
-      <span class="perm-name">Mikrofon</span>
-      <span class="perm-status waiting" id="perm-mic-status">Belum</span>
-      <button class="perm-grant-btn" id="perm-mic-btn" onclick="grantPerm('mic')">Izinkan</button>
+      <span class="perm-name">Lokasi GPS</span>
+      <span class="perm-st w" id="pg-st">Belum</span>
+      <button class="perm-btn2" id="pg-btn" onclick="grantPerm('geo')">Izinkan</button>
     </div>
   </div>
-  <button class="play-btn" id="play-btn" onclick="goToMain(null)">PLAY</button>
+  <div class="perm-info">Izin lokasi diperlukan untuk fitur GPS & tracking.<br>Bisa dilewati, tapi fitur lokasi tidak akan berfungsi.</div>
+  <br>
+  <button class="play-btn" id="play-btn" onclick="goToMain()">PLAY</button>
+  <br><br>
+  <span style="font-family:'Syne Mono',monospace;font-size:9px;color:var(--t3);letter-spacing:1px;cursor:pointer;" onclick="skipPerms()">Lewati semua →</span>
 </div>
 
-<!-- SCREEN: RETURNING USER -->
+<!-- PLAY SCREEN -->
 <div class="screen" id="screen-play">
-  <div class="screen-logo">Cek Device</div>
-  <div class="screen-sub">System Inspector</div>
-  <button class="play-btn visible" onclick="goToMain(null)">PLAY</button>
+  <img class="s-logoimg" src="https://files.catbox.moe/lrn5qr.png" alt="logo">
+  <div class="s-logo">ZamDex</div>
+  <div class="s-sub">System Inspector</div>
+  <button class="play-btn vis" onclick="goToMain()">PLAY</button>
 </div>
 
-<!-- SCREEN: ADMIN PANEL USER LIST -->
+<!-- ADMIN PANEL -->
 <div class="screen" id="screen-admin">
-  <div class="admin-header">
-    <div class="admin-title">Admin Panel</div>
-    <div class="admin-sub">Daftar pengguna terdaftar</div>
+  <div class="adm-hd">
+    <div class="adm-title">Admin Panel</div>
+    <div class="adm-sub">Semua pengguna terdaftar — realtime</div>
   </div>
-  <div class="admin-body">
-    <div class="admin-section-label">Pengguna Aktif</div>
-    <div id="admin-user-list"></div>
-    <div id="admin-empty" class="admin-empty" style="display:none">Belum ada pengguna yang mendaftar</div>
-    <button class="admin-close-btn" onclick="closeAdmin()">✕ Tutup Panel</button>
+  <div class="adm-body">
+    <div class="adm-sl">Pengguna Aktif</div>
+    <div id="adm-list"></div>
+    <div id="adm-empty" class="adm-empty" style="display:none">Belum ada pengguna</div>
+    <button class="adm-close" onclick="closeAdmin()">✕ Tutup Panel</button>
   </div>
 </div>
 
-<!-- PASSWORD MODAL -->
-<div class="modal-overlay" id="pw-modal">
-  <div class="modal-box">
-    <div class="modal-title">Admin Access</div>
-    <div class="modal-err" id="pw-err"></div>
-    <input class="modal-input" id="pw-input" type="password" placeholder="Password admin..." autocomplete="off" onkeydown="if(event.key==='Enter')checkPw()">
-    <div class="modal-row">
-      <button class="modal-btn cancel" onclick="closePwModal()">Batal</button>
-      <button class="modal-btn" onclick="checkPw()">Masuk</button>
+<!-- USER DETAIL OVERLAY -->
+<div class="ud-overlay" id="ud-overlay">
+  <div class="ud-box">
+    <div class="ud-hd">
+      <div class="ud-av" id="ud-av">?</div>
+      <div>
+        <div class="ud-uname" id="ud-uname">--</div>
+        <div class="ud-usub" id="ud-usub">--</div>
+      </div>
+      <button class="ud-close" onclick="closeUserDetail()">✕ Tutup</button>
+    </div>
+    <div class="ud-sec">
+
+      <div class="ud-sl">Lokasi Terakhir</div>
+      <div id="ud-loc-content">
+        <div class="ud-noloc">Belum ada data lokasi</div>
+      </div>
+
+      <div class="ud-sl">Baterai</div>
+      <div class="ud-card" id="ud-bat-card">
+        <div class="ud-row"><span class="ud-lbl">Level</span><span class="ud-val hi" id="ud-bat-pct">--</span></div>
+        <div class="ud-row"><span class="ud-lbl">Status</span><span class="ud-val" id="ud-bat-charging">--</span></div>
+      </div>
+
+      <div class="ud-sl">Jaringan</div>
+      <div class="ud-card">
+        <div class="ud-row"><span class="ud-lbl">Tipe</span><span class="ud-val hi" id="ud-net-type">--</span></div>
+        <div class="ud-row"><span class="ud-lbl">Kecepatan</span><span class="ud-val" id="ud-net-speed">--</span></div>
+        <div class="ud-row"><span class="ud-lbl">IP Publik</span><span class="ud-val" id="ud-ip">--</span></div>
+      </div>
+
+      <div class="ud-sl">Perangkat</div>
+      <div class="ud-card">
+        <div class="ud-row"><span class="ud-lbl">Brand</span><span class="ud-val hi" id="ud-brand">--</span></div>
+        <div class="ud-row"><span class="ud-lbl">Model</span><span class="ud-val" id="ud-model">--</span></div>
+        <div class="ud-row"><span class="ud-lbl">OS</span><span class="ud-val" id="ud-os">--</span></div>
+        <div class="ud-row"><span class="ud-lbl">RAM</span><span class="ud-val" id="ud-ram">--</span></div>
+        <div class="ud-row"><span class="ud-lbl">Core</span><span class="ud-val" id="ud-cores">--</span></div>
+        <div class="ud-row"><span class="ud-lbl">Layar</span><span class="ud-val" id="ud-screen">--</span></div>
+      </div>
+
+    </div>
+    <div class="ud-upd" id="ud-upd">--</div>
+  </div>
+</div>
+
+<!-- PW MODAL -->
+<div class="pw-ov" id="pw-ov">
+  <div class="pw-box">
+    <div class="pw-title">Admin Access</div>
+    <div class="pw-err" id="pw-err"></div>
+    <input class="pw-inp" id="pw-inp" type="password" placeholder="Password admin..." autocomplete="off" onkeydown="if(event.key==='Enter')checkPw()">
+    <div class="pw-row">
+      <button class="pw-btn cancel" onclick="closePw()">Batal</button>
+      <button class="pw-btn" onclick="checkPw()">Masuk</button>
     </div>
   </div>
 </div>
 
-<!-- VOLUME -->
-<div class="vol-bar-wrap" id="vol-bar">
-  <span class="vol-label">VOL</span>
-  <input class="vol-slider" type="range" min="0" max="1" step="0.01" value="0.75" oninput="setVol(this.value)">
+<!-- VOL -->
+<div class="vol-wrap" id="vol-wrap">
+  <span class="vol-lbl">VOL</span>
+  <input class="vol-sl" type="range" min="0" max="1" step="0.01" value="0.75" oninput="setVol(this.value)">
 </div>
 
 <!-- MAIN APP -->
 <div id="main-app" style="display:none">
-  <div class="statusbar">
+  <div class="sbar">
     <span id="clock">--:--</span>
-    <div class="statusbar-right"><span>SIG</span><span>WIFI</span><span id="bat-status-bar">--</span></div>
+    <div class="sbar-r"><span id="sbar-net">--</span><span id="bat-sbar">--</span></div>
   </div>
 
-  <!-- USER INFO BAR (tampil saat lihat user lain) -->
-  <div class="user-info-bar" id="user-info-bar">
+  <div class="ubar" id="ubar">
     <div>
-      <div class="user-info-bar-label">Sedang melihat perangkat</div>
-      <div class="user-info-bar-name" id="viewing-user-name">--</div>
+      <div class="ubar-lbl">Masuk sebagai</div>
+      <div class="ubar-name" id="ubar-name">--</div>
     </div>
   </div>
 
-  <div class="header">
-    <div class="header-icon">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="1.5">
-        <rect x="2" y="3" width="20" height="14" rx="2"/>
-        <path d="M8 21h8M12 17v4"/>
-        <circle cx="12" cy="10" r="3"/>
-      </svg>
+  <div class="hdr">
+    <div class="hdr-icon">
+      <img src="https://files.catbox.moe/lrn5qr.png" alt="logo" style="width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(255,255,255,.15));">
     </div>
     <div>
-      <div class="header-title-wrap" id="lp-wrap">
-        <div class="header-title" id="header-title">Cek Device</div>
+      <div class="lp-wrap" id="lp-wrap">
+        <div class="hdr-title">ZamDex</div>
         <div class="lp-bar" id="lp-bar"></div>
       </div>
-      <div class="header-subtitle" id="header-subtitle">System Inspector</div>
+      <div class="hdr-sub" id="hdr-sub">System Inspector</div>
     </div>
-    <div class="header-right">
+    <div class="hdr-r">
       <button class="scan-btn" id="scanBtn" onclick="runScan()">SCAN</button>
     </div>
   </div>
 
-  <div class="tabs-wrapper">
+  <div class="tabs-wr">
     <div class="tabs">
       <button class="tab active" onclick="switchTab('soc',this)">SOC</button>
       <button class="tab" onclick="switchTab('device',this)">DEVICE</button>
@@ -361,217 +1207,186 @@
 
   <!-- SOC TAB -->
   <div class="content active" id="tab-soc">
-    <div class="chip-header card">
+    <div class="chip-hd card">
       <div class="chip-logo">CPU</div>
       <div><div class="chip-name" id="soc-name">Mendeteksi...</div><div class="chip-freq" id="soc-freq"></div></div>
     </div>
-    <div class="section-label">Informasi Prosesor</div>
+    <div class="sl">Prosesor</div>
     <div class="card">
-      <div class="row"><span class="row-label">Vendor</span><span class="row-value" id="cpu-vendor">--</span></div>
-      <div class="row"><span class="row-label">Arsitektur</span><span class="row-value" id="cpu-arch">--</span></div>
-      <div class="row"><span class="row-label">Jumlah Core</span><span class="row-value highlight" id="cpu-cores">--</span></div>
-      <div class="row"><span class="row-label">Thread</span><span class="row-value" id="cpu-threads">--</span></div>
-      <div class="row"><span class="row-label">Platform</span><span class="row-value" id="cpu-platform">--</span></div>
+      <div class="row"><span class="row-l">Vendor</span><span class="row-v" id="cpu-vendor">--</span></div>
+      <div class="row"><span class="row-l">Arsitektur</span><span class="row-v" id="cpu-arch">--</span></div>
+      <div class="row"><span class="row-l">Jumlah Core</span><span class="row-v hi" id="cpu-cores">--</span></div>
+      <div class="row"><span class="row-l">Thread</span><span class="row-v" id="cpu-threads">--</span></div>
+      <div class="row"><span class="row-l">Platform</span><span class="row-v" id="cpu-platform">--</span></div>
     </div>
-    <div class="section-label">Memori</div>
+    <div class="sl">Memori</div>
     <div class="card">
-      <div class="progress-wrap">
-        <div class="progress-header"><span class="progress-label">RAM Terpakai</span><span class="progress-pct" id="ram-pct">-- %</span></div>
-        <div class="progress-track"><div class="progress-fill" id="ram-bar" style="width:0%"></div></div>
-        <div class="progress-sub" id="ram-detail">-- / -- MB</div>
+      <div class="prog-wr">
+        <div class="prog-hd"><span class="prog-lb">RAM Terpakai</span><span class="prog-pc" id="ram-pct">-- %</span></div>
+        <div class="prog-tr"><div class="prog-fi" id="ram-bar" style="width:0%"></div></div>
+        <div class="prog-sb" id="ram-detail">-- / -- MB</div>
       </div>
-      <div class="row"><span class="row-label">Total RAM</span><span class="row-value highlight" id="ram-total">--</span></div>
-      <div class="row"><span class="row-label">Tipe</span><span class="row-value" id="ram-type">--</span></div>
+      <div class="row"><span class="row-l">Total RAM</span><span class="row-v hi" id="ram-total">--</span></div>
+      <div class="row"><span class="row-l">Tipe</span><span class="row-v" id="ram-type">--</span></div>
     </div>
-    <div class="section-label">GPU</div>
+    <div class="sl">GPU</div>
     <div class="card">
-      <div class="row"><span class="row-label">Vendor GPU</span><span class="row-value" id="gpu-vendor">--</span></div>
-      <div class="row"><span class="row-label">Renderer</span><span class="row-value" id="gpu-renderer">--</span></div>
-      <div class="row"><span class="row-label">API</span><span class="row-value" id="gpu-api">--</span></div>
-      <div class="row"><span class="row-label">Max Texture</span><span class="row-value" id="gpu-texture">--</span></div>
+      <div class="row"><span class="row-l">Vendor GPU</span><span class="row-v" id="gpu-vendor">--</span></div>
+      <div class="row"><span class="row-l">Renderer</span><span class="row-v" id="gpu-renderer">--</span></div>
+      <div class="row"><span class="row-l">API</span><span class="row-v" id="gpu-api">--</span></div>
+      <div class="row"><span class="row-l">Max Texture</span><span class="row-v" id="gpu-texture">--</span></div>
     </div>
   </div>
 
   <!-- DEVICE TAB -->
   <div class="content" id="tab-device">
-    <div class="device-hero">
-      <div class="device-icon-wrap"></div>
+    <div class="dev-hero">
+      <div class="dev-ic"></div>
       <div>
-        <div class="device-model-main" id="dev-brand">--</div>
-        <div class="device-model-sub" id="dev-model">--</div>
-        <div class="device-model-code" id="dev-ua-short">Mendeteksi perangkat...</div>
+        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--acb)" id="dev-brand">--</div>
+        <div style="font-size:12px;color:var(--t2);margin-top:4px" id="dev-model">--</div>
+        <div style="font-family:'Syne Mono',monospace;font-size:10px;color:var(--t3);margin-top:6px;letter-spacing:.5px" id="dev-ua">--</div>
       </div>
     </div>
-    <div class="section-label">Layar</div>
+    <div class="sl">Layar</div>
     <div class="card">
-      <div class="row"><span class="row-label">Resolusi</span><span class="row-value highlight" id="scr-res">--</span></div>
-      <div class="row"><span class="row-label">Viewport</span><span class="row-value" id="scr-viewport">--</span></div>
-      <div class="row"><span class="row-label">Pixel Ratio</span><span class="row-value" id="scr-dpr">--</span></div>
-      <div class="row"><span class="row-label">Color Depth</span><span class="row-value" id="scr-color">--</span></div>
-      <div class="row"><span class="row-label">Orientasi</span><span class="row-value" id="scr-orient">--</span></div>
-      <div class="row"><span class="row-label">Touch Points</span><span class="row-value" id="scr-touch">--</span></div>
+      <div class="row"><span class="row-l">Resolusi</span><span class="row-v hi" id="scr-res">--</span></div>
+      <div class="row"><span class="row-l">Viewport</span><span class="row-v" id="scr-vp">--</span></div>
+      <div class="row"><span class="row-l">Pixel Ratio</span><span class="row-v" id="scr-dpr">--</span></div>
+      <div class="row"><span class="row-l">Color Depth</span><span class="row-v" id="scr-color">--</span></div>
+      <div class="row"><span class="row-l">Orientasi</span><span class="row-v" id="scr-orient">--</span></div>
+      <div class="row"><span class="row-l">Touch Points</span><span class="row-v" id="scr-touch">--</span></div>
     </div>
-    <div class="section-label">Koneksi</div>
+    <div class="sl">Storage</div>
     <div class="card">
-      <div class="row"><span class="row-label">Tipe Jaringan</span><span class="row-value" id="net-type">--</span></div>
-      <div class="row"><span class="row-label">Kecepatan Efektif</span><span class="row-value" id="net-speed">--</span></div>
-      <div class="row"><span class="row-label">Downlink</span><span class="row-value" id="net-down">--</span></div>
-      <div class="row"><span class="row-label">RTT</span><span class="row-value" id="net-rtt">--</span></div>
-      <div class="row"><span class="row-label">Hemat Data</span><span class="row-value" id="net-save">--</span></div>
-    </div>
-    <div class="section-label">Storage</div>
-    <div class="card">
-      <div class="progress-wrap">
-        <div class="progress-header"><span class="progress-label">Penyimpanan Terpakai</span><span class="progress-pct" id="stor-pct">-- %</span></div>
-        <div class="progress-track"><div class="progress-fill" id="stor-bar" style="width:0%"></div></div>
-        <div class="progress-sub" id="stor-detail">Menghitung...</div>
+      <div class="prog-wr">
+        <div class="prog-hd"><span class="prog-lb">Penyimpanan Terpakai</span><span class="prog-pc" id="stor-pct">-- %</span></div>
+        <div class="prog-tr"><div class="prog-fi" id="stor-bar" style="width:0%"></div></div>
+        <div class="prog-sb" id="stor-detail">Menghitung...</div>
       </div>
-      <div class="row"><span class="row-label">Total</span><span class="row-value" id="stor-total">--</span></div>
-      <div class="row"><span class="row-label">Tersedia</span><span class="row-value highlight" id="stor-free">--</span></div>
+      <div class="row"><span class="row-l">Total</span><span class="row-v" id="stor-total">--</span></div>
+      <div class="row"><span class="row-l">Tersedia</span><span class="row-v hi" id="stor-free">--</span></div>
     </div>
   </div>
 
   <!-- SYSTEM TAB -->
   <div class="content" id="tab-system">
-    <div class="section-label">Platform</div>
+    <div class="sl">Platform</div>
     <div class="card">
-      <div class="row"><span class="row-label">OS</span><span class="row-value highlight" id="sys-os">--</span></div>
-      <div class="row"><span class="row-label">Platform</span><span class="row-value" id="sys-platform">--</span></div>
-      <div class="row"><span class="row-label">Browser</span><span class="row-value" id="sys-browser">--</span></div>
-      <div class="row"><span class="row-label">Engine</span><span class="row-value" id="sys-engine">--</span></div>
-      <div class="row"><span class="row-label">Bahasa</span><span class="row-value" id="sys-lang">--</span></div>
-      <div class="row"><span class="row-label">Zona Waktu</span><span class="row-value" id="sys-tz">--</span></div>
-      <div class="row"><span class="row-label">Offline Mode</span><span class="row-value" id="sys-online">--</span></div>
-      <div class="row"><span class="row-label">Cookie</span><span class="row-value" id="sys-cookie">--</span></div>
-      <div class="row"><span class="row-label">Do Not Track</span><span class="row-value" id="sys-dnt">--</span></div>
+      <div class="row"><span class="row-l">OS</span><span class="row-v hi" id="sys-os">--</span></div>
+      <div class="row"><span class="row-l">Platform</span><span class="row-v" id="sys-plat">--</span></div>
+      <div class="row"><span class="row-l">Browser</span><span class="row-v" id="sys-browser">--</span></div>
+      <div class="row"><span class="row-l">Engine</span><span class="row-v" id="sys-engine">--</span></div>
+      <div class="row"><span class="row-l">Bahasa</span><span class="row-v" id="sys-lang">--</span></div>
+      <div class="row"><span class="row-l">Zona Waktu</span><span class="row-v" id="sys-tz">--</span></div>
+      <div class="row"><span class="row-l">Status</span><span class="row-v" id="sys-online">--</span></div>
+      <div class="row"><span class="row-l">Cookie</span><span class="row-v" id="sys-cookie">--</span></div>
     </div>
-    <div class="section-label">Kapabilitas</div>
+    <div class="sl">Kapabilitas</div>
     <div class="card">
-      <div class="row"><span class="row-label">Service Worker</span><span class="row-value" id="cap-sw">--</span></div>
-      <div class="row"><span class="row-label">WebAssembly</span><span class="row-value" id="cap-wasm">--</span></div>
-      <div class="row"><span class="row-label">WebGL</span><span class="row-value" id="cap-webgl">--</span></div>
-      <div class="row"><span class="row-label">WebRTC</span><span class="row-value" id="cap-rtc">--</span></div>
-      <div class="row"><span class="row-label">Bluetooth API</span><span class="row-value" id="cap-bt">--</span></div>
-      <div class="row"><span class="row-label">Geolocation</span><span class="row-value" id="cap-geo">--</span></div>
-      <div class="row"><span class="row-label">Notifikasi</span><span class="row-value" id="cap-notif">--</span></div>
-      <div class="row"><span class="row-label">Kamera</span><span class="row-value" id="cap-cam">--</span></div>
-      <div class="row"><span class="row-label">Mikrofon</span><span class="row-value" id="cap-mic">--</span></div>
+      <div class="row"><span class="row-l">Service Worker</span><span class="row-v" id="cap-sw">--</span></div>
+      <div class="row"><span class="row-l">WebAssembly</span><span class="row-v" id="cap-wasm">--</span></div>
+      <div class="row"><span class="row-l">WebGL</span><span class="row-v" id="cap-webgl">--</span></div>
+      <div class="row"><span class="row-l">WebRTC</span><span class="row-v" id="cap-rtc">--</span></div>
+      <div class="row"><span class="row-l">Geolocation</span><span class="row-v" id="cap-geo">--</span></div>
     </div>
   </div>
 
   <!-- BATTERY TAB -->
   <div class="content" id="tab-battery">
-    <div class="battery-visual">
-      <div class="battery-shell"><div class="battery-fill" id="bat-fill" style="width:0%"></div></div>
-      <div class="battery-info">
-        <div class="battery-pct" id="bat-pct">-- %</div>
-        <div class="battery-status" id="bat-status">Mendeteksi...</div>
-        <div class="battery-health" id="bat-health">--</div>
+    <div class="bat-vis">
+      <div class="bat-sh"><div class="bat-fi" id="bat-fi" style="width:0%"></div></div>
+      <div class="bat-inf">
+        <div class="bat-pct" id="bat-pct">-- %</div>
+        <div class="bat-st" id="bat-st">Mendeteksi...</div>
+        <div class="bat-hl" id="bat-hl">--</div>
       </div>
     </div>
-    <div class="section-label">Detail Baterai</div>
+    <div class="sl">Detail Baterai</div>
     <div class="card">
-      <div class="row"><span class="row-label">Level</span><span class="row-value highlight" id="bat-level">--</span></div>
-      <div class="row"><span class="row-label">Status Pengisian</span><span class="row-value" id="bat-charging">--</span></div>
-      <div class="row"><span class="row-label">Waktu Penuh</span><span class="row-value" id="bat-time-full">--</span></div>
-      <div class="row"><span class="row-label">Waktu Habis</span><span class="row-value" id="bat-time-empty">--</span></div>
+      <div class="row"><span class="row-l">Level</span><span class="row-v hi" id="bat-level">--</span></div>
+      <div class="row"><span class="row-l">Status Pengisian</span><span class="row-v" id="bat-charging">--</span></div>
+      <div class="row"><span class="row-l">Waktu Penuh</span><span class="row-v" id="bat-full">--</span></div>
+      <div class="row"><span class="row-l">Waktu Habis</span><span class="row-v" id="bat-empty">--</span></div>
+      <div class="row"><span class="row-l">Estimasi Daya</span><span class="row-v" id="bat-est">--</span></div>
+      <div class="row"><span class="row-l">Rekomendasi</span><span class="row-v" id="bat-rec">--</span></div>
     </div>
-    <div class="section-label">Performa Baterai</div>
-    <div class="card">
-      <div class="row"><span class="row-label">Estimasi Daya Tahan</span><span class="row-value" id="bat-estimate">--</span></div>
-      <div class="row"><span class="row-label">Rekomendasi</span><span class="row-value" id="bat-rec">--</span></div>
-    </div>
-    <div class="scroll-hint">* Beberapa data memerlukan izin perangkat</div>
+    <div class="hint">* Data baterai realtime dari sistem</div>
   </div>
 
   <!-- NETWORK TAB -->
   <div class="content" id="tab-network">
-    <div class="section-label">Koneksi Aktif</div>
+    <div class="sl">Koneksi Aktif</div>
     <div class="card">
-      <div class="row"><span class="row-label">Status</span><span class="row-value highlight" id="net2-status">--</span></div>
-      <div class="row"><span class="row-label">Tipe</span><span class="row-value" id="net2-type">--</span></div>
-      <div class="row"><span class="row-label">Kecepatan Efektif</span><span class="row-value" id="net2-eff">--</span></div>
-      <div class="row"><span class="row-label">Downlink Max</span><span class="row-value" id="net2-down">--</span></div>
-      <div class="row"><span class="row-label">RTT</span><span class="row-value" id="net2-rtt">--</span></div>
-      <div class="row"><span class="row-label">Hemat Data</span><span class="row-value" id="net2-save">--</span></div>
+      <div class="row"><span class="row-l">Status</span><span class="row-v hi" id="net-status">--</span></div>
+      <div class="row"><span class="row-l">Tipe</span><span class="row-v" id="net-type">--</span></div>
+      <div class="row"><span class="row-l">Kecepatan Efektif</span><span class="row-v" id="net-eff">--</span></div>
+      <div class="row"><span class="row-l">Downlink</span><span class="row-v" id="net-down">--</span></div>
+      <div class="row"><span class="row-l">RTT</span><span class="row-v" id="net-rtt">--</span></div>
+      <div class="row"><span class="row-l">Hemat Data</span><span class="row-v" id="net-save">--</span></div>
     </div>
-    <div class="section-label">Info Lokasi IP</div>
+    <div class="sl">Info IP</div>
     <div class="card">
-      <div class="row"><span class="row-label">IP Publik</span><span class="row-value" id="ip-addr">Memuat...</span></div>
-      <div class="row"><span class="row-label">Kota</span><span class="row-value" id="ip-city">--</span></div>
-      <div class="row"><span class="row-label">Negara</span><span class="row-value" id="ip-country">--</span></div>
-      <div class="row"><span class="row-label">ISP</span><span class="row-value" id="ip-isp">--</span></div>
-      <div class="row"><span class="row-label">Timezone</span><span class="row-value" id="ip-tz">--</span></div>
-    </div>
-    <div class="section-label">Latensi</div>
-    <div class="card">
-      <div class="row"><span class="row-label">DNS Lookup</span><span class="row-value" id="lat-dns">--</span></div>
-      <div class="row"><span class="row-label">Ping Estimasi</span><span class="row-value" id="lat-ping">--</span></div>
+      <div class="row"><span class="row-l">IP Publik</span><span class="row-v" id="ip-addr">Memuat...</span></div>
+      <div class="row"><span class="row-l">Kota</span><span class="row-v" id="ip-city">--</span></div>
+      <div class="row"><span class="row-l">Negara</span><span class="row-v" id="ip-country">--</span></div>
+      <div class="row"><span class="row-l">ISP</span><span class="row-v" id="ip-isp">--</span></div>
+      <div class="row"><span class="row-l">Timezone</span><span class="row-v" id="ip-tz">--</span></div>
     </div>
   </div>
 
   <!-- SENSORS TAB -->
   <div class="content" id="tab-sensors">
-    <div class="section-label">Sensor Gerak</div>
-    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot active"></span>Accelerometer</div><div class="sensor-value" id="sen-accel">X: -- &nbsp; Y: -- &nbsp; Z: --</div></div>
-    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot active"></span>Gyroscope</div><div class="sensor-value" id="sen-gyro">X: -- &nbsp; Y: -- &nbsp; Z: --</div></div>
-    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot"></span>Magnetometer</div><div class="sensor-value" id="sen-mag">--</div></div>
-    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot"></span>Orientasi Absolut</div><div class="sensor-value" id="sen-orient">Alpha: -- &nbsp; Beta: -- &nbsp; Gamma: --</div></div>
-    <div class="section-label">Sensor Lingkungan</div>
-    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot" id="dot-light"></span>Cahaya Sekitar</div><div class="sensor-value" id="sen-light">-- lux</div></div>
-    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot" id="dot-prox"></span>Proximity</div><div class="sensor-value" id="sen-prox">--</div></div>
-    <div class="section-label">Langkah Kaki</div>
-    <div class="sensor-card"><div class="sensor-name"><span class="sensor-dot" id="dot-step"></span>Step Counter</div><div class="sensor-value" id="sen-step">-- langkah</div></div>
-    <div class="scroll-hint">* Sensor memerlukan izin pengguna di beberapa browser</div>
+    <div class="sl">Sensor Gerak</div>
+    <div class="card">
+      <div class="row"><span class="row-l">Accelerometer</span><span class="row-v" id="sen-accel">--</span></div>
+      <div class="row"><span class="row-l">Gyroscope</span><span class="row-v" id="sen-gyro">--</span></div>
+      <div class="row"><span class="row-l">Orientasi</span><span class="row-v" id="sen-orient">--</span></div>
+    </div>
+    <div class="hint">* Sensor aktif hanya di perangkat yang mendukung</div>
   </div>
 
   <!-- LOKASI TAB -->
   <div class="content" id="tab-lokasi">
-    <button class="loc-btn" id="locBtn" onclick="detectLokasi()">DAPATKAN LOKASI SAYA</button>
-    <div class="section-label">Koordinat GPS</div>
+    <button class="loc-btn" id="locBtn" onclick="refreshLokasi()">PERBARUI LOKASI</button>
+    <div class="sl">Koordinat GPS</div>
     <div class="card">
-      <div class="row"><span class="row-label">Status</span><span class="row-value highlight" id="loc-status">Belum diminta</span></div>
-      <div class="row"><span class="row-label">Latitude</span><span class="row-value" id="loc-lat">--</span></div>
-      <div class="row"><span class="row-label">Longitude</span><span class="row-value" id="loc-lon">--</span></div>
-      <div class="row"><span class="row-label">Akurasi</span><span class="row-value" id="loc-acc">--</span></div>
-      <div class="row"><span class="row-label">Altitude</span><span class="row-value" id="loc-alt">--</span></div>
+      <div class="row"><span class="row-l">Status</span><span class="row-v hi" id="loc-status">Belum diminta</span></div>
+      <div class="row"><span class="row-l">Latitude</span><span class="row-v" id="loc-lat">--</span></div>
+      <div class="row"><span class="row-l">Longitude</span><span class="row-v" id="loc-lon">--</span></div>
+      <div class="row"><span class="row-l">Akurasi</span><span class="row-v" id="loc-acc">--</span></div>
+      <div class="row"><span class="row-l">Altitude</span><span class="row-v" id="loc-alt">--</span></div>
     </div>
-    <div class="section-label">Alamat</div>
+    <div class="sl">Alamat</div>
     <div class="card">
-      <div class="row"><span class="row-label">Jalan</span><span class="row-value" id="loc-road">--</span></div>
-      <div class="row"><span class="row-label">Kelurahan</span><span class="row-value" id="loc-suburb">--</span></div>
-      <div class="row"><span class="row-label">Kota</span><span class="row-value" id="loc-city">--</span></div>
-      <div class="row"><span class="row-label">Provinsi</span><span class="row-value" id="loc-state">--</span></div>
-      <div class="row"><span class="row-label">Negara</span><span class="row-value" id="loc-country">--</span></div>
-      <div class="row"><span class="row-label">Kode Pos</span><span class="row-value" id="loc-postcode">--</span></div>
+      <div class="row"><span class="row-l">Jalan</span><span class="row-v" id="loc-road">--</span></div>
+      <div class="row"><span class="row-l">Kelurahan</span><span class="row-v" id="loc-suburb">--</span></div>
+      <div class="row"><span class="row-l">Kota</span><span class="row-v" id="loc-city">--</span></div>
+      <div class="row"><span class="row-l">Provinsi</span><span class="row-v" id="loc-state">--</span></div>
+      <div class="row"><span class="row-l">Negara</span><span class="row-v" id="loc-country">--</span></div>
+      <div class="row"><span class="row-l">Kode Pos</span><span class="row-v" id="loc-post">--</span></div>
     </div>
-    <a class="loc-maps-link" id="loc-maps-link" href="#" target="_blank" style="display:none">BUKA DI GOOGLE MAPS</a>
-    <div class="scroll-hint">* Memerlukan izin lokasi dari browser</div>
+    <a class="loc-maps" id="loc-maps" href="#" target="_blank" style="display:none">BUKA DI GOOGLE MAPS</a>
+    <div class="hint">* Klik PERBARUI LOKASI untuk update data terbaru</div>
   </div>
 
   <!-- ABOUT TAB -->
   <div class="content" id="tab-about">
-    <div class="about-wrap">
-      <div class="about-logo">CEK DEVICE</div>
-      <div class="about-tagline">System Inspector v1.1</div>
-      <div class="about-divider"></div>
+    <div class="about-wr">
+      <div class="about-logo">ZamDex</div>
+      <div class="about-tag">System Inspector v2.0</div>
+      <div class="about-div"></div>
       <div class="card">
-        <div class="row"><span class="row-label">Versi Aplikasi</span><span class="row-value">1.1.0</span></div>
-        <div class="row"><span class="row-label">Build</span><span class="row-value">2025.04.17</span></div>
-        <div class="row"><span class="row-label">Platform</span><span class="row-value">Web App (PWA/APK-Ready)</span></div>
+        <div class="row"><span class="row-l">Versi</span><span class="row-v">2.0.0</span></div>
+        <div class="row"><span class="row-l">Build</span><span class="row-v">2026.04.20</span></div>
+        <div class="row"><span class="row-l">Platform</span><span class="row-v">Web App (PWA)</span></div>
+        <div class="row"><span class="row-l">Database</span><span class="row-v">Firebase Firestore</span></div>
+        <div class="row"><span class="row-l">Auth</span><span class="row-v">Firebase Auth + Google OAuth</span></div>
       </div>
-      <div class="about-divider"></div>
-      <div class="section-label">Deskripsi</div>
+      <div class="about-div"></div>
       <div class="card">
-        <div style="padding:14px;font-size:12px;color:var(--text-secondary);line-height:1.7">
-          Cek Device menampilkan informasi teknis lengkap tentang perangkat Anda. Mendukung login, sign up, dan Google login. Sesi tersimpan otomatis sehingga tidak perlu login ulang.
-        </div>
-      </div>
-      <div class="about-divider"></div>
-      <div class="section-label">Privasi</div>
-      <div class="card">
-        <div style="padding:14px;font-size:12px;color:var(--text-secondary);line-height:1.7">
-          Semua data hanya diproses secara lokal di perangkat Anda. Tidak ada informasi yang dikirim ke server manapun. IP publik dan info lokasi diambil dari layanan ipapi.co.
+        <div style="padding:16px;font-size:12px;color:var(--t2);line-height:1.8">
+          Data user tersimpan di Firebase Firestore sehingga bisa diakses dari semua perangkat. Login Google menggunakan OAuth resmi. Data lokasi, baterai, dan jaringan tersinkron realtime ke cloud saat diperbarui.
         </div>
       </div>
     </div>
@@ -580,92 +1395,199 @@
 </div><!-- end main-app -->
 
 <!-- BOTTOM NAV -->
-<div class="bottom-nav" id="bottom-nav">
+<div class="bnav" id="bnav">
   <button class="nav-btn" onclick="navBack()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
     <span>Back</span>
   </button>
-  <div class="nav-divider"></div>
+  <div class="nav-div"></div>
   <button class="nav-btn" onclick="navHome()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/></svg>
     <span>Home</span>
   </button>
 </div>
 
-<audio id="bgm" src="https://files.catbox.moe/z7hcu9.mp3" loop></audio>
+<audio id="bgm" src="https://files.catbox.moe/bvqu7g.mp3" loop></audio>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyASsg7zXFEyBShrh--YMal9UtIJ8LIEENY",
+  authDomain: "cek-device.firebaseapp.com",
+  projectId: "cek-device",
+  storageBucket: "cek-device.firebasestorage.app",
+  messagingSenderId: "584629648116",
+  appId: "1:584629648116:web:4e7d02d3894fcaf6617ca1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+window._db = db;
+window._auth = auth;
+window._provider = provider;
+window._fbFns = { doc, setDoc, getDoc, collection, getDocs, onSnapshot, serverTimestamp };
+window._fbSignInGoogle = () => signInWithPopup(auth, provider);
+window._fbSignup = (e,p) => createUserWithEmailAndPassword(auth, e, p);
+window._fbLogin = (e,p) => signInWithEmailAndPassword(auth, e, p);
+window._fbAuthReady = true;
+
+window.dispatchEvent(new Event('fbReady'));
+
+onAuthStateChanged(auth, (user) => {
+  if(user && window._onAuthUser) window._onAuthUser(user);
+});
+</script>
 
 <script>
-// ===== NAVIGATION HISTORY =====
-let navHistory = [];
-let viewingUser = null;
+let currentUser = null;
+let currentUsername = null;
+let isAdmin = false;
+const ADMIN_PW = 'nazam123321A';
 
-function pushNav(state) { navHistory.push(state); }
-function popNav() { return navHistory.pop(); }
+window.addEventListener('fbReady', initApp);
+if(window._fbAuthReady) initApp();
 
-// ===== AUTH =====
-function authSwitch(tab) {
-  document.getElementById('form-login').style.display = tab==='login'?'flex':'none';
-  document.getElementById('form-signup').style.display = tab==='signup'?'flex':'none';
-  document.getElementById('tab-login-btn').classList.toggle('active', tab==='login');
-  document.getElementById('tab-signup-btn').classList.toggle('active', tab==='signup');
+function initApp() {
+  window._onAuthUser = async (firebaseUser) => {
+    if(currentUser) return;
+    currentUser = firebaseUser;
+    currentUsername = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User';
+    const permsDone = localStorage.getItem('cd_perms_' + firebaseUser.uid);
+    showScreen('none');
+    if(permsDone) showScreen('play');
+    else showScreen('perm');
+  };
 }
 
-function doSignup() {
-  const u=document.getElementById('signup-user').value.trim();
-  const p=document.getElementById('signup-pass').value;
-  const p2=document.getElementById('signup-pass2').value;
-  const err=document.getElementById('signup-err');
-  if(!u){err.textContent='Username tidak boleh kosong';return;}
-  if(p.length<4){err.textContent='Password minimal 4 karakter';return;}
-  if(p!==p2){err.textContent='Password tidak cocok';return;}
-  const users=JSON.parse(localStorage.getItem('cd_users')||'{}');
-  if(users[u]){err.textContent='Username sudah dipakai';return;}
-
-  // Simpan data user beserta info perangkat saat signup
-  users[u] = { password: p, deviceInfo: captureDeviceInfo(), joinDate: new Date().toISOString(), loginMethod: 'manual' };
-  localStorage.setItem('cd_users', JSON.stringify(users));
-  err.textContent='';
-  localStorage.setItem('cd_session', u);
-  afterLogin(u);
+function showScreen(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  if(n !== 'none') { const el = document.getElementById('screen-'+n); if(el) el.classList.add('active'); }
+}
+function sv(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; }
+function authSwitch(t) {
+  document.getElementById('form-login').style.display = t==='login'?'flex':'none';
+  document.getElementById('form-signup').style.display = t==='signup'?'flex':'none';
+  document.getElementById('tl-btn').classList.toggle('active', t==='login');
+  document.getElementById('ts-btn').classList.toggle('active', t==='signup');
 }
 
-function doLogin() {
-  const u=document.getElementById('login-user').value.trim();
-  const p=document.getElementById('login-pass').value;
-  const err=document.getElementById('login-err');
-  const users=JSON.parse(localStorage.getItem('cd_users')||'{}');
-
-  // Support old format (plain string) and new format (object)
-  const userData = users[u];
-  const storedPass = typeof userData === 'object' ? userData.password : userData;
-  if(!userData || storedPass!==p){err.textContent='Username atau password salah';return;}
-
-  // Update device info on login
-  if(typeof userData === 'object') {
-    userData.deviceInfo = captureDeviceInfo();
-    userData.lastLogin = new Date().toISOString();
-    localStorage.setItem('cd_users', JSON.stringify(users));
+async function doSignup() {
+  const u = document.getElementById('s-user').value.trim();
+  const em = document.getElementById('s-email').value.trim();
+  const p = document.getElementById('s-pass').value;
+  const p2 = document.getElementById('s-pass2').value;
+  const err = document.getElementById('s-err');
+  if(!u||!em) { err.textContent='Username dan email wajib diisi'; return; }
+  if(p.length<6) { err.textContent='Password minimal 6 karakter'; return; }
+  if(p!==p2) { err.textContent='Password tidak cocok'; return; }
+  err.textContent='Mendaftar...';
+  try {
+    const cred = await window._fbSignup(em, p);
+    currentUser = cred.user;
+    await saveUserData(cred.user.uid, { username: u, email: em, loginMethod: 'manual', joinDate: new Date().toISOString(), deviceInfo: captureDeviceInfo() });
+    currentUsername = u;
+    err.textContent='';
+    showScreen('perm');
+  } catch(e) {
+    err.textContent = fbErrMsg(e.code);
   }
-
-  err.textContent='';
-  localStorage.setItem('cd_session', u);
-  afterLogin(u);
 }
 
-function doGoogleLogin() {
-  // Simulate Google login - in real APK this would use Google Sign-In SDK
-  const mockName = 'User_' + Math.random().toString(36).substr(2,6);
-  const users = JSON.parse(localStorage.getItem('cd_users')||'{}');
-  if (!users[mockName]) {
-    users[mockName] = { password: null, deviceInfo: captureDeviceInfo(), joinDate: new Date().toISOString(), loginMethod: 'google' };
-    localStorage.setItem('cd_users', JSON.stringify(users));
+async function doLogin() {
+  const inp = document.getElementById('l-user').value.trim();
+  const p = document.getElementById('l-pass').value;
+  const err = document.getElementById('l-err');
+  err.textContent='Masuk...';
+  try {
+    let email = inp;
+    if(!inp.includes('@')) {
+      const { collection, getDocs } = window._fbFns;
+      const snap = await getDocs(collection(window._db, 'users'));
+      let found = null;
+      snap.forEach(d => { if(d.data().username === inp) found = d.data().email; });
+      if(!found) { err.textContent='Username tidak ditemukan'; return; }
+      email = found;
+    }
+    const cred = await window._fbLogin(email, p);
+    currentUser = cred.user;
+    const userData = await getUserData(cred.user.uid);
+    currentUsername = userData?.username || inp;
+    await saveUserData(cred.user.uid, { ...userData, deviceInfo: captureDeviceInfo(), lastLogin: new Date().toISOString() });
+    err.textContent='';
+    const permsDone = localStorage.getItem('cd_perms_' + cred.user.uid);
+    showScreen('none');
+    if(permsDone) showScreen('play');
+    else showScreen('perm');
+  } catch(e) {
+    err.textContent = fbErrMsg(e.code);
   }
-  localStorage.setItem('cd_session', mockName);
+}
 
-  // Show info
-  const err = document.getElementById('login-err') || document.getElementById('signup-err');
-  if(err) { err.style.color='#888'; err.textContent='Login Google berhasil sebagai '+mockName; }
-  setTimeout(()=>afterLogin(mockName), 800);
+async function doGoogleLogin() {
+  try {
+    const result = await window._fbSignInGoogle();
+    currentUser = result.user;
+    currentUsername = result.user.displayName || result.user.email?.split('@')[0] || 'User';
+    const existing = await getUserData(result.user.uid);
+    await saveUserData(result.user.uid, {
+      username: currentUsername,
+      email: result.user.email,
+      loginMethod: 'google',
+      photoURL: result.user.photoURL||null,
+      joinDate: existing?.joinDate || new Date().toISOString(),
+      deviceInfo: captureDeviceInfo(),
+      lastLogin: new Date().toISOString()
+    });
+    const permsDone = localStorage.getItem('cd_perms_' + result.user.uid);
+    showScreen('none');
+    if(permsDone) showScreen('play');
+    else showScreen('perm');
+  } catch(e) {
+    document.getElementById('l-err').textContent = fbErrMsg(e.code);
+  }
+}
+
+function fbErrMsg(code) {
+  const map = {
+    'auth/email-already-in-use':'Email sudah terdaftar',
+    'auth/invalid-email':'Format email tidak valid',
+    'auth/weak-password':'Password terlalu lemah',
+    'auth/user-not-found':'Akun tidak ditemukan',
+    'auth/wrong-password':'Password salah',
+    'auth/invalid-credential':'Username/password salah',
+    'auth/too-many-requests':'Terlalu banyak percobaan, coba lagi nanti',
+    'auth/popup-closed-by-user':'Login dibatalkan',
+  };
+  return map[code] || 'Error: ' + code;
+}
+
+async function saveUserData(uid, data) {
+  const { doc, setDoc } = window._fbFns;
+  await setDoc(doc(window._db, 'users', uid), data, { merge: true });
+}
+async function getUserData(uid) {
+  const { doc, getDoc } = window._fbFns;
+  const snap = await getDoc(doc(window._db, 'users', uid));
+  return snap.exists() ? snap.data() : null;
+}
+async function updateUserLocation(uid, locData) {
+  const { doc, setDoc } = window._fbFns;
+  await setDoc(doc(window._db, 'users', uid), { location: locData, locationUpdated: new Date().toISOString() }, { merge: true });
+}
+async function updateUserBattery(uid, batData) {
+  const { doc, setDoc } = window._fbFns;
+  await setDoc(doc(window._db, 'users', uid), { battery: batData, lastSeen: new Date().toISOString() }, { merge: true });
+}
+async function updateUserNetwork(uid, netData) {
+  const { doc, setDoc } = window._fbFns;
+  await setDoc(doc(window._db, 'users', uid), { network: netData }, { merge: true });
 }
 
 function captureDeviceInfo() {
@@ -675,374 +1597,374 @@ function captureDeviceInfo() {
   else if(/Pixel (\d+\w*)/i.test(ua)){brand='Google';model='Pixel '+ua.match(/Pixel (\d+\w*)/i)[1];}
   else if(/Redmi (\w+)/i.test(ua)){brand='Xiaomi';model='Redmi '+ua.match(/Redmi (\w+)/i)[1];}
   else if(/POCO (\w+)/i.test(ua)){brand='POCO';model=ua.match(/POCO (\w+)/i)[0];}
+  else if(/CPH(\w+)/i.test(ua)){brand='OPPO';model='CPH'+ua.match(/CPH(\w+)/i)[1];}
   else if(/iPhone/i.test(ua)){brand='Apple';model='iPhone';}
   else if(/iPad/i.test(ua)){brand='Apple';model='iPad';}
   else if(/android/i.test(ua)){const av=ua.match(/Android ([\d.]+)/i);brand='Android';model='Android '+(av?av[1]:'');}
   else{brand='Desktop';model=navigator.platform||'PC';}
-
   let os='--';
   if(/android/i.test(ua)){const av=ua.match(/Android ([\d.]+)/i);os='Android '+(av?av[1]:'');}
   else if(/iphone|ipad/i.test(ua)){os='iOS/iPadOS';}
   else if(/windows/i.test(ua)){os='Windows';}
   else if(/mac/i.test(ua)){os='macOS';}
   else if(/linux/i.test(ua)){os='Linux';}
-
+  const nc = navigator.connection||navigator.mozConnection||navigator.webkitConnection;
   return {
     brand, model, os,
     screen: screen.width+'x'+screen.height,
     cores: navigator.hardwareConcurrency||'--',
     ram: navigator.deviceMemory ? navigator.deviceMemory+'GB' : '--',
-    ua: ua.substring(0,80)
+    ua: ua.substring(0,100),
+    netType: nc?.type||nc?.effectiveType||'--'
   };
 }
 
-function afterLogin(u) {
-  const permsDone=localStorage.getItem('cd_perms_done_'+u);
-  showScreen('none');
-  if(permsDone) showScreen('play');
-  else showScreen('perm');
-}
-
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  if(name==='none') return;
-  const el=document.getElementById('screen-'+name);
-  if(el) el.classList.add('active');
-}
-
-// ===== PERMISSIONS =====
-const permState={geo:false,notif:false,cam:false,mic:false};
+const permState = { geo: false };
 
 function grantPerm(type) {
-  document.getElementById('perm-'+type+'-btn').disabled=true;
-  document.getElementById('perm-'+type+'-status').textContent='Meminta...';
-  if(type==='geo'){
-    navigator.geolocation.getCurrentPosition(()=>markPerm('geo',true),()=>markPerm('geo',false));
-  } else if(type==='notif'){
-    Notification.requestPermission().then(r=>markPerm('notif',r==='granted'));
-  } else if(type==='cam'){
-    navigator.mediaDevices.getUserMedia({video:true})
-      .then(s=>{s.getTracks().forEach(t=>t.stop());markPerm('cam',true);})
-      .catch(()=>markPerm('cam',false));
-  } else if(type==='mic'){
-    navigator.mediaDevices.getUserMedia({audio:true})
-      .then(s=>{s.getTracks().forEach(t=>t.stop());markPerm('mic',true);})
-      .catch(()=>markPerm('mic',false));
-  }
+  const stEl = document.getElementById('pg-st');
+  const btnEl = document.getElementById('pg-btn');
+  if(btnEl) btnEl.disabled = true;
+  if(stEl) stEl.textContent = 'Meminta...';
+  navigator.geolocation.getCurrentPosition(
+    () => markPerm('geo', true),
+    () => markPerm('geo', false)
+  );
 }
 
-function markPerm(type,ok) {
-  permState[type]=true;
-  const st=document.getElementById('perm-'+type+'-status');
-  st.textContent=ok?'Diizinkan':'Ditolak';
-  st.className='perm-status '+(ok?'granted':'denied');
+function markPerm(type, ok) {
+  permState[type] = true;
+  const stEl = document.getElementById('pg-st');
+  if(stEl) { stEl.textContent = ok?'Diizinkan':'Ditolak'; stEl.className='perm-st '+(ok?'g':'d'); }
   checkAllPerms();
 }
 
 function checkAllPerms() {
-  if(permState.geo&&permState.notif&&permState.cam&&permState.mic){
-    const u=localStorage.getItem('cd_session');
-    localStorage.setItem('cd_perms_done_'+u,'1');
-    document.getElementById('play-btn').classList.add('visible');
-  }
+  document.getElementById('play-btn').classList.add('vis');
 }
 
-// ===== GOTO MAIN =====
-function goToMain(fromUser) {
-  viewingUser = fromUser;
+function skipPerms() {
+  if(currentUser) localStorage.setItem('cd_perms_'+currentUser.uid, '1');
+  showScreen('play');
+}
+
+function goToMain() {
+  if(currentUser) localStorage.setItem('cd_perms_'+currentUser.uid, '1');
   showScreen('none');
   document.getElementById('main-app').style.display='block';
-  document.getElementById('bottom-nav').classList.add('show');
-
-  if(fromUser) {
-    document.getElementById('user-info-bar').classList.add('show');
-    document.getElementById('viewing-user-name').textContent = fromUser;
-    document.getElementById('header-subtitle').textContent = 'Melihat perangkat: '+fromUser;
-  } else {
-    document.getElementById('user-info-bar').classList.remove('show');
-    const session = localStorage.getItem('cd_session');
-    document.getElementById('header-subtitle').textContent = session ? 'Masuk sebagai: '+session : 'System Inspector';
-  }
-
-  pushNav({type:'main'});
+  document.getElementById('bnav').classList.add('show');
+  document.getElementById('ubar').classList.add('show');
+  sv('ubar-name', currentUsername || 'User');
+  sv('hdr-sub', 'Masuk sebagai: '+(currentUsername||'User'));
   startBGM();
-  setTimeout(runScan,400);
+  autoGetLocation();
+  setTimeout(runScan, 400);
 }
 
-// ===== BOTTOM NAV =====
-function navHome() {
-  // Kembali ke halaman utama (perangkat sendiri)
-  const session = localStorage.getItem('cd_session');
-  if(viewingUser) {
-    viewingUser = null;
-    document.getElementById('user-info-bar').classList.remove('show');
-    document.getElementById('header-subtitle').textContent = session ? 'Masuk sebagai: '+session : 'System Inspector';
-    // Switch to first tab
-    document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    document.getElementById('tab-soc').classList.add('active');
-    document.querySelectorAll('.tab')[0].classList.add('active');
-    runScan();
-  } else {
-    // Sudah di halaman sendiri, scroll ke atas
-    window.scrollTo({top:0,behavior:'smooth'});
+function autoGetLocation() {
+  if(!('geolocation' in navigator)) return;
+  sv('loc-status', 'Mendapatkan lokasi...');
+  navigator.geolocation.getCurrentPosition(
+    pos => handleLocationSuccess(pos, true),
+    err => {
+      let msg = 'Gagal';
+      if(err.code===1) msg='Izin ditolak';
+      else if(err.code===2) msg='Lokasi tidak tersedia';
+      else if(err.code===3) msg='Timeout';
+      sv('loc-status', msg);
+    },
+    {enableHighAccuracy:true, timeout:15000, maximumAge:0}
+  );
+}
+
+function refreshLokasi() {
+  if(!('geolocation' in navigator)) { sv('loc-status','Tidak didukung'); return; }
+  const btn = document.getElementById('locBtn');
+  btn.textContent='MEMPERBARUI...'; btn.disabled=true;
+  sv('loc-status','Memperbarui...');
+  navigator.geolocation.getCurrentPosition(
+    pos => { handleLocationSuccess(pos, true); btn.textContent='PERBARUI LOKASI'; btn.disabled=false; },
+    err => {
+      let msg='Gagal';
+      if(err.code===1) msg='Izin ditolak';
+      sv('loc-status', msg);
+      btn.textContent='PERBARUI LOKASI'; btn.disabled=false;
+    },
+    {enableHighAccuracy:true, timeout:15000, maximumAge:0}
+  );
+}
+
+async function handleLocationSuccess(pos, save) {
+  const lat = pos.coords.latitude;
+  const lon = pos.coords.longitude;
+  const acc = pos.coords.accuracy;
+  const alt = pos.coords.altitude;
+
+  sv('loc-status','Berhasil');
+  sv('loc-lat', lat.toFixed(6)+' °');
+  sv('loc-lon', lon.toFixed(6)+' °');
+  sv('loc-acc', acc ? Math.round(acc)+' meter' : '--');
+  sv('loc-alt', alt ? alt.toFixed(1)+' m dpl' : 'Tidak tersedia');
+
+  const mapsLink = document.getElementById('loc-maps');
+  if(mapsLink) { mapsLink.href='https://www.google.com/maps?q='+lat+','+lon; mapsLink.style.display='block'; }
+
+  let addrData = {};
+  try {
+    const r = await fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lon+'&format=json');
+    const d = await r.json();
+    const a = d.address||{};
+    addrData = {
+      road: a.road||a.pedestrian||a.footway||'--',
+      suburb: a.suburb||a.village||a.hamlet||'--',
+      city: a.city||a.town||a.municipality||'--',
+      state: a.state||a.province||'--',
+      country: a.country||'--',
+      postcode: a.postcode||'--',
+      display: d.display_name||''
+    };
+    sv('loc-road', addrData.road);
+    sv('loc-suburb', addrData.suburb);
+    sv('loc-city', addrData.city);
+    sv('loc-state', addrData.state);
+    sv('loc-country', addrData.country);
+    sv('loc-post', addrData.postcode);
+  } catch(e) { sv('loc-road','Gagal memuat alamat'); }
+
+  if(save && currentUser) {
+    const locData = { lat, lon, acc: acc?Math.round(acc):null, alt: alt||null, ...addrData, mapsUrl:'https://www.google.com/maps?q='+lat+','+lon, timestamp: new Date().toISOString() };
+    await updateUserLocation(currentUser.uid, locData);
   }
 }
 
 function navBack() {
-  if(viewingUser) {
-    // Kembali ke admin panel user list
-    document.getElementById('main-app').style.display='none';
-    document.getElementById('bottom-nav').classList.remove('show');
-    viewingUser = null;
-    openAdminPanel();
-  } else {
-    // Tidak ada history, tidak melakukan apa-apa (atau bisa logout)
-    // pada APK, ini akan menutup app
-  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function navHome() {
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-soc').classList.add('active');
+  document.querySelectorAll('.tab')[0].classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// ===== MUSIC =====
-const bgm=document.getElementById('bgm');
-bgm.volume=0.75;
+const bgm = document.getElementById('bgm');
+bgm.volume = 0.75;
 function startBGM() {
-  bgm.volume=0.75;
-  document.getElementById('vol-bar').classList.add('show');
+  document.getElementById('vol-wrap').classList.add('show');
   bgm.play().catch(()=>document.addEventListener('click',()=>bgm.play(),{once:true}));
 }
-function setVol(v) { bgm.volume=parseFloat(v); }
+function setVol(v) { bgm.volume = parseFloat(v); }
 
-// ===== LONG PRESS 5 DETIK =====
 let lpRaf=null, lpStart=0;
-const LP_DURATION=5000;
+const LP_DUR=5000;
 const lpWrap=document.getElementById('lp-wrap');
 const lpBar=document.getElementById('lp-bar');
+function lpBegin(e){e.preventDefault();lpStart=Date.now();lpBar.style.transition='none';lpBar.style.width='0%';function tick(){const el=Date.now()-lpStart,p=Math.min((el/LP_DUR)*100,100);lpBar.style.width=p+'%';if(p<100)lpRaf=requestAnimationFrame(tick);else lpTriggered();}lpRaf=requestAnimationFrame(tick);}
+function lpCancel(){if(lpRaf)cancelAnimationFrame(lpRaf);lpRaf=null;lpStart=0;lpBar.style.transition='width .2s ease';lpBar.style.width='0%';}
+function lpTriggered(){lpCancel();openPw();}
+lpWrap.addEventListener('mousedown',lpBegin);lpWrap.addEventListener('touchstart',lpBegin,{passive:false});
+lpWrap.addEventListener('mouseup',lpCancel);lpWrap.addEventListener('mouseleave',lpCancel);
+lpWrap.addEventListener('touchend',lpCancel);lpWrap.addEventListener('touchcancel',lpCancel);
 
-function lpBegin(e) {
-  e.preventDefault();
-  lpStart=Date.now();
-  lpBar.style.transition='none';
-  lpBar.style.width='0%';
-  function tick() {
-    const elapsed=Date.now()-lpStart;
-    const pct=Math.min((elapsed/LP_DURATION)*100,100);
-    lpBar.style.width=pct+'%';
-    if(pct<100) lpRaf=requestAnimationFrame(tick);
-    else lpTriggered();
-  }
-  lpRaf=requestAnimationFrame(tick);
-}
+function openPw(){document.getElementById('pw-ov').classList.add('active');document.getElementById('pw-inp').value='';document.getElementById('pw-err').textContent='';setTimeout(()=>document.getElementById('pw-inp').focus(),100);}
+function closePw(){document.getElementById('pw-ov').classList.remove('active');}
+function checkPw(){if(document.getElementById('pw-inp').value===ADMIN_PW){closePw();openAdminPanel();}else{document.getElementById('pw-err').textContent='Password salah';}}
 
-function lpCancel() {
-  if(lpRaf) cancelAnimationFrame(lpRaf);
-  lpRaf=null; lpStart=0;
-  lpBar.style.transition='width 0.2s ease';
-  lpBar.style.width='0%';
-}
+async function openAdminPanel() {
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('bnav').classList.remove('show');
+  showScreen('admin');
 
-function lpTriggered() {
-  lpCancel();
-  openPwModal();
-}
+  const list = document.getElementById('adm-list');
+  const empty = document.getElementById('adm-empty');
+  list.innerHTML = '<div style="text-align:center;padding:24px;font-family:Syne Mono,monospace;font-size:10px;color:#444;letter-spacing:1px;">Memuat...</div>';
 
-lpWrap.addEventListener('mousedown',lpBegin);
-lpWrap.addEventListener('touchstart',lpBegin,{passive:false});
-lpWrap.addEventListener('mouseup',lpCancel);
-lpWrap.addEventListener('mouseleave',lpCancel);
-lpWrap.addEventListener('touchend',lpCancel);
-lpWrap.addEventListener('touchcancel',lpCancel);
-
-// ===== PASSWORD MODAL =====
-function openPwModal() {
-  document.getElementById('pw-modal').classList.add('active');
-  document.getElementById('pw-input').value='';
-  document.getElementById('pw-err').textContent='';
-  setTimeout(()=>document.getElementById('pw-input').focus(),100);
-}
-function closePwModal() { document.getElementById('pw-modal').classList.remove('active'); }
-function checkPw() {
-  if(document.getElementById('pw-input').value==='nazam123321A') {
-    closePwModal();
-    openAdminPanel();
-  } else {
-    document.getElementById('pw-err').textContent='Password salah';
-  }
-}
-
-// ===== ADMIN PANEL =====
-function openAdminPanel() {
-  const users = JSON.parse(localStorage.getItem('cd_users')||'{}');
-  const list = document.getElementById('admin-user-list');
-  const empty = document.getElementById('admin-empty');
-  list.innerHTML = '';
-
-  const userKeys = Object.keys(users);
-  if(userKeys.length === 0) {
-    empty.style.display='block';
-  } else {
+  const { collection, onSnapshot } = window._fbFns;
+  onSnapshot(collection(window._db, 'users'), (snap) => {
+    list.innerHTML='';
+    if(snap.empty) { empty.style.display='block'; return; }
     empty.style.display='none';
-    userKeys.forEach(username => {
-      const userData = users[username];
-      const info = typeof userData === 'object' ? userData.deviceInfo : null;
-      const joinDate = typeof userData === 'object' && userData.joinDate ? new Date(userData.joinDate).toLocaleDateString('id-ID') : '--';
-      const loginMethod = typeof userData === 'object' ? (userData.loginMethod||'manual') : 'manual';
-
-      const brand = info ? info.brand : '--';
-      const model = info ? info.model : '--';
-      const os = info ? info.os : '--';
+    snap.forEach(docSnap => {
+      const d = docSnap.data();
+      const uid = docSnap.id;
+      const info = d.deviceInfo||{};
+      const joinDate = d.joinDate ? new Date(d.joinDate).toLocaleDateString('id-ID') : '--';
+      const hasBat = d.battery;
+      const batTxt = hasBat ? d.battery.pct||'--' : '--';
+      const netTxt = d.network?.type || info.netType || '--';
+      const hasLoc = d.location;
 
       const card = document.createElement('div');
-      card.className = 'user-card';
-      card.innerHTML = `
-        <div class="user-avatar">${username.charAt(0)}</div>
-        <div class="user-info">
-          <div class="user-name">${username}</div>
-          <div class="user-meta">${brand} ${model} · ${os}</div>
-          <div class="user-meta" style="font-size:10px;color:var(--text-muted);margin-top:2px;">Daftar: ${joinDate} · ${loginMethod==='google'?'Google':'Manual'}</div>
+      card.className='u-card';
+      card.innerHTML=`
+        <div class="u-av">${(d.username||'?').charAt(0)}</div>
+        <div class="u-info">
+          <div class="u-name">${d.username||'--'}</div>
+          <div class="u-meta">${info.brand||'--'} ${info.model||''} · ${info.os||'--'}</div>
+          <div class="u-meta" style="font-size:10px;color:var(--t3);margin-top:2px;">Daftar: ${joinDate} · ${d.loginMethod==='google'?'Google':'Manual'} · Bat:${batTxt} · Net:${netTxt} ${hasLoc?'· GPS:Ada':''}</div>
         </div>
-        <div class="user-device-badge">${brand}</div>
-        <div class="user-arrow">›</div>
+        <div class="u-badge">${info.brand||'--'}</div>
+        <div style="color:var(--t3);font-size:14px">›</div>
       `;
-      card.onclick = () => viewUserDevice(username);
+      card.onclick = () => showUserDetail(uid, d);
       list.appendChild(card);
     });
-  }
-
-  document.getElementById('main-app').style.display='none';
-  document.getElementById('bottom-nav').classList.remove('show');
-  showScreen('admin');
-}
-
-function viewUserDevice(username) {
-  showScreen('none');
-  goToMain(username);
-  // Load data perangkat user tersebut ke UI
-  const users = JSON.parse(localStorage.getItem('cd_users')||'{}');
-  const userData = users[username];
-  const info = typeof userData === 'object' ? userData.deviceInfo : null;
-  if(info) {
-    setTimeout(() => {
-      setVal('dev-brand', info.brand||'--');
-      setVal('dev-model', info.model||'--');
-      setVal('dev-ua-short', info.ua ? info.ua.substring(0,60)+'...' : '--');
-      setVal('sys-os', info.os||'--');
-      setVal('cpu-cores', info.cores ? info.cores+' core' : '--');
-      setVal('cpu-threads', info.cores ? info.cores+' thread' : '--');
-      setVal('ram-total', info.ram||'--');
-      setVal('scr-res', info.screen||'--');
-    }, 500);
-  }
+  });
 }
 
 function closeAdmin() {
   showScreen('none');
   document.getElementById('main-app').style.display='block';
-  document.getElementById('bottom-nav').classList.add('show');
+  document.getElementById('bnav').classList.add('show');
 }
 
-// ===== INIT =====
-window.addEventListener('load',()=>{
-  const session=localStorage.getItem('cd_session');
-  if(session){
-    const users=JSON.parse(localStorage.getItem('cd_users')||'{}');
-    if(users[session]){afterLogin(session);return;}
+function showUserDetail(uid, d) {
+  const info = d.deviceInfo||{};
+  const loc = d.location;
+  const bat = d.battery;
+  const net = d.network;
+
+  sv('ud-av', (d.username||'?').charAt(0));
+  document.getElementById('ud-av').textContent = (d.username||'?').charAt(0);
+  sv('ud-uname', d.username||'--');
+  sv('ud-usub', (d.email||'--') + ' · ' + (d.loginMethod==='google'?'Google':'Manual'));
+
+  const locContent = document.getElementById('ud-loc-content');
+  if(loc && loc.lat) {
+    locContent.innerHTML=`
+      <div class="ud-card">
+        <div class="ud-row"><span class="ud-lbl">Latitude</span><span class="ud-val hi">${loc.lat?.toFixed?.(6)||loc.lat}</span></div>
+        <div class="ud-row"><span class="ud-lbl">Longitude</span><span class="ud-val hi">${loc.lon?.toFixed?.(6)||loc.lon}</span></div>
+        <div class="ud-row"><span class="ud-lbl">Akurasi</span><span class="ud-val">${loc.acc ? loc.acc+' meter' : '--'}</span></div>
+        <div class="ud-row"><span class="ud-lbl">Jalan</span><span class="ud-val">${loc.road||'--'}</span></div>
+        <div class="ud-row"><span class="ud-lbl">Kelurahan</span><span class="ud-val">${loc.suburb||'--'}</span></div>
+        <div class="ud-row"><span class="ud-lbl">Kota</span><span class="ud-val">${loc.city||'--'}</span></div>
+        <div class="ud-row"><span class="ud-lbl">Provinsi</span><span class="ud-val">${loc.state||'--'}</span></div>
+        <div class="ud-row"><span class="ud-lbl">Negara</span><span class="ud-val">${loc.country||'--'}</span></div>
+        <div class="ud-row"><span class="ud-lbl">Kode Pos</span><span class="ud-val">${loc.postcode||'--'}</span></div>
+      </div>
+      ${loc.mapsUrl ? '<a class="ud-maps" href="'+loc.mapsUrl+'" target="_blank">BUKA DI GOOGLE MAPS</a>' : ''}
+    `;
+  } else {
+    locContent.innerHTML='<div class="ud-noloc">User belum berbagi lokasi</div>';
   }
-  showScreen('auth');
-});
 
-// ===== CLOCK =====
-function updateClock(){
-  const now=new Date(), el=document.getElementById('clock');
-  if(el) el.textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  sv('ud-bat-pct', bat?.pct || '--');
+  sv('ud-bat-charging', bat?.charging || '--');
+  sv('ud-net-type', net?.type || info.netType || '--');
+  sv('ud-net-speed', net?.speed || '--');
+  sv('ud-ip', net?.ip || '--');
+  sv('ud-brand', info.brand||'--');
+  sv('ud-model', info.model||'--');
+  sv('ud-os', info.os||'--');
+  sv('ud-ram', info.ram||'--');
+  sv('ud-cores', info.cores ? info.cores+' core' : '--');
+  sv('ud-screen', info.screen||'--');
+
+  const upd = d.locationUpdated || d.lastLogin || d.joinDate;
+  sv('ud-upd', upd ? 'Terakhir diperbarui: '+new Date(upd).toLocaleString('id-ID') : '--');
+
+  const { doc, onSnapshot } = window._fbFns;
+  const unsubRef = onSnapshot(doc(window._db, 'users', uid), (snap) => {
+    if(!snap.exists()) return;
+    const newD = snap.data();
+    const newBat = newD.battery;
+    const newNet = newD.network;
+    const newLoc = newD.location;
+    if(newBat) { sv('ud-bat-pct', newBat.pct||'--'); sv('ud-bat-charging', newBat.charging||'--'); }
+    if(newNet) { sv('ud-net-type', newNet.type||'--'); sv('ud-net-speed', newNet.speed||'--'); sv('ud-ip', newNet.ip||'--'); }
+    if(newLoc && newLoc.lat) {
+      const upd2 = newD.locationUpdated;
+      sv('ud-upd', upd2 ? 'Terakhir diperbarui: '+new Date(upd2).toLocaleString('id-ID') : '--');
+    }
+  });
+  window._currentUnsub = unsubRef;
+
+  document.getElementById('ud-overlay').classList.add('active');
 }
-updateClock(); setInterval(updateClock,5000);
 
-// ===== TABS =====
-function switchTab(name,el){
-  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-  el.classList.add('active');
+function closeUserDetail() {
+  document.getElementById('ud-overlay').classList.remove('active');
+  if(window._currentUnsub) { window._currentUnsub(); window._currentUnsub=null; }
 }
 
-function setVal(id,val){const e=document.getElementById(id);if(e)e.textContent=val;}
+function runScan() {
+  const btn = document.getElementById('scanBtn');
+  if(!btn) return;
+  btn.textContent='SCANNING'; btn.classList.add('sc');
+  detectSOC(); detectDevice(); detectSystem(); detectBattery(); detectNetwork(); detectSensors();
+  setTimeout(()=>{ btn.textContent='SELESAI'; setTimeout(()=>{ btn.textContent='SCAN'; btn.classList.remove('sc'); },1500); },1200);
+}
 
-// ===== DETECT =====
-function detectSOC(){
+function detectSOC() {
   const ua=navigator.userAgent;
-  let socName='Tidak Terdeteksi',cpuVendor='Tidak Diketahui';
+  let soc='Tidak Terdeteksi', vendor='Tidak Diketahui';
   if(/android/i.test(ua)){
-    if(/SM-|samsung/i.test(ua)){cpuVendor='Samsung / ARM';socName='Exynos / Snapdragon';}
-    else if(/Pixel/i.test(ua)){cpuVendor='Google / ARM';socName='Google Tensor';}
-    else if(/CPH|OPPO|Reno|Find/i.test(ua)){cpuVendor='MediaTek / Qualcomm';socName='MediaTek / Snapdragon';}
-    else if(/Redmi|POCO|Mi /i.test(ua)){cpuVendor='Qualcomm';socName='Snapdragon Series';}
-    else if(/vivo/i.test(ua)){cpuVendor='MediaTek / Qualcomm';socName='MediaTek / Snapdragon';}
-    else if(/HUAWEI|HW/i.test(ua)){cpuVendor='HiSilicon';socName='Kirin Series';}
-    else{cpuVendor='ARM';socName='ARM Processor';}
-  } else if(/iPhone|iPad/i.test(ua)){cpuVendor='Apple';socName='Apple Silicon (A/M Series)';}
-  else{cpuVendor='x86 / x64';socName='Desktop / Laptop CPU';}
+    if(/SM-|samsung/i.test(ua)){vendor='Samsung / ARM';soc='Exynos / Snapdragon';}
+    else if(/Pixel/i.test(ua)){vendor='Google / ARM';soc='Google Tensor';}
+    else if(/CPH|OPPO|Reno|Find/i.test(ua)){vendor='MediaTek / Qualcomm';soc='MediaTek / Snapdragon';}
+    else if(/Redmi|POCO|Mi /i.test(ua)){vendor='Qualcomm';soc='Snapdragon Series';}
+    else if(/vivo/i.test(ua)){vendor='MediaTek / Qualcomm';soc='MediaTek / Snapdragon';}
+    else if(/HUAWEI/i.test(ua)){vendor='HiSilicon';soc='Kirin Series';}
+    else{vendor='ARM';soc='ARM Processor';}
+  } else if(/iPhone|iPad/i.test(ua)){vendor='Apple';soc='Apple Silicon (A/M Series)';}
+  else{vendor='x86 / x64';soc='Desktop CPU';}
   const cores=navigator.hardwareConcurrency||'--';
-  document.getElementById('soc-name').textContent=socName;
-  document.getElementById('soc-freq').textContent=cores+' Core Terdeteksi';
-  setVal('cpu-vendor',cpuVendor);
-  setVal('cpu-arch',/arm|aarch/i.test(navigator.platform||'')?'ARM64 (aarch64)':navigator.platform||'arm64');
-  setVal('cpu-cores',cores+' core'); setVal('cpu-threads',cores+' thread');
-  setVal('cpu-platform',/android/i.test(ua)?'Android':/iPhone|iPad/i.test(ua)?'iOS / iPadOS':'Desktop');
+  sv('soc-name',soc); sv('soc-freq',cores+' Core');
+  sv('cpu-vendor',vendor);
+  sv('cpu-arch',/arm|aarch/i.test(navigator.platform||'')?'ARM64':'x86_64 / ARM64');
+  sv('cpu-cores',cores+' core'); sv('cpu-threads',cores+' thread');
+  sv('cpu-platform',/android/i.test(ua)?'Android':/iPhone|iPad/i.test(ua)?'iOS':'Desktop');
+  const mem=navigator.deviceMemory;
+  if(mem){const t=mem*1024,u=Math.round(t*.55),p=Math.round((u/t)*100);sv('ram-total',mem+' GB');sv('ram-pct',p+' %');sv('ram-detail',u+' MB / '+t+' MB');document.getElementById('ram-bar').style.width=p+'%';}
+  else{sv('ram-total','N/A');sv('ram-pct','N/A');}
+  sv('ram-type','LPDDR4 / LPDDR5 (estimasi)');
   try{
-    const canvas=document.createElement('canvas');
-    const gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
+    const c=document.createElement('canvas');
+    const gl=c.getContext('webgl')||c.getContext('experimental-webgl');
     if(gl){
       const ext=gl.getExtension('WEBGL_debug_renderer_info');
-      if(ext){setVal('gpu-vendor',gl.getParameter(ext.UNMASKED_VENDOR_WEBGL)||'--');setVal('gpu-renderer',gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)||'--');}
-      else{setVal('gpu-vendor','ARM / Qualcomm');setVal('gpu-renderer','Tidak dapat dibaca');}
-      setVal('gpu-api','OpenGL ES 3.x / WebGL '+(gl.getParameter(gl.VERSION)||''));
-      setVal('gpu-texture',gl.getParameter(gl.MAX_TEXTURE_SIZE)+' px');
+      if(ext){sv('gpu-vendor',gl.getParameter(ext.UNMASKED_VENDOR_WEBGL)||'--');sv('gpu-renderer',gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)||'--');}
+      else{sv('gpu-vendor','ARM / Qualcomm');sv('gpu-renderer','Tidak dapat dibaca');}
+      sv('gpu-api','WebGL '+gl.getParameter(gl.VERSION));
+      sv('gpu-texture',gl.getParameter(gl.MAX_TEXTURE_SIZE)+' px');
     }
   }catch(e){}
 }
 
-function detectRAM(){
-  const mem=navigator.deviceMemory;
-  if(mem){const total=mem*1024,used=Math.round(total*0.55),pct=Math.round((used/total)*100);
-    setVal('ram-total',mem+' GB (approx)');setVal('ram-pct',pct+' %');setVal('ram-detail',used+' MB / '+total+' MB');
-    document.getElementById('ram-bar').style.width=pct+'%';
-  }else{setVal('ram-total','Tidak Tersedia');setVal('ram-pct','N/A');setVal('ram-detail','Browser membatasi akses');}
-  setVal('ram-type','LPDDR4 / LPDDR5 (estimasi)');
-}
-
-function detectDevice(){
+function detectDevice() {
   const ua=navigator.userAgent;
-  let brand='Perangkat',model='Tidak Teridentifikasi';
-  if(/CPH2577/i.test(ua)){brand='OPPO';model='CPH2577';}
-  else if(/SM-(\w+)/i.test(ua)){brand='Samsung';model='Galaxy '+ua.match(/SM-(\w+)/i)[1];}
+  let brand='Perangkat', model='--';
+  if(/SM-(\w+)/i.test(ua)){brand='Samsung';model='Galaxy '+ua.match(/SM-(\w+)/i)[1];}
   else if(/Pixel (\d+\w*)/i.test(ua)){brand='Google';model='Pixel '+ua.match(/Pixel (\d+\w*)/i)[1];}
   else if(/Redmi (\w+)/i.test(ua)){brand='Xiaomi';model='Redmi '+ua.match(/Redmi (\w+)/i)[1];}
   else if(/POCO (\w+)/i.test(ua)){brand='POCO';model=ua.match(/POCO (\w+)/i)[0];}
+  else if(/CPH(\w+)/i.test(ua)){brand='OPPO';model='CPH'+ua.match(/CPH(\w+)/i)[1];}
   else if(/iPhone/i.test(ua)){brand='Apple';model='iPhone';}
   else if(/iPad/i.test(ua)){brand='Apple';model='iPad';}
   else if(/android/i.test(ua)){brand='Android';model='Perangkat Android';}
   else{brand='Desktop';model=navigator.platform;}
-  setVal('dev-brand',brand);setVal('dev-model',model);setVal('dev-ua-short',ua.substring(0,60)+'...');
-  const sw=screen.width,sh=screen.height,vw=window.innerWidth,vh=window.innerHeight,dpr=window.devicePixelRatio||1;
-  setVal('scr-res',sw*dpr+' x '+sh*dpr+' px');setVal('scr-viewport',vw+' x '+vh+' px');
-  setVal('scr-dpr',dpr+'x');setVal('scr-color',(screen.colorDepth||'--')+' bit');
-  setVal('scr-orient',screen.orientation?screen.orientation.type:(sw>sh?'Landscape':'Portrait'));
-  setVal('scr-touch',navigator.maxTouchPoints+' titik');
-  const nc=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
-  if(nc){setVal('net-type',nc.type||'--');setVal('net-speed',nc.effectiveType||'--');setVal('net-down',nc.downlink?nc.downlink+' Mbps':'--');setVal('net-rtt',nc.rtt?nc.rtt+' ms':'--');setVal('net-save',nc.saveData?'Aktif':'Nonaktif');}
+  sv('dev-brand',brand); sv('dev-model',model); sv('dev-ua',ua.substring(0,60)+'...');
+  const sw=screen.width,sh=screen.height,dpr=window.devicePixelRatio||1;
+  sv('scr-res',Math.round(sw*dpr)+' x '+Math.round(sh*dpr)+' px');
+  sv('scr-vp',window.innerWidth+' x '+window.innerHeight+' px');
+  sv('scr-dpr',dpr+'x'); sv('scr-color',(screen.colorDepth||'--')+' bit');
+  sv('scr-orient',screen.orientation?screen.orientation.type:(sw>sh?'Landscape':'Portrait'));
+  sv('scr-touch',navigator.maxTouchPoints+' titik');
   if(navigator.storage&&navigator.storage.estimate){
     navigator.storage.estimate().then(est=>{
-      const total=Math.round(est.quota/(1024*1024*1024)*10)/10,used=Math.round(est.usage/(1024*1024)*10)/10,pct=Math.round((est.usage/est.quota)*100);
-      setVal('stor-total',total+' GB');setVal('stor-free',Math.round((est.quota-est.usage)/(1024*1024*1024)*10)/10+' GB');
-      setVal('stor-pct',pct+' %');setVal('stor-detail',used+' MB terpakai dari '+total+' GB');
-      document.getElementById('stor-bar').style.width=pct+'%';
+      const t=Math.round(est.quota/(1024*1024*1024)*10)/10, u=Math.round(est.usage/(1024*1024)*10)/10, p=Math.round((est.usage/est.quota)*100);
+      sv('stor-total',t+' GB'); sv('stor-free',Math.round((est.quota-est.usage)/(1024*1024*1024)*10)/10+' GB');
+      sv('stor-pct',p+' %'); sv('stor-detail',u+' MB terpakai dari '+t+' GB');
+      document.getElementById('stor-bar').style.width=p+'%';
     });
   }
 }
 
-function detectSystem(){
+function detectSystem() {
   const ua=navigator.userAgent;
-  let os='Tidak Diketahui',browser='Tidak Diketahui',engine='Tidak Diketahui';
+  let os='--', browser='--', engine='--';
   if(/android/i.test(ua)){const av=ua.match(/Android ([\d.]+)/i);os='Android '+(av?av[1]:'');}
   else if(/iphone|ipad/i.test(ua)){os='iOS / iPadOS';}
   else if(/windows/i.test(ua)){os='Windows';}
@@ -1052,123 +1974,134 @@ function detectSystem(){
   else if(/Firefox\//i.test(ua)){const fv=ua.match(/Firefox\/([\d.]+)/i);browser='Firefox '+(fv?fv[1]:'');engine='Gecko';}
   else if(/Safari\//i.test(ua)&&!/Chrome/i.test(ua)){browser='Safari';engine='WebKit';}
   else if(/Edg\//i.test(ua)){browser='Microsoft Edge';engine='Blink';}
-  else if(/OPR\//i.test(ua)){browser='Opera';engine='Blink';}
-  setVal('sys-os',os);setVal('sys-platform',navigator.platform||'--');setVal('sys-browser',browser);setVal('sys-engine',engine);
-  setVal('sys-lang',navigator.language+(navigator.languages?' ['+navigator.languages.slice(0,3).join(', ')+']':''));
-  setVal('sys-tz',Intl.DateTimeFormat().resolvedOptions().timeZone);
-  setVal('sys-online',navigator.onLine?'Online':'Offline');setVal('sys-cookie',navigator.cookieEnabled?'Diaktifkan':'Dinonaktifkan');
-  setVal('sys-dnt',navigator.doNotTrack==='1'?'Aktif':navigator.doNotTrack==='0'?'Nonaktif':'Tidak Diset');
-  setVal('cap-sw','serviceWorker' in navigator?'Didukung':'Tidak Didukung');
-  setVal('cap-wasm',typeof WebAssembly!=='undefined'?'Didukung':'Tidak Didukung');
-  setVal('cap-webgl',(()=>{try{const c=document.createElement('canvas');return c.getContext('webgl')||c.getContext('experimental-webgl')?'Didukung':'Tidak';}catch(e){return 'Tidak';}})());
-  setVal('cap-rtc',typeof RTCPeerConnection!=='undefined'?'Didukung':'Tidak Didukung');
-  setVal('cap-bt','bluetooth' in navigator?'Didukung':'Tidak Didukung');
-  setVal('cap-geo','geolocation' in navigator?'Tersedia':'Tidak Tersedia');
-  setVal('cap-notif','Notification' in window?(Notification.permission==='granted'?'Diizinkan':'Tersedia (Belum Diizinkan)'):'Tidak Didukung');
-  setVal('cap-cam',navigator.mediaDevices?'Tersedia':'Tidak Tersedia');
-  setVal('cap-mic',navigator.mediaDevices?'Tersedia':'Tidak Tersedia');
+  sv('sys-os',os); sv('sys-plat',navigator.platform||'--'); sv('sys-browser',browser); sv('sys-engine',engine);
+  sv('sys-lang',navigator.language||'--');
+  sv('sys-tz',Intl.DateTimeFormat().resolvedOptions().timeZone);
+  sv('sys-online',navigator.onLine?'Online':'Offline');
+  sv('sys-cookie',navigator.cookieEnabled?'Aktif':'Nonaktif');
+  sv('cap-sw','serviceWorker' in navigator?'Didukung':'Tidak');
+  sv('cap-wasm',typeof WebAssembly!=='undefined'?'Didukung':'Tidak');
+  sv('cap-webgl',(()=>{try{const c=document.createElement('canvas');return c.getContext('webgl')?'Didukung':'Tidak';}catch(e){return 'Tidak';}})());
+  sv('cap-rtc',typeof RTCPeerConnection!=='undefined'?'Didukung':'Tidak');
+  sv('cap-geo','geolocation' in navigator?'Tersedia':'Tidak');
 }
 
-let batteryObj=null;
-function detectBattery(){
-  if(navigator.getBattery){
-    navigator.getBattery().then(bat=>{
-      batteryObj=bat;updateBatteryUI(bat);
-      bat.addEventListener('levelchange',()=>updateBatteryUI(bat));
-      bat.addEventListener('chargingchange',()=>updateBatteryUI(bat));
-    }).catch(()=>{setVal('bat-level','Tidak Tersedia');setVal('bat-pct','N/A');setVal('bat-status','API tidak dapat diakses');});
-  }else{setVal('bat-level','Tidak Tersedia');setVal('bat-pct','N/A');setVal('bat-status','API Baterai tidak didukung');}
-}
-
-function updateBatteryUI(bat){
-  const pct=Math.round(bat.level*100);
-  setVal('bat-pct',pct+' %');setVal('bat-level',pct+' %');
-  setVal('bat-charging',bat.charging?'Sedang Mengisi Daya':'Tidak Mengisi');
-  setVal('bat-status',bat.charging?'Charging':'Discharging');
-  setVal('bat-health',bat.charging?'Terhubung ke charger':'Berjalan dari baterai');
-  document.getElementById('bat-fill').style.width=pct+'%';
-  document.getElementById('bat-status-bar').textContent=pct+'%';
-  setVal('bat-time-full',bat.chargingTime!==Infinity?Math.round(bat.chargingTime/60)+' menit hingga penuh':(bat.charging?'Menghitung...':'Tidak mengisi'));
-  if(bat.dischargingTime!==Infinity){const h=Math.floor(bat.dischargingTime/3600),m=Math.round((bat.dischargingTime%3600)/60);setVal('bat-time-empty',h+' jam '+m+' menit tersisa');setVal('bat-estimate',h+' jam '+m+' menit');}
-  else{setVal('bat-time-empty',bat.charging?'Mengisi daya':'Menghitung...');setVal('bat-estimate','Tidak dapat dihitung');}
-  setVal('bat-rec',pct<20?'Segera charge - baterai kritis':pct<50?'Disarankan untuk charge':'Baterai dalam kondisi baik');
-}
-
-function detectNetwork(){
-  const nc=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
-  setVal('net2-status',navigator.onLine?'TERHUBUNG':'OFFLINE');
-  if(nc){setVal('net2-type',nc.type||'Tidak Diketahui');setVal('net2-eff',nc.effectiveType?nc.effectiveType.toUpperCase():'--');setVal('net2-down',nc.downlink?nc.downlink+' Mbps':'--');setVal('net2-rtt',nc.rtt?nc.rtt+' ms':'--');setVal('net2-save',nc.saveData?'Aktif':'Nonaktif');}
-  setVal('ip-addr','Memuat...');
-  fetch('https://ipapi.co/json/').then(r=>r.json()).then(d=>{
-    setVal('ip-addr',d.ip||'--');setVal('ip-city',(d.city||'--')+', '+(d.region||'--'));
-    setVal('ip-country',d.country_name||'--');setVal('ip-isp',d.org||'--');setVal('ip-tz',d.timezone||'--');
-  }).catch(()=>{setVal('ip-addr','Gagal dimuat');setVal('ip-city','--');setVal('ip-country','--');setVal('ip-isp','--');setVal('ip-tz','--');});
-  const t0=performance.now();
-  fetch('https://ipapi.co/ip',{mode:'no-cors'}).then(()=>{const rtt=Math.round(performance.now()-t0);setVal('lat-ping',rtt+' ms');setVal('lat-dns',Math.round(rtt*0.3)+' ms (estimasi)');}).catch(()=>{setVal('lat-ping','--');setVal('lat-dns','--');});
-}
-
-function detectSensors(){
-  if(typeof DeviceMotionEvent!=='undefined'){
-    if(typeof DeviceMotionEvent.requestPermission==='function'){
-      setVal('sen-accel','Klik untuk izinkan');
-      document.getElementById('sen-accel').style.cursor='pointer';
-      document.getElementById('sen-accel').onclick=()=>DeviceMotionEvent.requestPermission().then(p=>{if(p==='granted')startMotion();});
-    }else startMotion();
-  }else setVal('sen-accel','Tidak didukung');
-  if(typeof DeviceOrientationEvent!=='undefined'){
-    window.addEventListener('deviceorientation',e=>{setVal('sen-orient','Alpha: '+(e.alpha?e.alpha.toFixed(1):'--')+'  Beta: '+(e.beta?e.beta.toFixed(1):'--')+'  Gamma: '+(e.gamma?e.gamma.toFixed(1):'--'));});
-  }else setVal('sen-orient','Tidak didukung');
-  if('AmbientLightSensor' in window){
-    try{const als=new AmbientLightSensor();als.addEventListener('reading',()=>{setVal('sen-light',als.illuminance.toFixed(1)+' lux');document.getElementById('dot-light').classList.add('active');});als.start();}
-    catch(e){setVal('sen-light','Tidak tersedia / izin ditolak');}
-  }else setVal('sen-light','Tidak didukung browser ini');
-  setVal('sen-mag','Memerlukan Web Bluetooth / sensor langsung');
-  setVal('sen-prox','Tidak dapat diakses via browser');
-  setVal('sen-step','Tidak dapat diakses via browser');
-  setVal('sen-gyro','Menunggu data gerak...');
-}
-
-function startMotion(){
-  window.addEventListener('devicemotion',e=>{
-    const a=e.acceleration||{};
-    setVal('sen-accel','X: '+((a.x||0).toFixed(2))+' m/s²  Y: '+((a.y||0).toFixed(2))+' m/s²  Z: '+((a.z||0).toFixed(2))+' m/s²');
-    const r=e.rotationRate||{};
-    setVal('sen-gyro','Alpha: '+((r.alpha||0).toFixed(2))+' deg/s  Beta: '+((r.beta||0).toFixed(2))+'  Gamma: '+((r.gamma||0).toFixed(2)));
+function detectBattery() {
+  if(!navigator.getBattery){sv('bat-pct','N/A');sv('bat-st','Tidak didukung');return;}
+  navigator.getBattery().then(bat=>{
+    updateBatUI(bat);
+    bat.addEventListener('levelchange',()=>updateBatUI(bat));
+    bat.addEventListener('chargingchange',()=>updateBatUI(bat));
   });
 }
 
-function detectLokasi(){
-  if(!('geolocation' in navigator)){setVal('loc-status','Tidak didukung browser ini');return;}
-  const btn=document.getElementById('locBtn');
-  btn.textContent='MENDAPATKAN LOKASI...';btn.disabled=true;
-  setVal('loc-status','Meminta izin...');
-  navigator.geolocation.getCurrentPosition(pos=>{
-    const lat=pos.coords.latitude,lon=pos.coords.longitude,acc=pos.coords.accuracy,alt=pos.coords.altitude;
-    setVal('loc-status','Berhasil');setVal('loc-lat',lat.toFixed(6)+' deg');setVal('loc-lon',lon.toFixed(6)+' deg');
-    setVal('loc-acc',acc?Math.round(acc)+' meter':'--');setVal('loc-alt',alt?alt.toFixed(1)+' m dpl':'Tidak tersedia');
-    const link=document.getElementById('loc-maps-link');
-    link.href='https://www.google.com/maps?q='+lat+','+lon;link.style.display='block';
-    fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lon+'&format=json').then(r=>r.json()).then(d=>{
-      const a=d.address||{};
-      setVal('loc-road',a.road||a.pedestrian||a.footway||'--');setVal('loc-suburb',a.suburb||a.village||a.hamlet||'--');
-      setVal('loc-city',a.city||a.town||a.municipality||'--');setVal('loc-state',a.state||a.province||'--');
-      setVal('loc-country',a.country||'--');setVal('loc-postcode',a.postcode||'--');
-    }).catch(()=>setVal('loc-road','Gagal memuat alamat'));
-    btn.textContent='PERBARUI LOKASI';btn.disabled=false;
-  },err=>{
-    let msg='Gagal';
-    if(err.code===1)msg='Izin ditolak pengguna';else if(err.code===2)msg='Lokasi tidak tersedia';else if(err.code===3)msg='Waktu habis';
-    setVal('loc-status',msg);btn.textContent='COBA LAGI';btn.disabled=false;
-  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+function updateBatUI(bat) {
+  const pct=Math.round(bat.level*100);
+  sv('bat-pct',pct+' %'); sv('bat-level',pct+' %');
+  sv('bat-charging',bat.charging?'Sedang Mengisi':'Tidak Mengisi');
+  sv('bat-st',bat.charging?'Charging':'Discharging');
+  sv('bat-hl',bat.charging?'Terhubung charger':'Dari baterai');
+  document.getElementById('bat-fi').style.width=pct+'%';
+  sv('bat-sbar',pct+'%');
+  sv('bat-full',bat.chargingTime!==Infinity?Math.round(bat.chargingTime/60)+' menit hingga penuh':(bat.charging?'Menghitung...':'--'));
+  if(bat.dischargingTime!==Infinity){const h=Math.floor(bat.dischargingTime/3600),m=Math.round((bat.dischargingTime%3600)/60);sv('bat-empty',h+' jam '+m+' menit');sv('bat-est',h+' jam '+m+' menit');}
+  else{sv('bat-empty',bat.charging?'Sedang mengisi':'--');sv('bat-est','--');}
+  sv('bat-rec',pct<20?'Segera charge!':pct<50?'Disarankan charge':'Baterai baik');
+  if(currentUser) {
+    updateUserBattery(currentUser.uid, { pct:pct+'%', charging:bat.charging?'Mengisi':'Tidak mengisi', level:bat.level });
+  }
 }
 
-function runScan(){
-  const btn=document.getElementById('scanBtn');
-  if(!btn)return;
-  btn.textContent='SCANNING';btn.classList.add('scanning');
-  detectSOC();detectRAM();detectDevice();detectSystem();detectBattery();detectNetwork();detectSensors();
-  setTimeout(()=>{btn.textContent='SELESAI';setTimeout(()=>{btn.textContent='SCAN';btn.classList.remove('scanning');},1500);},1200);
+function detectNetwork() {
+  const nc=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
+  sv('net-status',navigator.onLine?'TERHUBUNG':'OFFLINE');
+  if(nc){sv('net-type',nc.type||'--');sv('net-eff',nc.effectiveType?nc.effectiveType.toUpperCase():'--');sv('net-down',nc.downlink?nc.downlink+' Mbps':'--');sv('net-rtt',nc.rtt?nc.rtt+' ms':'--');sv('net-save',nc.saveData?'Aktif':'Nonaktif');sv('sbar-net',nc.effectiveType||'NET');}
+  sv('ip-addr','Memuat...');
+  fetch('https://ipapi.co/json/').then(r=>r.json()).then(d=>{
+    sv('ip-addr',d.ip||'--'); sv('ip-city',(d.city||'--')+', '+(d.region||'--'));
+    sv('ip-country',d.country_name||'--'); sv('ip-isp',d.org||'--'); sv('ip-tz',d.timezone||'--');
+    if(currentUser) {
+      updateUserNetwork(currentUser.uid, { type: nc?.type||nc?.effectiveType||'--', speed: nc?.effectiveType||'--', ip: d.ip||'--', isp: d.org||'--', city: d.city||'--', country: d.country_name||'--' });
+    }
+  }).catch(()=>sv('ip-addr','Gagal dimuat'));
 }
+
+function detectSensors() {
+  if(typeof DeviceMotionEvent!=='undefined'){
+    if(typeof DeviceMotionEvent.requestPermission==='function'){
+      sv('sen-accel','Tap untuk izinkan');
+      document.getElementById('sen-accel').style.cursor='pointer';
+      document.getElementById('sen-accel').onclick=()=>DeviceMotionEvent.requestPermission().then(p=>{if(p==='granted')startMotion();});
+    } else startMotion();
+  } else sv('sen-accel','Tidak didukung');
+  if(typeof DeviceOrientationEvent!=='undefined'){
+    window.addEventListener('deviceorientation',e=>{sv('sen-orient','α:'+(e.alpha?.toFixed(1)||'--')+' β:'+(e.beta?.toFixed(1)||'--')+' γ:'+(e.gamma?.toFixed(1)||'--'));});
+  } else sv('sen-orient','Tidak didukung');
+  sv('sen-gyro','Menunggu data gerak...');
+}
+function startMotion(){
+  window.addEventListener('devicemotion',e=>{
+    const a=e.acceleration||{};
+    sv('sen-accel','X:'+(a.x||0).toFixed(2)+' Y:'+(a.y||0).toFixed(2)+' Z:'+(a.z||0).toFixed(2));
+    const r=e.rotationRate||{};
+    sv('sen-gyro','α:'+(r.alpha||0).toFixed(1)+' β:'+(r.beta||0).toFixed(1)+' γ:'+(r.gamma||0).toFixed(1));
+  });
+}
+
+function switchTab(n,el){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');
+  el.classList.add('active');
+}
+
+function updateClock(){const n=new Date(),el=document.getElementById('clock');if(el)el.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
+updateClock(); setInterval(updateClock,5000);
+
+showScreen('auth');
+
+// ── RIPPLE EFFECT ──
+function addRipple(e) {
+  const btn = e.currentTarget;
+  btn.classList.add('ripple-host');
+  const r = document.createElement('span');
+  r.className = 'ripple';
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const x = (e.clientX || e.touches?.[0]?.clientX || rect.left + rect.width/2) - rect.left - size/2;
+  const y = (e.clientY || e.touches?.[0]?.clientY || rect.top + rect.height/2) - rect.top - size/2;
+  r.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px;`;
+  btn.appendChild(r);
+  setTimeout(() => r.remove(), 550);
+}
+
+function initRipples() {
+  document.querySelectorAll('.a-btn,.play-btn,.loc-btn,.scan-btn,.perm-btn2,.pw-btn,.adm-close,.a-google,.auth-tab,.tab,.nav-btn,.u-card,.ud-close,.adm-close').forEach(el => {
+    el.addEventListener('mousedown', addRipple);
+    el.addEventListener('touchstart', addRipple, {passive:true});
+  });
+}
+// Init now + re-init after DOM changes
+initRipples();
+const _origSwitchTab = switchTab;
+window.switchTab = function(n, el) {
+  _origSwitchTab(n, el);
+  // stagger rows
+  const content = document.getElementById('tab-'+n);
+  if(content) {
+    const rows = content.querySelectorAll('.row,.prog-wr,.chip-hd,.bat-vis,.dev-hero');
+    rows.forEach((r,i) => {
+      r.style.opacity = '0';
+      r.style.transform = 'translateY(6px)';
+      r.style.transition = 'none';
+      setTimeout(() => {
+        r.style.transition = 'opacity .2s ease, transform .2s ease';
+        r.style.opacity = '1';
+        r.style.transform = 'translateY(0)';
+      }, i * 30);
+    });
+  }
+};
 </script>
 </body>
 </html>
