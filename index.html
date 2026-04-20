@@ -28,7 +28,26 @@
   --sv:#aaa;
   --accent:#e8e8e8;
   --glow:rgba(255,255,255,0.04);
+  --r:10px;
+  --r-sm:6px;
+  --r-lg:14px;
 }
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+
+/* ── GLOBAL ROUNDED ── */
+.screen,.card,.auth-tabs,.auth-tab,.a-inp,.a-btn,.a-google,.perm-item,.perm-btn2,.play-btn,
+.adm-hd,.u-card,.u-av,.ud-box,.ud-hd,.ud-av,.ud-card,.ud-maps,.pw-box,.pw-inp,.pw-btn,
+.vol-wrap,.hdr,.hdr-icon,.tabs-wr,.tab,.chip-hd,.prog-tr,.bat-vis,.bat-sh,.dev-hero,.dev-ic,
+.loc-btn,.loc-maps,.about-div,.scan-btn,.bnav,.nav-btn,.ubar,.adm-close,.u-badge,
+.sbar,.hint,.perm-info,.a-err,.pw-err,.adm-empty,.ud-noloc,.ud-upd{
+  border-radius:var(--r-sm);
+}
+.card,.bat-vis,.dev-hero,.ud-box,.pw-box,.vol-wrap,.u-card{border-radius:var(--r);}
+.a-btn,.play-btn,.loc-btn,.scan-btn{border-radius:var(--r-sm);}
+.auth-tabs,.hdr,.bnav,.tabs-wr,.ubar,.sbar{border-radius:0;}
+.s-logoimg{border-radius:var(--r);}
+.chip-hd{border-radius:var(--r) var(--r) 0 0;}
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 
