@@ -1389,6 +1389,8 @@ body::before{
           Data user tersimpan di Firebase Firestore sehingga bisa diakses dari semua perangkat. Login Google menggunakan OAuth resmi. Data lokasi, baterai, dan jaringan tersinkron realtime ke cloud saat diperbarui.
         </div>
       </div>
+      <div class="about-div"></div>
+      <button class="loc-btn" onclick="doLogout()" style="margin-bottom:0;">LOGOUT</button>
     </div>
   </div>
 
@@ -2053,6 +2055,18 @@ function switchTab(n,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+n).classList.add('active');
   el.classList.add('active');
+}
+
+async function doLogout() {
+  try {
+    await window._auth.signOut();
+  } catch(e) {}
+  currentUser = null;
+  currentUsername = null;
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('bnav').classList.remove('show');
+  document.getElementById('ubar').classList.remove('show');
+  showScreen('auth');
 }
 
 function updateClock(){const n=new Date(),el=document.getElementById('clock');if(el)el.textContent=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
